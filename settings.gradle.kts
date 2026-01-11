@@ -33,3 +33,6 @@ include(":domain:photo")
 
 // data
 include(":data:photo")
+
+// feature
+include(":feature:album")
