@@ -1,4 +1,4 @@
-package com.chac.ui.theme
+package com.chac.core.designsystem.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
