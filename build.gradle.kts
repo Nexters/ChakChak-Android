@@ -6,4 +6,10 @@ plugins {
     alias(libs.plugins.ksp) apply false
     alias(libs.plugins.hilt) apply false
     alias(libs.plugins.kotlin.serialization) apply false
+    alias(libs.plugins.gradle.ktlint)
+}
+
+subprojects {
+    // 모든 하위 프로젝트에 ktlint 설정
+    apply(plugin = "org.jlleitschuh.gradle.ktlint")
 }

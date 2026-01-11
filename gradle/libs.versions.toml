@@ -28,6 +28,9 @@ hiltNavigationCompose = "1.3.0"
 # Room
 room = "2.8.4"
 
+# Lint & Formatting
+ktlint = "14.0.1"
+
 [libraries]
 # Gradle Plugins
 android-gradlePlugin = { group = "com.android.tools.build", name = "gradle", version.ref = "androidGradlePlugin" }
@@ -81,6 +84,7 @@ compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 hilt = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
+gradle-ktlint = { id = "org.jlleitschuh.gradle.ktlint", version.ref = "ktlint" }
 
 # Custom Plugins
 chakchak-android-application = { id = "chakchak.android.application" }
