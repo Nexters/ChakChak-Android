@@ -30,3 +30,6 @@ include(":core:designsystem")
 
 // domain
 include(":domain:photo")
+
+// data
+include(":data:photo")
