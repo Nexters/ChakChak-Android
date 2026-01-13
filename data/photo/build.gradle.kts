@@ -8,3 +8,7 @@ plugins {
 android {
     setNamespace("data.photo")
 }
+
+dependencies {
+    implementation(libs.commons.math3)
+}
