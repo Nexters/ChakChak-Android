@@ -1,4 +1,5 @@
 pluginManagement {
+    includeBuild("build-logic")
     repositories {
         google {
             content {
@@ -23,3 +24,15 @@ rootProject.name = "Chac"
 
 // app
 include(":app")
+
+// core
+include(":core:designsystem")
+
+// domain
+include(":domain:photo")
+
+// data
+include(":data:photo")
+
+// feature
+include(":feature:album")

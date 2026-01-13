@@ -1,0 +1,20 @@
+root = true
+
+[*.{kt,kts}]
+charset = utf-8
+end_of_line = lf
+indent_size = 4
+indent_style = space
+trim_trailing_whitespace = true
+insert_final_newline = true
+max_line_length = 140
+tab_width = 4
+
+# trailing comma
+ij_kotlin_allow_trailing_comma = true
+ij_kotlin_allow_trailing_comma_on_call_site = true
+
+ktlint_disabled_rules = import-ordering, argument-list-wrapping, no-wildcard-imports, parameter-list-wrapping, spacing-between-declarations-with-annotations
+
+# 함수 네이밍을 Camel Case로 강제하지 않는다. (ex. Composable 함수)
+ktlint_standard_function-naming = disabled
