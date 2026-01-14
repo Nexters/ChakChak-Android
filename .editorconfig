@@ -14,7 +14,15 @@ tab_width = 4
 ij_kotlin_allow_trailing_comma = true
 ij_kotlin_allow_trailing_comma_on_call_site = true
 
-ktlint_disabled_rules = import-ordering, argument-list-wrapping, no-wildcard-imports, parameter-list-wrapping, spacing-between-declarations-with-annotations
+# ktlint 표준 규칙 참고: https://pinterest.github.io/ktlint/latest/rules/standard/
+ktlint_standard_import-ordering = disabled
+ktlint_standard_argument-list-wrapping = disabled
+ktlint_standard_no-wildcard-imports = disabled
+ktlint_standard_parameter-list-wrapping = disabled
+ktlint_standard_spacing-between-declarations-with-annotations = disabled
 
 # 함수 네이밍을 Camel Case로 강제하지 않는다. (ex. Composable 함수)
 ktlint_standard_function-naming = disabled
+
+# 멀티라인 표현식 줄바꿈 규칙 (예: val x = listOf(...) 형태 허용)
+ktlint_standard_multiline-expression-wrapping = disabled
