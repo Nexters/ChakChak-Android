@@ -8,6 +8,9 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.saveable.rememberSaveableStateHolder
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
+import androidx.lifecycle.viewmodel.navigation3.ViewModelStoreNavEntryDecoratorDefaults
+import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.SaveableStateHolderNavEntryDecorator
@@ -40,6 +43,10 @@ fun ChacAppNavigation() {
             onBack = { backStack.pop() },
             entryDecorators = listOf(
                 SaveableStateHolderNavEntryDecorator(saveableStateHolder),
+                rememberViewModelStoreNavEntryDecorator(
+                    viewModelStoreOwner = checkNotNull(LocalViewModelStoreOwner.current),
+                    removeViewModelStoreOnPop = ViewModelStoreNavEntryDecoratorDefaults.removeViewModelStoreOnPop(),
+                ),
             ),
             modifier = Modifier.padding(innerPadding),
             entryProvider = entryProvider {
