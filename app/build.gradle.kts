@@ -19,4 +19,10 @@ android {
 
 dependencies {
     implementation(projects.core.designsystem)
+    implementation(projects.feature.album)
+
+    // Core Navigation 3 라이브러리
+    implementation(libs.androidx.navigation3.runtime)
+    implementation(libs.androidx.navigation3.ui)
+    implementation(libs.androidx.lifecycle.viewmodel.navigation3)
 }
