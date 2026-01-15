@@ -44,7 +44,7 @@ class ClusteringViewModel
     }
 
 /**
- * (임시) 클러스터링 화면에서 사용하는 간단한 클러스터 모델N
+ * (임시) 클러스터링 화면에서 사용하는 간단한 클러스터 모델
  *
  * @param title 클러스터 제목
  * @param photos 클러스터에 포함된 사진 목록
