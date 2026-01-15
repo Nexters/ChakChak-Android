@@ -30,6 +30,9 @@ room = "2.8.4"
 # Lint & Formatting
 ktlint = "14.0.1"
 
+# ETC
+apacheCommonsMath3 = "3.6.1"
+
 [libraries]
 # Gradle Plugins
 android-gradlePlugin = { group = "com.android.tools.build", name = "gradle", version.ref = "androidGradlePlugin" }
@@ -78,6 +81,9 @@ hilt-android-compiler = { group = "com.google.dagger", name = "hilt-android-comp
 room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "room" }
 room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "room" }
 room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
+
+# ETC
+commons-math3 = { group = "org.apache.commons", name = "commons-math3", version.ref = "apacheCommonsMath3" }
 
 [plugins]
 # Gradle Plugins
