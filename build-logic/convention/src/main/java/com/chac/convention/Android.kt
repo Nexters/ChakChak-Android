@@ -43,5 +43,6 @@ internal fun Project.configureAndroid() {
         "coreLibraryDesugaring"(libs.findLibrary("android.desugarJdkLibs").get())
         "implementation"(libs.findLibrary("androidx.core.ktx").get())
         "implementation"(libs.findLibrary("androidx.lifecycle.runtime.ktx").get())
+        "implementation"(libs.findLibrary("timber").get())
     }
 }

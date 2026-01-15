@@ -12,6 +12,7 @@ android {
 dependencies {
     implementation(projects.core.designsystem)
     implementation(projects.core.permission)
+    implementation(projects.domain.photo)
 
     implementation(libs.androidx.navigation3.runtime)
     implementation(libs.androidx.lifecycle.viewmodel.ktx)
