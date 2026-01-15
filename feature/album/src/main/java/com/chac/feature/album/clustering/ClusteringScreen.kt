@@ -5,6 +5,8 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -17,7 +19,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.chac.core.designsystem.ui.theme.ChacTheme
 import com.chac.core.permission.MediaWithLocationPermissionUtil.launchMediaWithLocationPermission
 import com.chac.core.permission.compose.PermissionDeniedDialog
@@ -33,10 +35,12 @@ import com.chac.core.permission.compose.rememberRegisterMediaWithLocationPermiss
 @Composable
 fun ClusteringRoute(
     onOpenGallery: (List<String>) -> Unit,
-    viewModel: ClusteringViewModel = viewModel(),
+    viewModel: ClusteringViewModel = hiltViewModel(),
 ) {
+    val mediaState by viewModel.mediaState
     ClusteringScreen(
         clusters = viewModel.clusters,
+        media = mediaState,
         onOpenGallery = onOpenGallery,
     )
 }
@@ -50,6 +54,7 @@ fun ClusteringRoute(
 @Composable
 private fun ClusteringScreen(
     clusters: List<ClusterItem>,
+    media: List<MediaUiModel>,
     onOpenGallery: (List<String>) -> Unit,
 ) {
     Column(
@@ -66,10 +71,15 @@ private fun ClusteringScreen(
             }
         }
 
+        LazyColumn {
+            items(items = media, key = { it.id }) {
+                Text(text = "id:${it.id}, uri:${it.uriString}")
+            }
+        }
+
         PermissionSample()
     }
 }
-
 
 @Composable
 fun PermissionSample() {
@@ -117,6 +127,7 @@ private fun ClusteringScreenPreview() {
                 ClusterItem(title = "Cluster A", photos = listOf("A-1", "A-2")),
                 ClusterItem(title = "Cluster B", photos = listOf("B-1")),
             ),
+            media = emptyList(),
             onOpenGallery = {},
         )
     }
