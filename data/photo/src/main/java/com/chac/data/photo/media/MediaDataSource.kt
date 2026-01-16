@@ -3,9 +3,7 @@ package com.chac.data.photo.media
 import android.content.ContentUris
 import android.content.Context
 import android.database.Cursor
-import android.media.ExifInterface
 import android.provider.MediaStore
-import androidx.core.net.toUri
 import com.chac.domain.photo.media.Media
 import com.chac.domain.photo.media.MediaLocation
 import com.chac.domain.photo.media.MediaSortOrder
@@ -13,7 +11,6 @@ import com.chac.domain.photo.media.MediaType
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import java.io.InputStream
 import javax.inject.Inject
 
 internal class MediaDataSource
@@ -120,23 +117,6 @@ internal class MediaDataSource
 
         suspend fun getMediaLocation(uri: String): MediaLocation? =
             withContext(ioDispatcher) {
-                runCatching {
-                    contentResolver.openInputStream(uri.toUri())?.use { stream ->
-                        extractLocationFromStream(stream)
-                    }
-                }.getOrNull()
-            }
-
-        private suspend fun extractLocationFromStream(stream: InputStream): MediaLocation? =
-            withContext(ioDispatcher) {
-                runCatching {
-                    val exif = ExifInterface(stream)
-                    val latLong = FloatArray(2)
-                    if (exif.getLatLong(latLong)) {
-                        MediaLocation(latLong[0].toDouble(), latLong[1].toDouble())
-                    } else {
-                        null
-                    }
-                }.getOrNull()
+                getMediaLocation(context, uri)
             }
     }

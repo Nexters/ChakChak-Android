@@ -33,6 +33,7 @@ ktlint = "14.0.1"
 
 # ETC
 apacheCommonsMath3 = "3.6.1"
+timber = "5.0.1"
 
 [libraries]
 # Gradle Plugins
@@ -86,6 +87,7 @@ room-compiler = { group = "androidx.room", name = "room-compiler", version.ref =
 
 # ETC
 commons-math3 = { group = "org.apache.commons", name = "commons-math3", version.ref = "apacheCommonsMath3" }
+timber = { group = "com.jakewharton.timber", name = "timber", version.ref = "timber" }
 
 [plugins]
 # Gradle Plugins

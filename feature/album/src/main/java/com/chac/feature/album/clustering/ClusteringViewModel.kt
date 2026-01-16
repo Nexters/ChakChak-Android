@@ -37,8 +37,8 @@ class ClusteringViewModel
 
         init {
             viewModelScope.launch {
-                val media = mediaRepository.getMedia()
-                mediaState.value = media.map(Media::toUiModel)
+                val clusters = mediaRepository.getClusteredMedia()
+                mediaState.value = clusters.values.flatten().map(Media::toUiModel)
             }
         }
     }
