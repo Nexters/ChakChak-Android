@@ -1,7 +1,11 @@
 package com.chac.domain.photo.media
 
+import kotlinx.coroutines.flow.Flow
+
 interface MediaRepository {
     suspend fun getClusteredMedia(): Map<Long, List<Media>>
+
+    fun getClusteredMediaStream(): Flow<MediaCluster> = TODO("Implement paging in data layer")
 
     suspend fun getMedia(
         startTime: Long = 0,
