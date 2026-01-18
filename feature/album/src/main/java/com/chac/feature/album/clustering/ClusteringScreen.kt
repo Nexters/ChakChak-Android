@@ -25,6 +25,7 @@ import com.chac.core.permission.MediaWithLocationPermissionUtil.launchMediaWithL
 import com.chac.core.permission.compose.PermissionDeniedDialog
 import com.chac.core.permission.compose.moveToPermissionSetting
 import com.chac.core.permission.compose.rememberRegisterMediaWithLocationPermission
+import com.chac.domain.photo.media.MediaCluster
 
 /**
  * 클러스터링 화면 라우트
@@ -37,10 +38,9 @@ fun ClusteringRoute(
     onOpenGallery: (List<String>) -> Unit,
     viewModel: ClusteringViewModel = hiltViewModel(),
 ) {
-    val mediaState by viewModel.mediaState
     ClusteringScreen(
         clusters = viewModel.clusters,
-        media = mediaState,
+        mediaClusters = viewModel.mediaClusters,
         onOpenGallery = onOpenGallery,
     )
 }
@@ -54,7 +54,7 @@ fun ClusteringRoute(
 @Composable
 private fun ClusteringScreen(
     clusters: List<ClusterItem>,
-    media: List<MediaUiModel>,
+    mediaClusters: List<MediaCluster>,
     onOpenGallery: (List<String>) -> Unit,
 ) {
     Column(
@@ -72,8 +72,8 @@ private fun ClusteringScreen(
         }
 
         LazyColumn {
-            items(items = media, key = { it.id }) {
-                Text(text = "id:${it.id}, uri:${it.uriString}")
+            items(items = mediaClusters, key = { it.id }) { cluster ->
+                Text(text = "cluster=${cluster.id}, size=${cluster.mediaList.size}")
             }
         }
 
@@ -127,7 +127,7 @@ private fun ClusteringScreenPreview() {
                 ClusterItem(title = "Cluster A", photos = listOf("A-1", "A-2")),
                 ClusterItem(title = "Cluster B", photos = listOf("B-1")),
             ),
-            media = emptyList(),
+            mediaClusters = emptyList(),
             onOpenGallery = {},
         )
     }

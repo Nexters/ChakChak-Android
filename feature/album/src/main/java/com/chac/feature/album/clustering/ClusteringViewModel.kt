@@ -1,11 +1,10 @@
 package com.chac.feature.album.clustering
 
-import androidx.compose.runtime.Immutable
-import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
+import androidx.compose.runtime.mutableStateListOf
 import androidx.lifecycle.viewModelScope
-import com.chac.domain.photo.media.Media
-import com.chac.domain.photo.media.MediaRepository
+import com.chac.domain.photo.media.GetClusteredMediaStreamUseCase
+import com.chac.domain.photo.media.MediaCluster
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -15,7 +14,7 @@ import javax.inject.Inject
 class ClusteringViewModel
     @Inject
     constructor(
-        private val mediaRepository: MediaRepository,
+        private val getClusteredMediaStreamUseCase: GetClusteredMediaStreamUseCase,
     ) : ViewModel() {
         /** 클러스터링 목록에 표시할 임시 데이터 */
         val clusters = listOf(
@@ -33,12 +32,13 @@ class ClusteringViewModel
             ),
         )
 
-        val mediaState = mutableStateOf(emptyList<MediaUiModel>())
+        val mediaClusters = mutableStateListOf<MediaCluster>()
 
         init {
             viewModelScope.launch {
-                val clusters = mediaRepository.getClusteredMedia()
-                mediaState.value = clusters.values.flatten().map(Media::toUiModel)
+                getClusteredMediaStreamUseCase().collect { cluster ->
+                    mediaClusters.add(cluster)
+                }
             }
         }
     }
@@ -53,11 +53,3 @@ data class ClusterItem(
     val title: String,
     val photos: List<String>,
 )
-
-@Immutable
-data class MediaUiModel(
-    val id: Long,
-    val uriString: String,
-)
-
-private fun Media.toUiModel(): MediaUiModel = MediaUiModel(id = id, uriString = uriString)
