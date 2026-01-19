@@ -17,6 +17,26 @@ android {
     buildFeatures {
         buildConfig = true
     }
+
+    signingConfigs {
+        create("release") {
+            storeFile = file(System.getenv("CHAC_KEYSTORE_PATH"))
+            storePassword = System.getenv("CHAC_KEYSTORE_PASSWORD")
+            keyAlias = System.getenv("CHAC_KEY_ALIAS")
+            keyPassword = System.getenv("CHAC_KEY_PASSWORD")
+        }
+    }
+
+    buildTypes {
+        release {
+            isMinifyEnabled = true
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
+            signingConfig = signingConfigs.getByName("release")
+        }
+    }
 }
 
 dependencies {
