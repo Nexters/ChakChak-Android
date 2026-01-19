@@ -16,7 +16,7 @@ import javax.inject.Inject
 internal class MediaDataSource
     @Inject
     constructor(
-        @ApplicationContext context: Context,
+        @ApplicationContext private val context: Context,
     ) {
         private val contentResolver = context.contentResolver
         private val ioDispatcher = Dispatchers.IO

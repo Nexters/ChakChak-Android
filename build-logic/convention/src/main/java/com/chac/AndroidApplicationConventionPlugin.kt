@@ -2,6 +2,8 @@ package com.chac
 
 import com.android.build.api.dsl.ApplicationExtension
 import com.chac.convention.configureAndroid
+import com.chac.convention.extensions.versionCode
+import com.chac.convention.extensions.versionName
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.apply
@@ -16,6 +18,9 @@ class AndroidApplicationConventionPlugin : Plugin<Project> {
 
             extensions.configure<ApplicationExtension> {
                 defaultConfig.targetSdk = 36
+
+                defaultConfig.versionCode = versionCode()
+                defaultConfig.versionName = versionName()
             }
         }
     }
