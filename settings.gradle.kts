@@ -28,6 +28,7 @@ include(":app")
 // core
 include(":core:designsystem")
 include(":core:permission")
+include(":core:resources")
 
 // domain
 include(":domain:photo")
