@@ -11,8 +11,8 @@ class TimeBasedClusteringStrategy
         override suspend fun performClustering(mediaList: List<Media>): Map<Long, List<Media>> {
             if (mediaList.isEmpty()) return emptyMap()
 
-            // 시간순으로 정렬
-            val sortedMedia = mediaList.sortedBy { it.dateTaken }
+            // 최신순으로 정렬
+            val sortedMedia = mediaList.sortedByDescending { it.dateTaken }
 
             // 결과 맵 (키: 클러스터 시작 시간, 값: 미디어 리스트)
             val resultClusters = mutableMapOf<Long, MutableList<Media>>()
@@ -34,7 +34,7 @@ class TimeBasedClusteringStrategy
                 }
 
                 val previousMedia = sortedMedia[i - 1]
-                val timeDifference = currentMedia.dateTaken - previousMedia.dateTaken
+                val timeDifference = previousMedia.dateTaken - currentMedia.dateTaken
 
                 // 시간 차이가 임계값을 초과하면 현재 클러스터 처리
                 if (timeDifference > maxTimeDifference) {
