@@ -70,29 +70,28 @@ internal class MediaRepositoryImpl
             )
 
             // TODO 이렇게 캐싱 없이 한번에 exif에서 LatLng를 가져오는 방식은 오래걸려서 개선해야함.
-            val clusteredMedia = LinkedHashMap<Long, MediaCluster>()
+            val mediaClusters = mutableListOf<MediaCluster>()
             timeBasedClusters.values.forEach { mediaInTimeCluster ->
-                val locationClusters = locationBasedClusteringStrategy.cluster(mediaInTimeCluster)
-                locationClusters.forEach { (keyTime, mediaList) ->
+                val locationBasedClusters = locationBasedClusteringStrategy.cluster(mediaInTimeCluster)
+                locationBasedClusters.forEach { (keyTime, mediaList) ->
                     val title = getClusterTitle(mediaList)
-                    val cluster =
-                        MediaCluster(
-                            id = keyTime,
-                            mediaList = mediaList,
-                            title = title,
-                        )
-                    clusteredMedia[keyTime] = cluster
+                    val cluster = MediaCluster(
+                        id = keyTime,
+                        mediaList = mediaList,
+                        title = title,
+                    )
+                    mediaClusters.add(cluster)
                     onCluster(cluster)
                 }
             }
 
             val step2Time = System.currentTimeMillis()
             Timber.d(
-                "MediaRepositoryImpl, locationBasedClusters-${clusteredMedia.size}," +
-                    "mediaCounts-${clusteredMedia.values.flatMap { it.mediaList }.size}, time = ${step2Time - step1Time}",
+                "MediaRepositoryImpl, locationBasedClusters-${mediaClusters.size}," +
+                    "mediaCounts-${mediaClusters.flatMap { it.mediaList }.size}, time = ${step2Time - step1Time}",
             )
 
-            return clusteredMedia.values.toList()
+            return mediaClusters
         }
 
         override suspend fun getMedia(
