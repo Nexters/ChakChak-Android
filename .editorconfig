@@ -20,6 +20,10 @@ ktlint_standard_argument-list-wrapping = disabled
 ktlint_standard_no-wildcard-imports = disabled
 ktlint_standard_parameter-list-wrapping = disabled
 ktlint_standard_spacing-between-declarations-with-annotations = disabled
+ktlint_standard_annotation = disabled
+ktlint_standard_class-signature = disabled
+ktlint_standard_function-signature = disabled
+ktlint_standard_chain-method-continuation = disabled
 
 # 함수 네이밍을 Camel Case로 강제하지 않는다. (ex. Composable 함수)
 ktlint_standard_function-naming = disabled

@@ -17,10 +17,9 @@ class GalleryViewModel(
          *
          * @param photos 갤러리 화면에 표시할 사진 목록
          */
-        fun provideFactory(photos: List<String>): ViewModelProvider.Factory =
-            object : ViewModelProvider.Factory {
-                @Suppress("UNCHECKED_CAST")
-                override fun <T : ViewModel> create(modelClass: Class<T>): T = GalleryViewModel(photos) as T
-            }
+        fun provideFactory(photos: List<String>): ViewModelProvider.Factory = object : ViewModelProvider.Factory {
+            @Suppress("UNCHECKED_CAST")
+            override fun <T : ViewModel> create(modelClass: Class<T>): T = GalleryViewModel(photos) as T
+        }
     }
 }

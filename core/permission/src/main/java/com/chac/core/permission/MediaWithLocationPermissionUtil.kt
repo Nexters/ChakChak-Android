@@ -32,13 +32,12 @@ object MediaWithLocationPermissionUtil : PermissionUtil() {
         launch()
     }
 
-    fun checkPermission(context: Context): Boolean =
-        permissions.all { permission ->
-            ContextCompat.checkSelfPermission(
-                context,
-                permission,
-            ) == PackageManager.PERMISSION_GRANTED
-        }
+    fun checkPermission(context: Context): Boolean = permissions.all { permission ->
+        ContextCompat.checkSelfPermission(
+            context,
+            permission,
+        ) == PackageManager.PERMISSION_GRANTED
+    }
 
     fun hasFullAccessPermission(context: Context): Boolean =
         hasFullAccessPhotosVideosPermission(context) && hasMediaAccessPermission(context)
@@ -59,57 +58,51 @@ object MediaWithLocationPermissionUtil : PermissionUtil() {
         }
 
     @RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
-    private fun hasReadMediaVisualUserSelectedPermission(context: Context): Boolean =
-        ContextCompat.checkSelfPermission(
-            context,
-            Manifest.permission.READ_MEDIA_VISUAL_USER_SELECTED,
-        ) == PackageManager.PERMISSION_GRANTED
+    private fun hasReadMediaVisualUserSelectedPermission(context: Context): Boolean = ContextCompat.checkSelfPermission(
+        context,
+        Manifest.permission.READ_MEDIA_VISUAL_USER_SELECTED,
+    ) == PackageManager.PERMISSION_GRANTED
 
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
-    private fun hasReadMediaImagesPermission(context: Context): Boolean =
-        ContextCompat.checkSelfPermission(
-            context,
-            Manifest.permission.READ_MEDIA_IMAGES,
-        ) == PackageManager.PERMISSION_GRANTED
+    private fun hasReadMediaImagesPermission(context: Context): Boolean = ContextCompat.checkSelfPermission(
+        context,
+        Manifest.permission.READ_MEDIA_IMAGES,
+    ) == PackageManager.PERMISSION_GRANTED
 
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
-    private fun hasReadMediaVideoPermission(context: Context): Boolean =
-        ContextCompat.checkSelfPermission(
-            context,
-            Manifest.permission.READ_MEDIA_VIDEO,
-        ) == PackageManager.PERMISSION_GRANTED
+    private fun hasReadMediaVideoPermission(context: Context): Boolean = ContextCompat.checkSelfPermission(
+        context,
+        Manifest.permission.READ_MEDIA_VIDEO,
+    ) == PackageManager.PERMISSION_GRANTED
 
-    private fun hasReadStoragePermission(context: Context): Boolean =
-        ContextCompat.checkSelfPermission(
-            context,
-            Manifest.permission.READ_EXTERNAL_STORAGE,
-        ) == PackageManager.PERMISSION_GRANTED
+    private fun hasReadStoragePermission(context: Context): Boolean = ContextCompat.checkSelfPermission(
+        context,
+        Manifest.permission.READ_EXTERNAL_STORAGE,
+    ) == PackageManager.PERMISSION_GRANTED
 
-    private fun hasMediaAccessPermission(context: Context): Boolean =
-        ContextCompat.checkSelfPermission(
-            context,
-            Manifest.permission.ACCESS_MEDIA_LOCATION,
-        ) == PackageManager.PERMISSION_GRANTED
+    private fun hasMediaAccessPermission(context: Context): Boolean = ContextCompat.checkSelfPermission(
+        context,
+        Manifest.permission.ACCESS_MEDIA_LOCATION,
+    ) == PackageManager.PERMISSION_GRANTED
 
     fun getPermissionResultListener(
         onGranted: () -> Unit,
         onDenied: (() -> Unit)?,
         onPermanentlyDenied: (() -> Unit)?,
-    ): (PermissionState) -> Unit =
-        { state ->
-            when (state) {
-                PermissionState.Granted -> onGranted()
-                PermissionState.Denied, PermissionState.PartiallyGranted -> {
-                    if (onDenied != null) {
-                        onDenied()
-                    }
+    ): (PermissionState) -> Unit = { state ->
+        when (state) {
+            PermissionState.Granted -> onGranted()
+            PermissionState.Denied, PermissionState.PartiallyGranted -> {
+                if (onDenied != null) {
+                    onDenied()
                 }
+            }
 
-                PermissionState.PermanentlyDenied -> {
-                    if (onPermanentlyDenied != null) {
-                        onPermanentlyDenied()
-                    }
+            PermissionState.PermanentlyDenied -> {
+                if (onPermanentlyDenied != null) {
+                    onPermanentlyDenied()
                 }
             }
         }
+    }
 }

@@ -20,10 +20,9 @@ abstract class ClusteringStrategy {
 
     protected abstract suspend fun performClustering(mediaList: List<Media>): Map<Long, List<Media>>
 
-    protected fun filterByMinSize(clusters: Map<Long, List<Media>>): Map<Long, List<Media>> =
-        clusters.filter { (_, cluster) ->
-            cluster.size >= minClusterSize
-        }
+    protected fun filterByMinSize(clusters: Map<Long, List<Media>>): Map<Long, List<Media>> = clusters.filter { (_, cluster) ->
+        cluster.size >= minClusterSize
+    }
 
     companion object {
         const val DEFAULT_MIN_CLUSTER_SIZE: Int = 20

@@ -8,10 +8,8 @@ import javax.inject.Inject
  *
  * @return 클러스터 UI 표시를 위한 스트림
  */
-class GetClusteredMediaStreamUseCase
-    @Inject
-    constructor(
-        private val mediaRepository: MediaRepository,
-    ) {
-        operator fun invoke(): Flow<MediaCluster> = mediaRepository.getClusteredMediaStream()
-    }
+class GetClusteredMediaStreamUseCase @Inject constructor(
+    private val mediaRepository: MediaRepository,
+) {
+    operator fun invoke(): Flow<MediaCluster> = mediaRepository.getClusteredMediaStream()
+}

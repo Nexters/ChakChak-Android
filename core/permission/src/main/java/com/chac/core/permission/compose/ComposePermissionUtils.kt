@@ -21,11 +21,10 @@ import com.chac.core.permission.PermissionUtil.PermissionState
 @Composable
 internal fun rememberRegisterPermission(onPermissionResult: (PermissionState) -> Unit): Permission {
     val activity = LocalActivity.current
-    val register =
-        rememberLauncherForActivityResult(
-            contract = ActivityResultContracts.RequestMultiplePermissions(),
-            onResult = { onPermissionResult(getPermissionState(activity = activity, result = it)) },
-        )
+    val register = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestMultiplePermissions(),
+        onResult = { onPermissionResult(getPermissionState(activity = activity, result = it)) },
+    )
     return Permission(register)
 }
 
@@ -34,15 +33,13 @@ fun rememberRegisterMediaWithLocationPermission(
     onGranted: () -> Unit,
     onDenied: (() -> Unit)? = null,
     onPermanentlyDenied: (() -> Unit)? = null,
-): Permission =
-    rememberRegisterPermission(
-        onPermissionResult =
-            getPermissionResultListener(
-                onGranted = onGranted,
-                onDenied = onDenied,
-                onPermanentlyDenied = onPermanentlyDenied,
-            ),
-    )
+): Permission = rememberRegisterPermission(
+    onPermissionResult = getPermissionResultListener(
+        onGranted = onGranted,
+        onDenied = onDenied,
+        onPermanentlyDenied = onPermanentlyDenied,
+    ),
+)
 
 @Composable
 fun PermissionDeniedDialog(
@@ -71,9 +68,8 @@ fun PermissionDeniedDialog(
 
 fun moveToPermissionSetting(context: Context) {
     try {
-        val intent =
-            Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
-                .setData("package:${context.packageName}".toUri())
+        val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
+            .setData("package:${context.packageName}".toUri())
         context.startActivity(intent)
     } catch (e: ActivityNotFoundException) {
         val intent = Intent(Settings.ACTION_MANAGE_APPLICATIONS_SETTINGS)
