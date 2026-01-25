@@ -35,6 +35,9 @@ ktlint = "14.0.1"
 apacheCommonsMath3 = "3.6.1"
 timber = "5.0.1"
 
+# Unit Test
+junit = "4.13.2"
+
 [libraries]
 # Gradle Plugins
 android-gradlePlugin = { group = "com.android.tools.build", name = "gradle", version.ref = "androidGradlePlugin" }
@@ -84,6 +87,9 @@ hilt-navigation-compose = { group = "androidx.hilt", name = "hilt-navigation-com
 room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "room" }
 room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "room" }
 room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
+
+# Unit Test
+junit = { group = "junit", name = "junit", version.ref = "junit" }
 
 # ETC
 commons-math3 = { group = "org.apache.commons", name = "commons-math3", version.ref = "apacheCommonsMath3" }
