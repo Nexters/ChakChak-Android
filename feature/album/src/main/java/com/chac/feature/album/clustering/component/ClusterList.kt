@@ -49,7 +49,7 @@ fun ClusterList(
     clusters: List<ClusterUiModel>,
     isLoading: Boolean,
     modifier: Modifier = Modifier,
-    onOpenGallery: (List<String>) -> Unit,
+    onOpenGallery: (String, List<MediaUiModel>) -> Unit,
 ) {
     LazyColumn(
         modifier = modifier.fillMaxSize(),
@@ -80,7 +80,7 @@ fun ClusterList(
 private fun ClusterCard(
     cluster: ClusterUiModel,
     modifier: Modifier = Modifier,
-    onOpenGallery: (List<String>) -> Unit,
+    onOpenGallery: (String, List<MediaUiModel>) -> Unit,
 ) {
     Card(
         modifier = modifier.fillMaxWidth(),
@@ -90,6 +90,7 @@ private fun ClusterCard(
         shape = RoundedCornerShape(12.dp),
     ) {
         val defaultTitle = stringResource(R.string.clustering_default_album_title)
+        val displayTitle = cluster.title.ifBlank { defaultTitle }
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -103,7 +104,7 @@ private fun ClusterCard(
                 verticalArrangement = Arrangement.spacedBy(6.dp),
             ) {
                 Text(
-                    text = cluster.title.ifBlank { defaultTitle },
+                    text = displayTitle,
                     style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.onSurface,
                     maxLines = 1,
@@ -120,7 +121,10 @@ private fun ClusterCard(
                 Spacer(modifier = Modifier.height(4.dp))
                 Button(
                     onClick = {
-                        onOpenGallery(cluster.mediaList.map { it.uriString })
+                        onOpenGallery(
+                            displayTitle,
+                            cluster.mediaList,
+                        )
                     },
                     modifier = Modifier.widthIn(min = 140.dp),
                 ) {
@@ -196,7 +200,7 @@ private fun ClusterListPreview() {
         ClusterList(
             clusters = sampleClusters,
             isLoading = true,
-            onOpenGallery = {},
+            onOpenGallery = { _, _ -> },
         )
     }
 }

@@ -54,7 +54,7 @@ import com.chac.feature.album.model.MediaUiModel
  */
 @Composable
 fun ClusteringRoute(
-    onOpenGallery: (List<String>) -> Unit,
+    onOpenGallery: (String, List<MediaUiModel>) -> Unit,
     viewModel: ClusteringViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -99,7 +99,7 @@ fun ClusteringRoute(
 @Composable
 private fun ClusteringScreen(
     uiState: ClusteringUiState,
-    onOpenGallery: (List<String>) -> Unit,
+    onOpenGallery: (String, List<MediaUiModel>) -> Unit,
 ) {
     val context = LocalContext.current
 
@@ -235,7 +235,7 @@ private fun ClusteringScreenPreview(
     ChacTheme {
         ClusteringScreen(
             uiState = uiState,
-            onOpenGallery = {},
+            onOpenGallery = { _, _ -> },
         )
     }
 }
