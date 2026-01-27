@@ -43,7 +43,9 @@ fun ChacAppNavigation() {
             modifier = Modifier.padding(innerPadding),
             entryProvider = entryProvider {
                 albumEntries(
-                    onOpenGallery = { photos -> backStack.add(AlbumNavKey.Gallery(photos)) },
+                    onOpenGallery = { title, mediaList ->
+                        backStack.add(AlbumNavKey.Gallery(title, mediaList))
+                    },
                     onBack = { backStack.pop() },
                 )
             },

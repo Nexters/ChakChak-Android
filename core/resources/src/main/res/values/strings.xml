@@ -15,4 +15,14 @@
     <string name="clustering_empty_message">사진을 올리면 앨범을 착 정리할게요.</string>
     <string name="clustering_permission_message">앨범을 생성하려면\n사진 접근 권한이 필요해요.</string>
     <string name="clustering_permission_action">설정으로 이동</string>
+    <string name="gallery_top_bar_title">사진 정리</string>
+    <string name="gallery_back_cd">뒤로가기</string>
+    <string name="gallery_select_all">전체 선택</string>
+    <string name="gallery_selected_count">%1$d/%2$d 선택</string>
+    <string name="gallery_select_prompt">사진을 선택해주세요</string>
+    <string name="gallery_save_album_count">%1$d장의 사진 앨범에 저장</string>
+    <string name="gallery_exit_title">페이지 나가기</string>
+    <string name="gallery_exit_message">선택된 내용은 저장되지 않습니다.\n페이지를 나가겠어요?</string>
+    <string name="gallery_exit_cancel">취소</string>
+    <string name="gallery_exit_confirm">확인</string>
 </resources>

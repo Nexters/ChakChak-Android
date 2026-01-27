@@ -4,6 +4,7 @@ import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavKey
 import com.chac.feature.album.clustering.ClusteringRoute
 import com.chac.feature.album.gallery.GalleryRoute
+import com.chac.feature.album.model.MediaUiModel
 
 /**
  * 앨범 목적지를 Navigation3 entry provider에 등록한다
@@ -12,7 +13,7 @@ import com.chac.feature.album.gallery.GalleryRoute
  * @param onBack 갤러리에서 뒤로가기 동작을 전달하는 콜백
  */
 fun EntryProviderScope<NavKey>.albumEntries(
-    onOpenGallery: (List<String>) -> Unit,
+    onOpenGallery: (String, List<MediaUiModel>) -> Unit,
     onBack: () -> Unit,
 ) {
     entry(AlbumNavKey.Clustering) { _ ->
@@ -20,7 +21,8 @@ fun EntryProviderScope<NavKey>.albumEntries(
     }
     entry<AlbumNavKey.Gallery> { key ->
         GalleryRoute(
-            photos = key.photos,
+            title = key.title,
+            mediaList = key.mediaList,
             onBack = onBack,
         )
     }
