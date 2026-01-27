@@ -15,4 +15,7 @@
     <string name="clustering_empty_message">사진을 올리면 앨범을 착 정리할게요.</string>
     <string name="clustering_permission_message">앨범을 생성하려면\n사진 접근 권한이 필요해요.</string>
     <string name="clustering_permission_action">설정으로 이동</string>
+
+    <string name="clustering_worker_fail_title">클러스터링 실패</string>
+    <string name="clustering_worker_progress_title">클러스터링 중</string>
 </resources>

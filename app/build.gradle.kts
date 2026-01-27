@@ -49,4 +49,8 @@ dependencies {
     implementation(libs.androidx.navigation3.ui)
     implementation(libs.androidx.lifecycle.viewmodel.navigation3)
     implementation(libs.timber)
+
+    // Hilt work
+    implementation(libs.hilt.ext.work)
+    ksp(libs.hilt.ext.compiler)
 }

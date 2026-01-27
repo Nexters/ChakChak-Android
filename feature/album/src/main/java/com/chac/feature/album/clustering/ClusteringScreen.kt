@@ -1,5 +1,8 @@
 package com.chac.feature.album.clustering
 
+import android.Manifest
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -66,12 +69,23 @@ fun ClusteringRoute(
         onPermanentlyDenied = { viewModel.onPermissionChanged(false) },
     )
 
+    // 알림 권한 요청 런처
+    val requestPermissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission(),
+        onResult = { isGranted ->
+            // TODO 여기다가 알림 권한 on off에 따른 ui 처리해두면됨
+        }
+    )
+
+
     LaunchedEffect(Unit) {
         val hasPermission = MediaWithLocationPermissionUtil.checkPermission(context)
         viewModel.onPermissionChanged(hasPermission)
         if (!hasPermission) {
             permission.launchMediaWithLocationPermission()
         }
+
+        requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
     }
 
     DisposableEffect(lifecycleOwner, context) {

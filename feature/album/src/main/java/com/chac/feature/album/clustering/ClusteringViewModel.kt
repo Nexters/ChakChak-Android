@@ -3,6 +3,7 @@ package com.chac.feature.album.clustering
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.chac.domain.album.media.GetClusteredMediaStreamUseCase
+import com.chac.domain.album.media.StartClusteringUseCase
 import com.chac.feature.album.clustering.model.ClusteringUiState
 import com.chac.feature.album.clustering.model.toUiModel
 import com.chac.feature.album.model.ClusterUiModel
@@ -18,6 +19,7 @@ import javax.inject.Inject
 @HiltViewModel
 class ClusteringViewModel @Inject constructor(
     private val getClusteredMediaStreamUseCase: GetClusteredMediaStreamUseCase,
+    private val startClusteringUseCase: StartClusteringUseCase
 ) : ViewModel() {
     /** 클러스터링 화면의 상태 */
     private val _uiState = MutableStateFlow<ClusteringUiState>(ClusteringUiState.PermissionChecking)
@@ -55,6 +57,7 @@ class ClusteringViewModel @Inject constructor(
      * 클러스터 스트림 수집을 수집하고 상태를 갱신한다.
      */
     private fun refreshClusters() {
+        startClusteringUseCase()
         clusterCollectJob = viewModelScope.launch {
             try {
                 _uiState.value = ClusteringUiState.Loading(emptyList())
