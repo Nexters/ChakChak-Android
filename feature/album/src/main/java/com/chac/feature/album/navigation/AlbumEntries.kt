@@ -26,14 +26,14 @@ fun EntryProviderScope<NavKey>.albumEntries(
     onBack: () -> Unit,
 ) {
     entry(AlbumNavKey.Clustering) { _ ->
-        ClusteringRoute(onOpenGallery = onOpenGallery)
+        ClusteringRoute(
+            onClickSavePartial = onOpenGallery,
+        )
     }
     entry<AlbumNavKey.Gallery> { key ->
         GalleryRoute(
             cluster = key.cluster,
-            onClickSave = { selectedMediaIdSet ->
-                onOpenSaveCompleted(key.cluster.title, selectedMediaIdSet.size)
-            },
+            onSaveCompleted = onOpenSaveCompleted,
             onBack = onBack,
         )
     }

@@ -14,4 +14,12 @@ interface MediaRepository {
     ): List<Media>
 
     suspend fun getMediaLocation(uri: String): MediaLocation?
+
+    /**
+     * 앨범으로 미디어를 저장한다
+     *
+     * @param cluster 저장할 클러스터
+     * @return 저장된 미디어 리스트
+     */
+    suspend fun saveAlbum(cluster: MediaCluster): List<Media>
 }

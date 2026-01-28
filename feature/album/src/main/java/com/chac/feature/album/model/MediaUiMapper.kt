@@ -14,3 +14,16 @@ internal fun Media.toUiModel(): MediaUiModel = MediaUiModel(
     dateTaken = dateTaken,
     mediaType = mediaType,
 )
+
+/**
+ * UI 미디어를 도메인 모델로 변환한다
+ *
+ * @receiver 변환 대상 UI 미디어
+ * @return 도메인 미디어
+ */
+internal fun MediaUiModel.toDomain(): Media = Media(
+    id = id,
+    uriString = uriString,
+    dateTaken = dateTaken,
+    mediaType = mediaType,
+)

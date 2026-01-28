@@ -105,6 +105,27 @@ internal class MediaRepositoryImpl @Inject constructor(
 
     override suspend fun getMediaLocation(uri: String): MediaLocation? = dataSource.getMediaLocation(uri)
 
+    override suspend fun saveAlbum(
+        cluster: MediaCluster,
+    ): List<Media> {
+        val savedMedia = dataSource.saveAlbum(cluster.title, cluster.mediaList)
+        if (savedMedia.isEmpty()) return emptyList()
+
+        val savedIds = savedMedia.map { it.id }.toSet()
+        synchronized(cacheLock) {
+            cachedClusteredMedia = cachedClusteredMedia?.map { cluster ->
+                val filtered = cluster.mediaList.filterNot { it.id in savedIds }
+                if (filtered.size == cluster.mediaList.size) {
+                    cluster
+                } else {
+                    cluster.copy(mediaList = filtered)
+                }
+            }
+        }
+
+        return savedMedia
+    }
+
     private suspend fun getClusterTitle(mediaList: List<Media>): String {
         val centroid = getClusterCentroid(mediaList) ?: return ""
         return reverseGeocoder.reverseGeocode(centroid).orEmpty()

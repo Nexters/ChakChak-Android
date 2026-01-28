@@ -42,14 +42,16 @@ import com.chac.feature.album.model.MediaUiModel
  *
  * @param clusters 클러스터 UI 모델 목록
  * @param isLoading 로딩 중 여부
- * @param onOpenGallery 갤러리로 이동하는 콜백
+ * @param onClickSavePartial '사진 정리하기' 버튼 클릭 이벤트
+ * @param onClickSaveAll '그대로 저장' 버튼 클릭 이벤트
  */
 @Composable
 fun ClusterList(
     clusters: List<ClusterUiModel>,
     isLoading: Boolean,
     modifier: Modifier = Modifier,
-    onOpenGallery: (ClusterUiModel) -> Unit,
+    onClickSavePartial: (ClusterUiModel) -> Unit,
+    onClickSaveAll: (ClusterUiModel) -> Unit,
 ) {
     LazyColumn(
         modifier = modifier.fillMaxSize(),
@@ -59,7 +61,8 @@ fun ClusterList(
         items(items = clusters, key = { it.id }) { cluster ->
             ClusterCard(
                 cluster = cluster,
-                onOpenGallery = onOpenGallery,
+                onClickSavePartial = { onClickSavePartial(cluster) },
+                onClickSaveAll = { onClickSaveAll(cluster) },
             )
         }
         if (isLoading) {
@@ -74,13 +77,15 @@ fun ClusterList(
  * 클러스터 정보를 카드로 표시한다
  *
  * @param cluster 표시할 클러스터 모델
- * @param onOpenGallery 갤러리로 이동하는 콜백
+ * @param onClickSavePartial '사진 정리하기' 버튼 클릭 이벤트
+ * @param onClickSaveAll '그대로 저장'버튼 클릭 이벤트
  */
 @Composable
 private fun ClusterCard(
     cluster: ClusterUiModel,
     modifier: Modifier = Modifier,
-    onOpenGallery: (ClusterUiModel) -> Unit,
+    onClickSavePartial: () -> Unit,
+    onClickSaveAll: () -> Unit,
 ) {
     Card(
         modifier = modifier.fillMaxWidth(),
@@ -120,15 +125,13 @@ private fun ClusterCard(
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 Button(
-                    onClick = {
-                        onOpenGallery(cluster)
-                    },
+                    onClick = onClickSavePartial,
                     modifier = Modifier.widthIn(min = 140.dp),
                 ) {
                     Text(text = stringResource(R.string.clustering_action_organize))
                 }
                 TextButton(
-                    onClick = {},
+                    onClick = onClickSaveAll,
                     modifier = Modifier.align(Alignment.Start),
                 ) {
                     Text(text = stringResource(R.string.clustering_action_keep))
@@ -197,7 +200,8 @@ private fun ClusterListPreview() {
         ClusterList(
             clusters = sampleClusters,
             isLoading = true,
-            onOpenGallery = {},
+            onClickSavePartial = {},
+            onClickSaveAll = {},
         )
     }
 }

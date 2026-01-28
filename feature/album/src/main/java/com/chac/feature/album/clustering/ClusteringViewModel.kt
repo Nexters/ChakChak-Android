@@ -3,9 +3,11 @@ package com.chac.feature.album.clustering
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.chac.domain.album.media.GetClusteredMediaStreamUseCase
+import com.chac.domain.album.media.SaveAlbumUseCase
 import com.chac.feature.album.clustering.model.ClusteringUiState
 import com.chac.feature.album.clustering.model.toUiModel
 import com.chac.feature.album.model.ClusterUiModel
+import com.chac.feature.album.model.toDomain
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -18,6 +20,7 @@ import javax.inject.Inject
 @HiltViewModel
 class ClusteringViewModel @Inject constructor(
     private val getClusteredMediaStreamUseCase: GetClusteredMediaStreamUseCase,
+    private val saveAlbumUseCase: SaveAlbumUseCase,
 ) : ViewModel() {
     /** 클러스터링 화면의 상태 */
     private val _uiState = MutableStateFlow<ClusteringUiState>(ClusteringUiState.PermissionChecking)
@@ -70,6 +73,13 @@ class ClusteringViewModel @Inject constructor(
             } finally {
                 clusterCollectJob = null
             }
+        }
+    }
+
+    /** 클러스터 전체를 앨범으로 저장한다. */
+    fun onClickSaveAll(cluster: ClusterUiModel) {
+        viewModelScope.launch {
+            saveAlbumUseCase(cluster.toDomain())
         }
     }
 

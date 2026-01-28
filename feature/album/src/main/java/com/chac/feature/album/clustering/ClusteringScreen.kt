@@ -32,8 +32,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.chac.core.designsystem.ui.theme.ChacTheme
 import com.chac.core.permission.MediaWithLocationPermissionUtil
 import com.chac.core.permission.MediaWithLocationPermissionUtil.launchMediaWithLocationPermission
-import com.chac.core.permission.compose.rememberRegisterMediaWithLocationPermission
 import com.chac.core.permission.compose.moveToPermissionSetting
+import com.chac.core.permission.compose.rememberRegisterMediaWithLocationPermission
 import com.chac.core.resources.R
 import com.chac.domain.album.media.MediaType
 import com.chac.feature.album.clustering.component.AlbumSectionHeader
@@ -49,13 +49,13 @@ import com.chac.feature.album.model.MediaUiModel
 /**
  * 클러스터링 화면 라우트
  *
- * @param onOpenGallery 갤러리로 이동하는 콜백
  * @param viewModel 클러스터링 화면 ViewModel
+ * @param onClickSavePartial '사진 정리하기' 버튼 클릭 이벤트
  */
 @Composable
 fun ClusteringRoute(
-    onOpenGallery: (ClusterUiModel) -> Unit,
     viewModel: ClusteringViewModel = hiltViewModel(),
+    onClickSavePartial: (ClusterUiModel) -> Unit,
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
@@ -86,7 +86,8 @@ fun ClusteringRoute(
 
     ClusteringScreen(
         uiState = uiState,
-        onOpenGallery = onOpenGallery,
+        onClickSavePartial = onClickSavePartial,
+        onClickSaveAll = viewModel::onClickSaveAll,
     )
 }
 
@@ -94,12 +95,14 @@ fun ClusteringRoute(
  * 클러스터링 목록 화면
  *
  * @param uiState 클러스터링 화면 상태
- * @param onOpenGallery 갤러리로 이동하는 콜백
+ * @param onClickSavePartial '사진 정리하기' 버튼 클릭 이벤트
+ * @param onClickSaveAll '그대로 저장' 버튼 클릭 이벤트
  */
 @Composable
 private fun ClusteringScreen(
     uiState: ClusteringUiState,
-    onOpenGallery: (ClusterUiModel) -> Unit,
+    onClickSavePartial: (ClusterUiModel) -> Unit,
+    onClickSaveAll: (ClusterUiModel) -> Unit,
 ) {
     val context = LocalContext.current
 
@@ -139,7 +142,8 @@ private fun ClusteringScreen(
                         ClusterList(
                             clusters = clusters,
                             isLoading = true,
-                            onOpenGallery = onOpenGallery,
+                            onClickSavePartial = onClickSavePartial,
+                            onClickSaveAll = {},
                         )
                     }
                 }
@@ -151,7 +155,8 @@ private fun ClusteringScreen(
                         ClusterList(
                             clusters = clusters,
                             isLoading = false,
-                            onOpenGallery = onOpenGallery,
+                            onClickSavePartial = onClickSavePartial,
+                            onClickSaveAll = {},
                         )
                     }
                 }
@@ -235,7 +240,8 @@ private fun ClusteringScreenPreview(
     ChacTheme {
         ClusteringScreen(
             uiState = uiState,
-            onOpenGallery = {},
+            onClickSavePartial = {},
+            onClickSaveAll = {},
         )
     }
 }

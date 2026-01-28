@@ -26,4 +26,15 @@ sealed interface GalleryUiState {
         override val cluster: ClusterUiModel,
         val selectedIds: Set<Long>,
     ) : GalleryUiState
+
+    /**
+     * 저장 중 상태
+     *
+     * @property cluster 화면에 표시할 클러스터
+     * @property selectedIds 저장 중인 미디어 ID 목록
+     */
+    data class Saving(
+        override val cluster: ClusterUiModel,
+        val selectedIds: Set<Long>,
+    ) : GalleryUiState
 }
