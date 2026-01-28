@@ -2,6 +2,7 @@ package com.chac.feature.album.clustering
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.chac.domain.album.media.GetClusteredMediaStateUseCase
 import com.chac.domain.album.media.GetClusteredMediaStreamUseCase
 import com.chac.domain.album.media.SaveAlbumUseCase
 import com.chac.feature.album.clustering.model.ClusteringUiState
@@ -20,6 +21,7 @@ import javax.inject.Inject
 @HiltViewModel
 class ClusteringViewModel @Inject constructor(
     private val getClusteredMediaStreamUseCase: GetClusteredMediaStreamUseCase,
+    private val getClusteredMediaStateUseCase: GetClusteredMediaStateUseCase,
     private val saveAlbumUseCase: SaveAlbumUseCase,
 ) : ViewModel() {
     /** 클러스터링 화면의 상태 */
@@ -34,6 +36,9 @@ class ClusteringViewModel @Inject constructor(
      */
     private var clusterCollectJob: Job? = null
 
+    /** 캐시 스냅샷 수집 Job */
+    private var clusterStateCollectJob: Job? = null
+
     /**
      * 권한 변경 결과를 반영해 UI 상태와 스트림 수집을 갱신한다.
      *
@@ -43,6 +48,8 @@ class ClusteringViewModel @Inject constructor(
         if (!hasPermission) {
             clusterCollectJob?.cancel()
             clusterCollectJob = null
+            clusterStateCollectJob?.cancel()
+            clusterStateCollectJob = null
             _uiState.value = ClusteringUiState.PermissionDenied
             return
         }
@@ -50,14 +57,17 @@ class ClusteringViewModel @Inject constructor(
         // 권한이 이미 허용된 상태라면 수집을 다시 시작하지 않는다.
         if (_uiState.value is ClusteringUiState.WithClusters) return
         if (clusterCollectJob != null) return
+        if (clusterStateCollectJob == null) {
+            observeClusterState()
+        }
 
-        refreshClusters()
+        initializeClusters()
     }
 
     /**
-     * 클러스터 스트림 수집을 수집하고 상태를 갱신한다.
+     * 초기 클러스터 스트림 수집을 수집하고 상태를 갱신한다.
      */
-    private fun refreshClusters() {
+    private fun initializeClusters() {
         clusterCollectJob = viewModelScope.launch {
             try {
                 _uiState.value = ClusteringUiState.Loading(emptyList())
@@ -72,6 +82,23 @@ class ClusteringViewModel @Inject constructor(
                 _uiState.value = ClusteringUiState.Completed(currentClusters())
             } finally {
                 clusterCollectJob = null
+            }
+        }
+    }
+
+    /**
+     * 캐시 스냅샷을 수집해 저장 이후 최신 상태로 UI를 동기화한다.
+     */
+    private fun observeClusterState() {
+        clusterStateCollectJob = viewModelScope.launch {
+            getClusteredMediaStateUseCase().collect { clusters ->
+                // 초기 스트림 수집 중에는 중복 갱신을 피한다.
+                if (clusterCollectJob != null) return@collect
+
+                val uiClusters = clusters.map { it.toUiModel() }
+                if (_uiState.value is ClusteringUiState.WithClusters) {
+                    _uiState.value = ClusteringUiState.Completed(uiClusters)
+                }
             }
         }
     }

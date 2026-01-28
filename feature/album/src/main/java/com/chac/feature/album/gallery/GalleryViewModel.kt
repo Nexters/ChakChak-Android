@@ -2,7 +2,9 @@ package com.chac.feature.album.gallery
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.chac.domain.album.media.GetClusteredMediaStateUseCase
 import com.chac.domain.album.media.SaveAlbumUseCase
+import com.chac.feature.album.clustering.model.toUiModel
 import com.chac.feature.album.gallery.model.GalleryUiState
 import com.chac.feature.album.gallery.model.SaveCompletedEvent
 import com.chac.feature.album.model.ClusterUiModel
@@ -15,6 +17,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -23,6 +26,7 @@ import javax.inject.Inject
 class GalleryViewModel @Inject constructor(
     /** 앨범 저장 유즈케이스 */
     private val saveAlbumUseCase: SaveAlbumUseCase,
+    private val getClusteredMediaStateUseCase: GetClusteredMediaStateUseCase,
 ) : ViewModel() {
     /** 갤러리 화면 UI 상태 */
     private val _uiState = MutableStateFlow<GalleryUiState>(GalleryUiState.NoneSelected(EMPTY_CLUSTER))
@@ -31,7 +35,14 @@ class GalleryViewModel @Inject constructor(
     private val saveCompletedEventsChannel = Channel<SaveCompletedEvent>(capacity = Channel.BUFFERED)
     val saveCompletedEvents = saveCompletedEventsChannel.receiveAsFlow()
 
+    /** 클러스터 캐시 스냅샷 상태를 Collect하는 코루틴 Job */
+    private var clusterStateCollectJob: Job? = null
+    private var clusterId: Long? = null
     private var saveJob: Job? = null
+
+    init {
+        observeClusterState()
+    }
 
     /**
      * 최초 상태값을 초기화한다.
@@ -40,6 +51,8 @@ class GalleryViewModel @Inject constructor(
      */
     fun initialize(cluster: ClusterUiModel) {
         if (_uiState.value.cluster != EMPTY_CLUSTER) return
+
+        clusterId = cluster.id
         _uiState.value = GalleryUiState.NoneSelected(cluster = cluster)
     }
 
@@ -111,6 +124,24 @@ class GalleryViewModel @Inject constructor(
                 )
             } finally {
                 saveJob = null
+            }
+        }
+    }
+
+    /**
+     * 캐시 스냅샷을 수집하고 변경이 발생하면 최신 상태로 동기화한다.
+     */
+    private fun observeClusterState() {
+        if (clusterStateCollectJob != null) return
+
+        clusterStateCollectJob = viewModelScope.launch {
+            getClusteredMediaStateUseCase().collect { clusters ->
+                val updatedCluster = clusters.firstOrNull { it.id == clusterId }?.toUiModel()
+
+                _uiState.update {
+                    val newCluster = updatedCluster ?: it.cluster.copy(mediaList = emptyList())
+                    GalleryUiState.NoneSelected(newCluster)
+                }
             }
         }
     }
