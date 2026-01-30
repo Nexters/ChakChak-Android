@@ -8,3 +8,7 @@ plugins {
 android {
     setNamespace("core.designsystem")
 }
+
+dependencies {
+    implementation(libs.coil.compose)
+}
