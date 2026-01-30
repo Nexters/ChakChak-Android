@@ -122,7 +122,7 @@ private fun ClusterCard(
                         text = displayTitle,
                         style = MaterialTheme.typography.titleMedium,
                         color = MaterialTheme.colorScheme.onSurface,
-                        maxLines = 1,
+                        maxLines = 2,
                         overflow = TextOverflow.Ellipsis,
                     )
                     Text(
