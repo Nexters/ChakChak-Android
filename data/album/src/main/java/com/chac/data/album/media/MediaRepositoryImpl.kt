@@ -4,6 +4,7 @@ import com.chac.data.album.media.clustering.ClusteringStrategy
 import com.chac.data.album.media.clustering.di.LocationBasedClustering
 import com.chac.data.album.media.clustering.di.TimeBasedClustering
 import com.chac.data.album.media.reversGeocoder.ReverseGeocoder
+import com.chac.data.album.media.timeformat.TimeFormatProvider
 import com.chac.domain.album.media.Media
 import com.chac.domain.album.media.MediaCluster
 import com.chac.domain.album.media.MediaLocation
@@ -31,6 +32,7 @@ internal class MediaRepositoryImpl @Inject constructor(
     @LocationBasedClustering
     private val locationBasedClusteringStrategy: ClusteringStrategy,
     private val reverseGeocoder: ReverseGeocoder,
+    private val timeFormatProvider: TimeFormatProvider,
     private val dataSource: MediaDataSource,
 ) : MediaRepository {
     /** 캐시된 클러스터 스냅샷을 외부에 전달하는 상태 Flow (계산 전에는 null) */
@@ -169,8 +171,18 @@ internal class MediaRepositoryImpl @Inject constructor(
     }
 
     private suspend fun getClusterTitle(mediaList: List<Media>): String {
-        val centroid = getClusterCentroid(mediaList) ?: return ""
-        return reverseGeocoder.reverseGeocode(centroid).orEmpty()
+        if (mediaList.isEmpty()) return ""
+        val address = getClusterCentroid(mediaList)
+            ?.let { centroid -> reverseGeocoder.reverseGeocode(centroid).orEmpty() }
+            .orEmpty()
+
+        val formattedTime = timeFormatProvider.formatClusterTime(mediaList.first().dateTaken)
+
+        return if (address.isBlank()) {
+            formattedTime
+        } else {
+            "$formattedTime $address"
+        }
     }
 
     private suspend fun getClusterCentroid(mediaList: List<Media>): MediaLocation? {
