@@ -51,6 +51,7 @@ import androidx.compose.ui.window.Dialog
 import androidx.core.net.toUri
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.chac.core.designsystem.ui.component.ChacImage
 import com.chac.core.designsystem.ui.theme.ChacTheme
 import com.chac.core.permission.compose.rememberWriteRequestLauncher
 import com.chac.core.resources.R
@@ -209,12 +210,13 @@ private fun GalleryScreen(
             modifier = Modifier
                 .weight(1f)
                 .fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp),
             contentPadding = PaddingValues(bottom = 8.dp),
         ) {
             items(mediaList, key = { it.id }) { media ->
                 GalleryPhotoItem(
+                    media = media,
                     isSelected = selectedMediaIds.contains(media.id),
                     onToggle = { onToggleMedia(media) },
                 )
@@ -376,11 +378,13 @@ private fun GalleryTopBar(
 /**
  * 사진 그리드의 선택 가능한 아이템을 표시한다
  *
+ * @param media 이미지 모델
  * @param isSelected 선택 상태 여부
  * @param onToggle 선택 상태 토글 콜백
  */
 @Composable
 private fun GalleryPhotoItem(
+    media: MediaUiModel,
     isSelected: Boolean,
     onToggle: () -> Unit,
     modifier: Modifier = Modifier,
@@ -388,10 +392,14 @@ private fun GalleryPhotoItem(
     Box(
         modifier = modifier
             .aspectRatio(1f)
-            .clip(RoundedCornerShape(8.dp))
+            .clip(RoundedCornerShape(12.dp))
             .background(MaterialTheme.colorScheme.surfaceVariant)
             .clickable(onClick = onToggle),
     ) {
+        ChacImage(
+            model = media.uriString,
+            modifier = Modifier.matchParentSize(),
+        )
         Box(
             modifier = Modifier
                 .align(Alignment.TopEnd)
