@@ -70,7 +70,8 @@ class ClusteringViewModel @Inject constructor(
      * 초기 클러스터 스트림 수집을 수집하고 상태를 갱신한다.
      */
     private fun initializeClusters() {
-        startClusteringUseCase()
+        // TODO 나중에 여기서 클러스터링 실행 시도만 하고, 클러스터링 후 데이터를 넣어주고 가져온느 작업을 Worker에서 추가해줘야함
+        // startClusteringUseCase()
         clusterCollectJob = viewModelScope.launch {
             try {
                 _uiState.value = ClusteringUiState.Loading(emptyList())
