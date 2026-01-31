@@ -2,16 +2,24 @@ package com.chac.core.designsystem.ui.theme
 
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
+import com.chac.core.designsystem.R
 
-// TODO: 실제 폰트 리소스 적용 시 교체
-private val Pretendard: FontFamily = FontFamily.Default
-private val Montserrat: FontFamily = FontFamily.Default
+private val Pretendard: FontFamily = FontFamily(
+    Font(R.font.pretendard_regular, weight = FontWeight.Normal),
+    Font(R.font.pretendard_medium, weight = FontWeight.Medium),
+    Font(R.font.pretendard_semibold, weight = FontWeight.SemiBold),
+    Font(R.font.pretendard_bold, weight = FontWeight.Bold),
+)
+
+private val Montserrat: FontFamily = FontFamily(
+    Font(R.font.montserrat_semibold, weight = FontWeight.SemiBold),
+)
 
 object ChacTextStyles {
-
     val Headline01 = TextStyle(
         fontFamily = Pretendard,
         fontWeight = FontWeight.SemiBold, // 600
