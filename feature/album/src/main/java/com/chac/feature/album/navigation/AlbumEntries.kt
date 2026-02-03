@@ -4,7 +4,7 @@ import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavKey
 import com.chac.feature.album.clustering.ClusteringRoute
 import com.chac.feature.album.gallery.GalleryRoute
-import com.chac.feature.album.model.ClusterUiModel
+import com.chac.feature.album.model.MediaClusterUiModel
 import com.chac.feature.album.save.SaveCompletedRoute
 
 /**
@@ -18,7 +18,7 @@ import com.chac.feature.album.save.SaveCompletedRoute
  * @param onBack 갤러리에서 뒤로가기 동작을 전달하는 콜백
  */
 fun EntryProviderScope<NavKey>.albumEntries(
-    onOpenGallery: (ClusterUiModel) -> Unit,
+    onOpenGallery: (MediaClusterUiModel) -> Unit,
     onOpenSaveCompleted: (String, Int) -> Unit,
     onCloseSaveCompleted: () -> Unit,
     onPopToGallery: () -> Unit,

@@ -8,7 +8,7 @@ import com.chac.domain.album.media.usecase.StartClusteringUseCase
 import com.chac.domain.album.media.usecase.SaveAlbumUseCase
 import com.chac.feature.album.clustering.model.ClusteringUiState
 import com.chac.feature.album.mapper.toUiModel
-import com.chac.feature.album.model.ClusterUiModel
+import com.chac.feature.album.model.MediaClusterUiModel
 import com.chac.feature.album.mapper.toDomain
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
@@ -108,7 +108,7 @@ class ClusteringViewModel @Inject constructor(
     }
 
     /** 클러스터 전체를 앨범으로 저장한다. */
-    fun onClickSaveAll(cluster: ClusterUiModel) {
+    fun onClickSaveAll(cluster: MediaClusterUiModel) {
         viewModelScope.launch {
             saveAlbumUseCase(cluster.toDomain())
         }
@@ -117,7 +117,7 @@ class ClusteringViewModel @Inject constructor(
     /**
      * 현재 UI 상태에 포함된 클러스터 목록을 가져온다.
      */
-    private fun currentClusters(): List<ClusterUiModel> = when (val state = _uiState.value) {
+    private fun currentClusters(): List<MediaClusterUiModel> = when (val state = _uiState.value) {
         is ClusteringUiState.WithClusters -> state.clusters
         ClusteringUiState.PermissionChecking -> emptyList()
         ClusteringUiState.PermissionDenied -> emptyList()

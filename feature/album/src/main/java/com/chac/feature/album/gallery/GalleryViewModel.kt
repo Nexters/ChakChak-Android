@@ -8,7 +8,7 @@ import com.chac.feature.album.model.SaveUiStatus
 import com.chac.feature.album.mapper.toUiModel
 import com.chac.feature.album.gallery.model.GalleryUiState
 import com.chac.feature.album.gallery.model.SaveCompletedEvent
-import com.chac.feature.album.model.ClusterUiModel
+import com.chac.feature.album.model.MediaClusterUiModel
 import com.chac.feature.album.model.MediaUiModel
 import com.chac.feature.album.mapper.toDomain
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -50,7 +50,7 @@ class GalleryViewModel @Inject constructor(
      *
      * @param cluster 화면에 표시할 클러스터
      */
-    fun initialize(cluster: ClusterUiModel) {
+    fun initialize(cluster: MediaClusterUiModel) {
         if (_uiState.value.cluster != EMPTY_CLUSTER) return
 
         clusterId = cluster.id
@@ -163,7 +163,7 @@ class GalleryViewModel @Inject constructor(
     }
 
     companion object {
-        private val EMPTY_CLUSTER = ClusterUiModel(
+        private val EMPTY_CLUSTER = MediaClusterUiModel(
             id = 0L,
             title = "",
             mediaList = emptyList(),

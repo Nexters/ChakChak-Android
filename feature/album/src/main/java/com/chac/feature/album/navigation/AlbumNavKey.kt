@@ -1,7 +1,7 @@
 package com.chac.feature.album.navigation
 
 import androidx.navigation3.runtime.NavKey
-import com.chac.feature.album.model.ClusterUiModel
+import com.chac.feature.album.model.MediaClusterUiModel
 import kotlinx.serialization.Serializable
 
 /** 앨범 기능에서 사용하는 NavKey 정의 */
@@ -18,7 +18,7 @@ sealed interface AlbumNavKey : NavKey {
      */
     @Serializable
     data class Gallery(
-        val cluster: ClusterUiModel,
+        val cluster: MediaClusterUiModel,
     ) : AlbumNavKey
 
     /**

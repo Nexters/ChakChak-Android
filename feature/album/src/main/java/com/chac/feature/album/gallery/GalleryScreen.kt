@@ -58,7 +58,7 @@ import com.chac.core.resources.R
 import com.chac.domain.album.media.model.MediaType
 import com.chac.feature.album.model.SaveUiStatus
 import com.chac.feature.album.gallery.model.GalleryUiState
-import com.chac.feature.album.model.ClusterUiModel
+import com.chac.feature.album.model.MediaClusterUiModel
 import com.chac.feature.album.model.MediaUiModel
 
 /**
@@ -71,7 +71,7 @@ import com.chac.feature.album.model.MediaUiModel
  */
 @Composable
 fun GalleryRoute(
-    cluster: ClusterUiModel,
+    cluster: MediaClusterUiModel,
     viewModel: GalleryViewModel = hiltViewModel(),
     onSaveCompleted: (String, Int) -> Unit,
     onBack: () -> Unit,
@@ -434,7 +434,7 @@ private fun GalleryScreenPreview() {
     ChacTheme {
         GalleryScreen(
             uiState = GalleryUiState.NoneSelected(
-                cluster = ClusterUiModel(
+                cluster = MediaClusterUiModel(
                     id = 1L,
                     title = "Jeju Trip",
                     mediaList = List(40) { index ->

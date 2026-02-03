@@ -13,7 +13,7 @@ import kotlinx.serialization.Serializable
  */
 @Immutable
 @Serializable
-data class ClusterUiModel(
+data class MediaClusterUiModel(
     val id: Long,
     val title: String,
     val mediaList: List<MediaUiModel>,

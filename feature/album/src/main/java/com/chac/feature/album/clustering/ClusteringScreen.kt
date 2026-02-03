@@ -53,7 +53,7 @@ import com.chac.feature.album.clustering.component.PlaceholderIcon
 import com.chac.feature.album.clustering.component.TotalPhotoSummary
 import com.chac.feature.album.clustering.model.ClusteringUiState
 import com.chac.feature.album.model.SaveUiStatus
-import com.chac.feature.album.model.ClusterUiModel
+import com.chac.feature.album.model.MediaClusterUiModel
 import com.chac.feature.album.model.MediaUiModel
 
 /**
@@ -65,12 +65,12 @@ import com.chac.feature.album.model.MediaUiModel
 @Composable
 fun ClusteringRoute(
     viewModel: ClusteringViewModel = hiltViewModel(),
-    onClickSavePartial: (ClusterUiModel) -> Unit,
+    onClickSavePartial: (MediaClusterUiModel) -> Unit,
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
-    var pendingWriteCluster by remember { mutableStateOf<ClusterUiModel?>(null) }
+    var pendingWriteCluster by remember { mutableStateOf<MediaClusterUiModel?>(null) }
     val permission = rememberRegisterMediaWithLocationPermission(
         onGranted = { viewModel.onPermissionChanged(true) },
         onDenied = { viewModel.onPermissionChanged(false) },
@@ -140,8 +140,8 @@ fun ClusteringRoute(
 @Composable
 private fun ClusteringScreen(
     uiState: ClusteringUiState,
-    onClickSavePartial: (ClusterUiModel) -> Unit,
-    onClickSaveAll: (ClusterUiModel) -> Unit,
+    onClickSavePartial: (MediaClusterUiModel) -> Unit,
+    onClickSaveAll: (MediaClusterUiModel) -> Unit,
 ) {
     val context = LocalContext.current
 
@@ -297,13 +297,13 @@ private class ClusteringUiStatePreviewProvider : PreviewParameterProvider<Cluste
     }
 
     private val sampleClusters = listOf(
-        ClusterUiModel(
+        MediaClusterUiModel(
             id = 1L,
             title = "Jeju Trip",
             mediaList = sampleMedia,
             saveStatus = SaveUiStatus.Default,
         ),
-        ClusterUiModel(
+        MediaClusterUiModel(
             id = 2L,
             title = "서초동",
             mediaList = sampleMedia,
