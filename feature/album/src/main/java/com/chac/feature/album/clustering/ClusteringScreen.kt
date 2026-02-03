@@ -88,9 +88,8 @@ fun ClusteringRoute(
         contract = ActivityResultContracts.RequestPermission(),
         onResult = { isGranted ->
             // TODO 여기다가 알림 권한 on off에 따른 ui 처리해두면됨
-        }
+        },
     )
-
 
     LaunchedEffect(Unit) {
         val hasPermission = MediaWithLocationPermissionUtil.checkPermission(context)

@@ -9,7 +9,6 @@ import javax.inject.Inject
 
 @HiltAndroidApp
 class ChacApp : Application(), Configuration.Provider {
-
     @Inject
     lateinit var workerFactory: HiltWorkerFactory
 
