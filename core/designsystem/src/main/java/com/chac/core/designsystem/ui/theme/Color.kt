@@ -15,7 +15,6 @@ object ChacColors {
     val Primary = Color(0xFF7346FF)
     val Sub01 = Color(0xFF8A65FF)
     val Sub02 = Color(0xFFA284FF)
-    val Sub03 = Color(0xFFB39BFF) // token name: "sun 03"
     val Sub04 = Color(0xFFE3DAFF)
 
     // State
@@ -23,13 +22,13 @@ object ChacColors {
 
     // Background
     val Background = Color(0xFF141519)
-    val BackgroundPopup = Color(0xFF1D1E23) // token name: "background(pop-up)"
+    val BackgroundPopup = Color(0xFF1D1E23)
 
     // Text
     val Text01 = Color(0xFFF6F6F6)
     val Text02 = Color(0xFFDDDDDD)
     val Text03 = Color(0xFFBBBBBB)
-    val Text04Caption = Color(0xFF999999) // token name: "text 04 (caption)"
+    val Text04Caption = Color(0xFF999999)
 
     // Button text
     val TextBtn01 = Color(0xFFFFFFFF)
@@ -37,11 +36,19 @@ object ChacColors {
     val TextBtn03 = Color(0xFF353245)
 
     // Stroke
-    val Stroke01 = Color(0x997346FF) // alpha 포함
-    val Stroke02 = Color(0x33785BD3) // alpha 포함
+    val Stroke01 = Color(0x997346FF)
+    val Stroke02 = Color(0x33785BD3)
     val Stroke03 = Color(0xFFB299FF)
 
     // Utility whites (alpha)
-    val White80 = Color(0xCCFFFFFF) // token name: "ffffff - 80"
-    val White40 = Color(0x66FFFFFF) // token name: "ffffff - 40"
+    val Sun03 = Color(0xFFB39BFF)
+    val Etc = Color(0xFF666666)
+    val Splash = Color(0xFF6B28E5)
+
+    val Ffffff80 = Color(0xCCFFFFFF)
+    val Ffffff40 = Color(0x66FFFFFF)
+    val Token00000080 = Color(0xCC000000)
+    val Token00000070 = Color(0xB3000000)
+    val Token00000040 = Color(0x66000000)
+    val Ffffff5 = Color(0x0DFFFFFF)
 }

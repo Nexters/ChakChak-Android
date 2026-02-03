@@ -1,3 +1,4 @@
+import com.chac.core.designsystem.tasks.registerDesignTokensTasks
 import com.chac.convention.extensions.setNamespace
 
 plugins {
@@ -12,3 +13,5 @@ android {
 dependencies {
     implementation(libs.coil.compose)
 }
+
+registerDesignTokensTasks()
