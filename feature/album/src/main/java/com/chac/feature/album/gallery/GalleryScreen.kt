@@ -55,8 +55,8 @@ import com.chac.core.designsystem.ui.component.ChacImage
 import com.chac.core.designsystem.ui.theme.ChacTheme
 import com.chac.core.permission.compose.rememberWriteRequestLauncher
 import com.chac.core.resources.R
-import com.chac.domain.album.media.MediaType
-import com.chac.feature.album.clustering.model.SaveUiStatus
+import com.chac.domain.album.media.model.MediaType
+import com.chac.feature.album.model.SaveUiStatus
 import com.chac.feature.album.gallery.model.GalleryUiState
 import com.chac.feature.album.model.ClusterUiModel
 import com.chac.feature.album.model.MediaUiModel

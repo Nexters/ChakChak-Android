@@ -1,9 +1,9 @@
-package com.chac.feature.album.clustering.model
+package com.chac.feature.album.mapper
 
-import com.chac.domain.album.media.MediaCluster
-import com.chac.domain.album.media.SaveStatus
+import com.chac.domain.album.media.model.SaveStatus
+import com.chac.domain.album.media.model.MediaCluster
+import com.chac.feature.album.model.SaveUiStatus
 import com.chac.feature.album.model.ClusterUiModel
-import com.chac.feature.album.model.toUiModel
 
 /**
  * 도메인 클러스터를 UI 모델로 변환한다.
@@ -20,4 +20,16 @@ internal fun MediaCluster.toUiModel(): ClusterUiModel = ClusterUiModel(
         SaveStatus.Saving -> SaveUiStatus.Saving
         SaveStatus.SaveCompleted -> SaveUiStatus.SaveCompleted
     },
+)
+
+/**
+ * UI 클러스터를 도메인 모델로 변환한다.
+ *
+ * @receiver 변환 대상 UI 클러스터
+ * @return 도메인 클러스터
+ */
+internal fun ClusterUiModel.toDomain(): MediaCluster = MediaCluster(
+    id = id,
+    title = title,
+    mediaList = mediaList.map { it.toDomain() },
 )

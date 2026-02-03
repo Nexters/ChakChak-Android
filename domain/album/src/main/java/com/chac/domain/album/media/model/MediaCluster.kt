@@ -1,4 +1,4 @@
-package com.chac.domain.album.media
+package com.chac.domain.album.media.model
 
 /**
  * 클러스터링 결과를 표현하는 모델.

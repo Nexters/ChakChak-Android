@@ -1,7 +1,6 @@
 package com.chac.feature.album.model
 
 import androidx.compose.runtime.Immutable
-import com.chac.feature.album.clustering.model.SaveUiStatus
 import kotlinx.serialization.Serializable
 
 /**

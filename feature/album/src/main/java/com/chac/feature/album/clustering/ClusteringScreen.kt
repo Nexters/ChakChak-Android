@@ -44,7 +44,7 @@ import com.chac.core.permission.compose.moveToPermissionSetting
 import com.chac.core.permission.compose.rememberRegisterMediaWithLocationPermission
 import com.chac.core.permission.compose.rememberWriteRequestLauncher
 import com.chac.core.resources.R
-import com.chac.domain.album.media.MediaType
+import com.chac.domain.album.media.model.MediaType
 import com.chac.feature.album.clustering.component.AlbumSectionHeader
 import com.chac.feature.album.clustering.component.ClusterList
 import com.chac.feature.album.clustering.component.ClusteringTopBar
@@ -52,7 +52,7 @@ import com.chac.feature.album.clustering.component.LoadingFooter
 import com.chac.feature.album.clustering.component.PlaceholderIcon
 import com.chac.feature.album.clustering.component.TotalPhotoSummary
 import com.chac.feature.album.clustering.model.ClusteringUiState
-import com.chac.feature.album.clustering.model.SaveUiStatus
+import com.chac.feature.album.model.SaveUiStatus
 import com.chac.feature.album.model.ClusterUiModel
 import com.chac.feature.album.model.MediaUiModel
 

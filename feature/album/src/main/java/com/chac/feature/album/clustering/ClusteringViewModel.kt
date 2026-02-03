@@ -2,14 +2,14 @@ package com.chac.feature.album.clustering
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.chac.domain.album.media.GetClusteredMediaStateUseCase
-import com.chac.domain.album.media.GetClusteredMediaStreamUseCase
-import com.chac.domain.album.media.StartClusteringUseCase
-import com.chac.domain.album.media.SaveAlbumUseCase
+import com.chac.domain.album.media.usecase.GetClusteredMediaStateUseCase
+import com.chac.domain.album.media.usecase.GetClusteredMediaStreamUseCase
+import com.chac.domain.album.media.usecase.StartClusteringUseCase
+import com.chac.domain.album.media.usecase.SaveAlbumUseCase
 import com.chac.feature.album.clustering.model.ClusteringUiState
-import com.chac.feature.album.clustering.model.toUiModel
+import com.chac.feature.album.mapper.toUiModel
 import com.chac.feature.album.model.ClusterUiModel
-import com.chac.feature.album.model.toDomain
+import com.chac.feature.album.mapper.toDomain
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow

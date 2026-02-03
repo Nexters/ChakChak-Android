@@ -1,5 +1,8 @@
-package com.chac.domain.album.media
+package com.chac.domain.album.media.usecase
 
+import com.chac.domain.album.media.model.Media
+import com.chac.domain.album.media.model.MediaCluster
+import com.chac.domain.album.media.repository.MediaRepository
 import javax.inject.Inject
 
 /**

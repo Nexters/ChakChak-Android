@@ -1,4 +1,4 @@
-package com.chac.domain.album.media
+package com.chac.domain.album.media.model
 
 /**
  * 클러스터 저장 상태.

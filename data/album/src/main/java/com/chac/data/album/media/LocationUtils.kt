@@ -3,7 +3,7 @@ package com.chac.data.album.media
 import android.content.Context
 import android.media.ExifInterface
 import androidx.core.net.toUri
-import com.chac.domain.album.media.MediaLocation
+import com.chac.domain.album.media.model.MediaLocation
 import java.io.InputStream
 
 fun getMediaLocation(
