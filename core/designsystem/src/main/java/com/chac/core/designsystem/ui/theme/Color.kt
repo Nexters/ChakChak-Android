@@ -40,11 +40,12 @@ object ChacColors {
     val Stroke02 = Color(0x33785BD3)
     val Stroke03 = Color(0xFFB299FF)
 
-    // Utility whites (alpha)
+    // Additional colors
     val Sun03 = Color(0xFFB39BFF)
     val Etc = Color(0xFF666666)
     val Splash = Color(0xFF6B28E5)
 
+    // Utility colors with alpha
     val Ffffff80 = Color(0xCCFFFFFF)
     val Ffffff40 = Color(0x66FFFFFF)
     val Token00000080 = Color(0xCC000000)

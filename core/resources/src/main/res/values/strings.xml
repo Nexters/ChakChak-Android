@@ -22,7 +22,8 @@
     <string name="gallery_top_bar_title">사진 정리</string>
     <string name="gallery_back_cd">뒤로가기</string>
     <string name="gallery_select_all">전체 선택</string>
-    <string name="gallery_selected_count">%1$d/%2$d 선택</string>
+    <string name="gallery_unselect_all">전체 해제</string>
+    <string name="gallery_slash">/</string>
     <string name="gallery_select_prompt">사진을 선택해주세요</string>
     <string name="gallery_save_album_count">%1$d장의 사진 앨범에 저장</string>
     <string name="gallery_exit_title">페이지 나가기</string>
