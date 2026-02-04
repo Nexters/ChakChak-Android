@@ -37,9 +37,9 @@ import androidx.compose.ui.zIndex
 import com.chac.core.designsystem.ui.component.ChacImage
 import com.chac.core.designsystem.ui.theme.ChacTheme
 import com.chac.core.resources.R
-import com.chac.domain.album.media.MediaType
-import com.chac.feature.album.clustering.model.SaveUiStatus
-import com.chac.feature.album.model.ClusterUiModel
+import com.chac.domain.album.media.model.MediaType
+import com.chac.feature.album.model.SaveUiStatus
+import com.chac.feature.album.model.MediaClusterUiModel
 import com.chac.feature.album.model.MediaUiModel
 
 /**
@@ -52,11 +52,11 @@ import com.chac.feature.album.model.MediaUiModel
  */
 @Composable
 fun ClusterList(
-    clusters: List<ClusterUiModel>,
+    clusters: List<MediaClusterUiModel>,
     isLoading: Boolean,
     modifier: Modifier = Modifier,
-    onClickSavePartial: (ClusterUiModel) -> Unit,
-    onClickSaveAll: (ClusterUiModel) -> Unit,
+    onClickSavePartial: (MediaClusterUiModel) -> Unit,
+    onClickSaveAll: (MediaClusterUiModel) -> Unit,
 ) {
     LazyColumn(
         modifier = modifier.fillMaxSize(),
@@ -87,7 +87,7 @@ fun ClusterList(
  */
 @Composable
 private fun ClusterCard(
-    cluster: ClusterUiModel,
+    cluster: MediaClusterUiModel,
     modifier: Modifier = Modifier,
     onClickSavePartial: () -> Unit,
     onClickSaveAll: () -> Unit,
@@ -246,13 +246,13 @@ private fun ClusterListPreview() {
             }
         }
         val sampleClusters = listOf(
-            ClusterUiModel(
+            MediaClusterUiModel(
                 id = 1L,
                 title = "Jeju Trip",
                 mediaList = sampleMedia(34),
                 saveStatus = SaveUiStatus.Default,
             ),
-            ClusterUiModel(
+            MediaClusterUiModel(
                 id = 2L,
                 title = "서초동",
                 mediaList = sampleMedia(34),

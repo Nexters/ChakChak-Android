@@ -8,10 +8,10 @@ import android.net.Uri
 import android.os.Environment
 import android.provider.MediaStore
 import androidx.core.net.toUri
-import com.chac.domain.album.media.Media
-import com.chac.domain.album.media.MediaLocation
-import com.chac.domain.album.media.MediaSortOrder
-import com.chac.domain.album.media.MediaType
+import com.chac.domain.album.media.model.Media
+import com.chac.domain.album.media.model.MediaLocation
+import com.chac.domain.album.media.model.MediaSortOrder
+import com.chac.domain.album.media.model.MediaType
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext

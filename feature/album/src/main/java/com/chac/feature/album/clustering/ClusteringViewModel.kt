@@ -2,21 +2,24 @@ package com.chac.feature.album.clustering
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.chac.domain.album.media.GetClusteredMediaStateUseCase
-import com.chac.domain.album.media.GetClusteredMediaStreamUseCase
-import com.chac.domain.album.media.StartClusteringUseCase
-import com.chac.domain.album.media.SaveAlbumUseCase
+import com.chac.domain.album.media.usecase.GetClusteredMediaStateUseCase
+import com.chac.domain.album.media.usecase.GetClusteredMediaStreamUseCase
+import com.chac.domain.album.media.usecase.SaveAlbumUseCase
+import com.chac.domain.album.media.usecase.StartClusteringUseCase
 import com.chac.feature.album.clustering.model.ClusteringUiState
-import com.chac.feature.album.clustering.model.toUiModel
-import com.chac.feature.album.model.ClusterUiModel
-import com.chac.feature.album.model.toDomain
+import com.chac.feature.album.mapper.toDomain
+import com.chac.feature.album.mapper.toUiModel
+import com.chac.feature.album.model.MediaClusterUiModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.retryWhen
 import kotlinx.coroutines.launch
+import timber.log.Timber
 import javax.inject.Inject
+import kotlin.coroutines.cancellation.CancellationException
 
 /** 클러스터링 화면 상태를 제공하는 ViewModel */
 @HiltViewModel
@@ -77,10 +80,20 @@ class ClusteringViewModel @Inject constructor(
                 _uiState.value = ClusteringUiState.Loading(emptyList())
 
                 // 클러스터 스트림을 수집하며 로딩 상태에 누적한다.
-                getClusteredMediaStreamUseCase().collect { cluster ->
-                    val updatedClusters = currentClusters() + cluster.toUiModel()
-                    _uiState.value = ClusteringUiState.Loading(updatedClusters)
-                }
+                getClusteredMediaStreamUseCase()
+                    .retryWhen { cause, _ ->
+                        if (cause is CancellationException) return@retryWhen false
+
+                        // 기존 누적 데이터를 초기화한다.
+                        _uiState.value = ClusteringUiState.Loading(emptyList())
+
+                        Timber.e(cause, "Failed to collect cluster stream; retrying")
+                        true
+                    }
+                    .collect { cluster ->
+                        val updatedClusters = currentClusters() + cluster.toUiModel()
+                        _uiState.value = ClusteringUiState.Loading(updatedClusters)
+                    }
 
                 // 클러스터링이 완료 되면 Completed 상태로 변경
                 _uiState.value = ClusteringUiState.Completed(currentClusters())
@@ -95,29 +108,37 @@ class ClusteringViewModel @Inject constructor(
      */
     private fun observeClusterState() {
         clusterStateCollectJob = viewModelScope.launch {
-            getClusteredMediaStateUseCase().collect { clusters ->
-                // 초기 스트림 수집 중에는 중복 갱신을 피한다.
-                if (clusterCollectJob != null) return@collect
+            getClusteredMediaStateUseCase()
+                .retryWhen { cause, _ ->
+                    if (cause is CancellationException) return@retryWhen false
 
-                val uiClusters = clusters.map { it.toUiModel() }
-                if (_uiState.value is ClusteringUiState.WithClusters) {
-                    _uiState.value = ClusteringUiState.Completed(uiClusters)
+                    Timber.e(cause, "Failed to collect cluster state; retrying")
+                    true
                 }
-            }
+                .collect { clusters ->
+                    // 초기 스트림 수집 중에는 중복 갱신을 피한다.
+                    if (clusterCollectJob != null) return@collect
+
+                    val uiClusters = clusters.map { it.toUiModel() }
+                    if (_uiState.value is ClusteringUiState.WithClusters) {
+                        _uiState.value = ClusteringUiState.Completed(uiClusters)
+                    }
+                }
         }
     }
 
     /** 클러스터 전체를 앨범으로 저장한다. */
-    fun onClickSaveAll(cluster: ClusterUiModel) {
+    fun onClickSaveAll(cluster: MediaClusterUiModel) {
         viewModelScope.launch {
-            saveAlbumUseCase(cluster.toDomain())
+            runCatching { saveAlbumUseCase(cluster.toDomain()) }
+                .onFailure { t -> Timber.e(t, "Failed to save cluster album") }
         }
     }
 
     /**
      * 현재 UI 상태에 포함된 클러스터 목록을 가져온다.
      */
-    private fun currentClusters(): List<ClusterUiModel> = when (val state = _uiState.value) {
+    private fun currentClusters(): List<MediaClusterUiModel> = when (val state = _uiState.value) {
         is ClusteringUiState.WithClusters -> state.clusters
         ClusteringUiState.PermissionChecking -> emptyList()
         ClusteringUiState.PermissionDenied -> emptyList()

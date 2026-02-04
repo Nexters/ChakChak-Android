@@ -44,7 +44,7 @@ import com.chac.core.permission.compose.moveToPermissionSetting
 import com.chac.core.permission.compose.rememberRegisterMediaWithLocationPermission
 import com.chac.core.permission.compose.rememberWriteRequestLauncher
 import com.chac.core.resources.R
-import com.chac.domain.album.media.MediaType
+import com.chac.domain.album.media.model.MediaType
 import com.chac.feature.album.clustering.component.AlbumSectionHeader
 import com.chac.feature.album.clustering.component.ClusterList
 import com.chac.feature.album.clustering.component.ClusteringTopBar
@@ -52,8 +52,8 @@ import com.chac.feature.album.clustering.component.LoadingFooter
 import com.chac.feature.album.clustering.component.PlaceholderIcon
 import com.chac.feature.album.clustering.component.TotalPhotoSummary
 import com.chac.feature.album.clustering.model.ClusteringUiState
-import com.chac.feature.album.clustering.model.SaveUiStatus
-import com.chac.feature.album.model.ClusterUiModel
+import com.chac.feature.album.model.SaveUiStatus
+import com.chac.feature.album.model.MediaClusterUiModel
 import com.chac.feature.album.model.MediaUiModel
 
 /**
@@ -65,12 +65,12 @@ import com.chac.feature.album.model.MediaUiModel
 @Composable
 fun ClusteringRoute(
     viewModel: ClusteringViewModel = hiltViewModel(),
-    onClickSavePartial: (ClusterUiModel) -> Unit,
+    onClickSavePartial: (MediaClusterUiModel) -> Unit,
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
-    var pendingWriteCluster by remember { mutableStateOf<ClusterUiModel?>(null) }
+    var pendingWriteCluster by remember { mutableStateOf<MediaClusterUiModel?>(null) }
     val permission = rememberRegisterMediaWithLocationPermission(
         onGranted = { viewModel.onPermissionChanged(true) },
         onDenied = { viewModel.onPermissionChanged(false) },
@@ -88,9 +88,8 @@ fun ClusteringRoute(
         contract = ActivityResultContracts.RequestPermission(),
         onResult = { isGranted ->
             // TODO 여기다가 알림 권한 on off에 따른 ui 처리해두면됨
-        }
+        },
     )
-
 
     LaunchedEffect(Unit) {
         val hasPermission = MediaWithLocationPermissionUtil.checkPermission(context)
@@ -140,8 +139,8 @@ fun ClusteringRoute(
 @Composable
 private fun ClusteringScreen(
     uiState: ClusteringUiState,
-    onClickSavePartial: (ClusterUiModel) -> Unit,
-    onClickSaveAll: (ClusterUiModel) -> Unit,
+    onClickSavePartial: (MediaClusterUiModel) -> Unit,
+    onClickSaveAll: (MediaClusterUiModel) -> Unit,
 ) {
     val context = LocalContext.current
 
@@ -297,13 +296,13 @@ private class ClusteringUiStatePreviewProvider : PreviewParameterProvider<Cluste
     }
 
     private val sampleClusters = listOf(
-        ClusterUiModel(
+        MediaClusterUiModel(
             id = 1L,
             title = "Jeju Trip",
             mediaList = sampleMedia,
             saveStatus = SaveUiStatus.Default,
         ),
-        ClusterUiModel(
+        MediaClusterUiModel(
             id = 2L,
             title = "서초동",
             mediaList = sampleMedia,

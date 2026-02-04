@@ -5,7 +5,7 @@ import android.location.Address
 import android.location.Geocoder
 import android.os.Build
 import androidx.annotation.RequiresApi
-import com.chac.domain.album.media.MediaLocation
+import com.chac.domain.album.media.model.MediaLocation
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.suspendCancellableCoroutine

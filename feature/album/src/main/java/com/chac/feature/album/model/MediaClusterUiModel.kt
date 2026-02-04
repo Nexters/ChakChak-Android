@@ -1,7 +1,6 @@
 package com.chac.feature.album.model
 
 import androidx.compose.runtime.Immutable
-import com.chac.feature.album.clustering.model.SaveUiStatus
 import kotlinx.serialization.Serializable
 
 /**
@@ -14,7 +13,7 @@ import kotlinx.serialization.Serializable
  */
 @Immutable
 @Serializable
-data class ClusterUiModel(
+data class MediaClusterUiModel(
     val id: Long,
     val title: String,
     val mediaList: List<MediaUiModel>,

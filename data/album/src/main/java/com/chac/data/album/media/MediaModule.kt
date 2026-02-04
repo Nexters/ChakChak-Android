@@ -2,7 +2,7 @@ package com.chac.data.album.media
 
 import com.chac.data.album.media.clustering.worker.ClusteringWorkerSchedulerImpl
 import com.chac.domain.album.media.ClusteringWorkScheduler
-import com.chac.domain.album.media.MediaRepository
+import com.chac.domain.album.media.repository.MediaRepository
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn

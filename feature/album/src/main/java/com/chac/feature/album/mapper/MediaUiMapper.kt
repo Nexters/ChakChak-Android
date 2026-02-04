@@ -1,6 +1,7 @@
-package com.chac.feature.album.model
+package com.chac.feature.album.mapper
 
-import com.chac.domain.album.media.Media
+import com.chac.domain.album.media.model.Media
+import com.chac.feature.album.model.MediaUiModel
 
 /**
  * 도메인 미디어를 UI 모델로 변환한다.

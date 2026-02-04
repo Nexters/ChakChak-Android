@@ -2,7 +2,7 @@ package com.chac.data.album.media.clustering
 
 import android.content.Context
 import com.chac.data.album.media.getMediaLocation
-import com.chac.domain.album.media.Media
+import com.chac.domain.album.media.model.Media
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll

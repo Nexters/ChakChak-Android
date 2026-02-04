@@ -1,11 +1,11 @@
 package com.chac.feature.album.gallery.model
 
-import com.chac.feature.album.model.ClusterUiModel
+import com.chac.feature.album.model.MediaClusterUiModel
 
 /** 갤러리 화면 선택 상태를 표현하는 UI 상태 */
 sealed interface GalleryUiState {
     /** 화면에 표시할 클러스터 */
-    val cluster: ClusterUiModel
+    val cluster: MediaClusterUiModel
 
     /**
      * 아무 것도 선택되지 않은 상태
@@ -13,7 +13,7 @@ sealed interface GalleryUiState {
      * @property cluster 화면에 표시할 클러스터
      */
     data class NoneSelected(
-        override val cluster: ClusterUiModel,
+        override val cluster: MediaClusterUiModel,
     ) : GalleryUiState
 
     /**
@@ -23,7 +23,7 @@ sealed interface GalleryUiState {
      * @property selectedIds 선택된 미디어 ID 목록
      */
     data class SomeSelected(
-        override val cluster: ClusterUiModel,
+        override val cluster: MediaClusterUiModel,
         val selectedIds: Set<Long>,
     ) : GalleryUiState
 
@@ -34,7 +34,7 @@ sealed interface GalleryUiState {
      * @property selectedIds 저장 중인 미디어 ID 목록
      */
     data class Saving(
-        override val cluster: ClusterUiModel,
+        override val cluster: MediaClusterUiModel,
         val selectedIds: Set<Long>,
     ) : GalleryUiState
 }

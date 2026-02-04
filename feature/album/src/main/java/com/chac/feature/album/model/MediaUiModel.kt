@@ -1,7 +1,7 @@
 package com.chac.feature.album.model
 
 import androidx.compose.runtime.Immutable
-import com.chac.domain.album.media.MediaType
+import com.chac.domain.album.media.model.MediaType
 import kotlinx.serialization.Serializable
 
 /**

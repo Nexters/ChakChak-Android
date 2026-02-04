@@ -1,6 +1,6 @@
 package com.chac.data.album.media.reversGeocoder
 
-import com.chac.domain.album.media.MediaLocation
+import com.chac.domain.album.media.model.MediaLocation
 
 /** 좌표를 사람이 읽을 수 있는 주소로 변환하는 리버스 지오코더. */
 interface ReverseGeocoder {

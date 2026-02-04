@@ -1,4 +1,4 @@
-package com.chac.domain.album.media
+package com.chac.domain.album.media.model
 
 enum class MediaSortOrder {
     NEWEST_FIRST, // 최신순

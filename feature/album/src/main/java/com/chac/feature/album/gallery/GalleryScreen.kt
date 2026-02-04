@@ -65,11 +65,11 @@ import com.chac.core.designsystem.ui.theme.ChacTextStyles
 import com.chac.core.designsystem.ui.theme.ChacTheme
 import com.chac.core.permission.compose.rememberWriteRequestLauncher
 import com.chac.core.resources.R
-import com.chac.domain.album.media.MediaType
-import com.chac.feature.album.clustering.model.SaveUiStatus
+import com.chac.domain.album.media.model.MediaType
 import com.chac.feature.album.gallery.model.GalleryUiState
-import com.chac.feature.album.model.ClusterUiModel
+import com.chac.feature.album.model.MediaClusterUiModel
 import com.chac.feature.album.model.MediaUiModel
+import com.chac.feature.album.model.SaveUiStatus
 
 /**
  * 갤러리 화면 라우트
@@ -77,14 +77,14 @@ import com.chac.feature.album.model.MediaUiModel
  * @param cluster 화면에 표시할 클러스터
  * @param viewModel 갤러리 화면의 뷰모델
  * @param onSaveCompleted 저장 완료 이후 동작을 전달하는 콜백
- * @param onBack 뒤로가기 동작을 전달하는 콜백
+ * @param onClickBack 뒤로가기 버튼 클릭 이벤트 콜백
  */
 @Composable
 fun GalleryRoute(
-    cluster: ClusterUiModel,
+    cluster: MediaClusterUiModel,
     viewModel: GalleryViewModel = hiltViewModel(),
     onSaveCompleted: (String, Int) -> Unit,
-    onBack: () -> Unit,
+    onClickBack: () -> Unit,
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
@@ -104,9 +104,14 @@ fun GalleryRoute(
     GalleryScreen(
         uiState = uiState,
         onToggleMedia = viewModel::toggleSelection,
-        onSelectAll = viewModel::selectAll,
-        onClearSelection = viewModel::clearSelection,
-        onSave = {
+        onClickSelectAll = { selected: Boolean ->
+            if (selected) {
+                viewModel.selectAll()
+            } else {
+                viewModel.clearSelection()
+            }
+        },
+        onClickSave = {
             val selectedMediaList = viewModel.getSelectedMediaList()
 
             if (selectedMediaList.isEmpty()) return@GalleryScreen
@@ -119,7 +124,7 @@ fun GalleryRoute(
 
             writeRequestLauncher(intentSender)
         },
-        onBack = onBack,
+        onClickBack = onClickBack,
     )
 }
 
@@ -128,19 +133,17 @@ fun GalleryRoute(
  *
  * @param uiState 갤러리 화면 UI 상태
  * @param onToggleMedia 미디어 선택 상태 토글 콜백
- * @param onSelectAll 전체 선택 콜백
- * @param onClearSelection 전체 선택 해제 콜백
- * @param onSave 저장 요청 콜백
- * @param onBack 뒤로가기 동작을 전달하는 콜백
+ * @param onClickSelectAll 전체 선택 버튼 클릭 이벤트 콜백
+ * @param onClickSave 저장 버튼 클릭 이벤트 콜백
+ * @param onClickBack 뒤로가기 버튼 클릭 이벤트 콜백
  */
 @Composable
 private fun GalleryScreen(
     uiState: GalleryUiState,
     onToggleMedia: (MediaUiModel) -> Unit,
-    onSelectAll: () -> Unit,
-    onClearSelection: () -> Unit,
-    onSave: () -> Unit,
-    onBack: () -> Unit,
+    onClickSelectAll: (Boolean) -> Unit,
+    onClickSave: () -> Unit,
+    onClickBack: () -> Unit,
 ) {
     var isExitDialogVisible by remember { mutableStateOf(false) }
     val cluster = uiState.cluster
@@ -166,11 +169,11 @@ private fun GalleryScreen(
             .padding(bottom = 20.dp),
     ) {
         GalleryTopBar(
-            onBack = {
+            onClickBack = {
                 if (uiState is GalleryUiState.SomeSelected) {
                     isExitDialogVisible = true
                 } else {
-                    onBack()
+                    onClickBack()
                 }
             },
         )
@@ -215,7 +218,7 @@ private fun GalleryScreen(
                         .background(color = ChacColors.BackgroundPopup)
                         .border(width = 1.dp, color = ChacColors.Stroke01, shape = RoundedCornerShape(16.dp))
                         .clickable {
-                            onClearSelection()
+                            onClickSelectAll(isAllSelected)
                         }
                         .padding(horizontal = 12.dp, vertical = 7.dp),
                     contentAlignment = Alignment.Center,
@@ -232,7 +235,7 @@ private fun GalleryScreen(
                         .clip(RoundedCornerShape(16.dp))
                         .background(color = ChacColors.BackgroundPopup)
                         .clickable {
-                            onSelectAll()
+                            onClickSelectAll(isAllSelected)
                         }
                         .padding(horizontal = 12.dp, vertical = 7.dp),
                     contentAlignment = Alignment.Center,
@@ -266,7 +269,7 @@ private fun GalleryScreen(
         }
         Spacer(modifier = Modifier.height(20.dp))
         Button(
-            onClick = onSave,
+            onClick = onClickSave,
             enabled = uiState is GalleryUiState.SomeSelected,
             modifier = Modifier
                 .padding(horizontal = 20.dp)
@@ -294,9 +297,9 @@ private fun GalleryScreen(
 
     if (isExitDialogVisible) {
         GalleryExitDialog(
-            onConfirm = {
+            onClickConfirm = {
                 isExitDialogVisible = false
-                onBack()
+                onClickBack()
             },
             onDismiss = { isExitDialogVisible = false },
         )
@@ -306,13 +309,13 @@ private fun GalleryScreen(
 /**
  * 선택 상태에서 페이지 이탈을 확인하는 대화상자를 표시한다
  *
- * @param onConfirm 확인 버튼 클릭 콜백
- * @param onDismiss 취소 또는 바깥 영역 클릭 콜백
+ * @param onClickConfirm 확인 버튼 클릭 이벤트 콜백
+ * @param onDismiss 대화상자 닫힘 이벤트 콜백 (ex. 취소 또는 바깥 영역 클릭)
  */
 @Composable
 private fun GalleryExitDialog(
     modifier: Modifier = Modifier,
-    onConfirm: () -> Unit,
+    onClickConfirm: () -> Unit,
     onDismiss: () -> Unit,
 ) {
     Dialog(onDismissRequest = onDismiss) {
@@ -367,7 +370,7 @@ private fun GalleryExitDialog(
                         )
                     }
                     Button(
-                        onClick = onConfirm,
+                        onClick = onClickConfirm,
                         modifier = Modifier
                             .weight(1f)
                             .height(54.dp),
@@ -392,12 +395,12 @@ private fun GalleryExitDialog(
 /**
  * 갤러리 상단의 뒤로가기 버튼과 타이틀을 표시한다
  *
- * @param onBack 뒤로가기 콜백
+ * @param onClickBack 뒤로가기 버튼 클릭 이벤트 콜백
  */
 @Composable
 private fun GalleryTopBar(
     modifier: Modifier = Modifier,
-    onBack: () -> Unit,
+    onClickBack: () -> Unit,
 ) {
     Box(
         modifier = modifier
@@ -406,7 +409,7 @@ private fun GalleryTopBar(
         contentAlignment = Alignment.Center,
     ) {
         IconButton(
-            onClick = onBack,
+            onClick = onClickBack,
             modifier = Modifier.align(Alignment.CenterStart),
         ) {
             Icon(
@@ -478,7 +481,7 @@ private fun GalleryScreenPreview() {
     ChacTheme {
         GalleryScreen(
             uiState = GalleryUiState.NoneSelected(
-                cluster = ClusterUiModel(
+                cluster = MediaClusterUiModel(
                     id = 1L,
                     title = "Jeju Trip",
                     mediaList = List(40) { index ->
@@ -507,7 +510,7 @@ private fun GalleryScreenAllSelectedPreview() {
     ChacTheme {
         GalleryScreen(
             uiState = GalleryUiState.SomeSelected(
-                cluster = ClusterUiModel(
+                cluster = MediaClusterUiModel(
                     id = 1L,
                     title = "Jeju Trip",
                     mediaList = List(40) { index ->
@@ -523,10 +526,9 @@ private fun GalleryScreenAllSelectedPreview() {
                 selectedIds = (0L until 40L).toSet(),
             ),
             onToggleMedia = {},
-            onSelectAll = {},
-            onClearSelection = {},
-            onSave = {},
-            onBack = {},
+            onClickSelectAll = {},
+            onClickSave = {},
+            onClickBack = {},
         )
     }
 }
@@ -536,7 +538,7 @@ private fun GalleryScreenAllSelectedPreview() {
 private fun GalleryExitDialogPreview() {
     ChacTheme {
         GalleryExitDialog(
-            onConfirm = {},
+            onClickConfirm = {},
             onDismiss = {},
         )
     }

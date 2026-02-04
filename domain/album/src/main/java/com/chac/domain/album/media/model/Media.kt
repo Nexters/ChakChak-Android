@@ -1,4 +1,4 @@
-package com.chac.domain.album.media
+package com.chac.domain.album.media.model
 
 data class Media(
     val id: Long,

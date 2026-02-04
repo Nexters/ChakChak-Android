@@ -123,12 +123,24 @@ object ChacTextStyles {
         lineHeight = 20.3.sp,
         letterSpacing = 0.sp,
     )
+
+    val SubNumber = TextStyle(
+        fontFamily = Montserrat,
+        fontWeight = FontWeight.SemiBold, // 600
+        fontSize = 13.sp,
+        lineHeight = 18.85.sp,
+        letterSpacing = 0.13.sp,
+    )
+
+    val SplashName = TextStyle(
+        fontFamily = Montserrat,
+        fontWeight = FontWeight.SemiBold, // 600
+        fontSize = 38.sp,
+        lineHeight = 45.6.sp,
+        letterSpacing = 0.38.sp,
+    )
 }
 
-/**
- * Material3 Typography로도 매핑하고 싶으면 이렇게 한 번 더 감싸서 쓰면 편해.
- * (원하는 스타일만 골라 매핑해도 OK)
- */
 val ChacTypography = Typography(
     headlineLarge = ChacTextStyles.Headline01,
     headlineMedium = ChacTextStyles.Headline02,

@@ -1,6 +1,6 @@
 package com.chac.data.album.media.clustering
 
-import com.chac.domain.album.media.Media
+import com.chac.domain.album.media.model.Media
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 

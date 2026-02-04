@@ -2,15 +2,15 @@ package com.chac.feature.album.gallery
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.chac.domain.album.media.GetClusteredMediaStateUseCase
-import com.chac.domain.album.media.SaveAlbumUseCase
-import com.chac.feature.album.clustering.model.SaveUiStatus
-import com.chac.feature.album.clustering.model.toUiModel
+import com.chac.domain.album.media.usecase.GetClusteredMediaStateUseCase
+import com.chac.domain.album.media.usecase.SaveAlbumUseCase
 import com.chac.feature.album.gallery.model.GalleryUiState
 import com.chac.feature.album.gallery.model.SaveCompletedEvent
-import com.chac.feature.album.model.ClusterUiModel
+import com.chac.feature.album.mapper.toDomain
+import com.chac.feature.album.mapper.toUiModel
+import com.chac.feature.album.model.MediaClusterUiModel
 import com.chac.feature.album.model.MediaUiModel
-import com.chac.feature.album.model.toDomain
+import com.chac.feature.album.model.SaveUiStatus
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
@@ -18,9 +18,12 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.flow.retryWhen
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import timber.log.Timber
 import javax.inject.Inject
+import kotlin.coroutines.cancellation.CancellationException
 
 /** 갤러리 화면 상태를 제공하는 ViewModel */
 @HiltViewModel
@@ -50,7 +53,7 @@ class GalleryViewModel @Inject constructor(
      *
      * @param cluster 화면에 표시할 클러스터
      */
-    fun initialize(cluster: ClusterUiModel) {
+    fun initialize(cluster: MediaClusterUiModel) {
         if (_uiState.value.cluster != EMPTY_CLUSTER) return
 
         clusterId = cluster.id
@@ -116,13 +119,18 @@ class GalleryViewModel @Inject constructor(
                 val selectedCluster = domainCluster.copy(
                     mediaList = domainCluster.mediaList.filter { it.id in selectedIds },
                 )
-                val savedCount = runCatching {
+                val result = runCatching {
                     val savedMediaList = saveAlbumUseCase(selectedCluster)
                     savedMediaList.size
-                }.getOrDefault(0)
-                saveCompletedEventsChannel.trySend(
-                    SaveCompletedEvent(savingState.cluster.title, savedCount),
-                )
+                }
+                if (result.isSuccess) {
+                    saveCompletedEventsChannel.trySend(
+                        SaveCompletedEvent(savingState.cluster.title, result.getOrNull() ?: 0),
+                    )
+                } else {
+                    GalleryUiState.SomeSelected(savingState.cluster, selectedIds)
+                    Timber.e(result.exceptionOrNull(), "Failed to save selected media")
+                }
             } finally {
                 saveJob = null
             }
@@ -151,19 +159,26 @@ class GalleryViewModel @Inject constructor(
         if (clusterStateCollectJob != null) return
 
         clusterStateCollectJob = viewModelScope.launch {
-            getClusteredMediaStateUseCase().collect { clusters ->
-                val updatedCluster = clusters.firstOrNull { it.id == clusterId }?.toUiModel()
+            getClusteredMediaStateUseCase()
+                .retryWhen { cause, _ ->
+                    if (cause is CancellationException) return@retryWhen false
 
-                _uiState.update {
-                    val newCluster = updatedCluster ?: it.cluster.copy(mediaList = emptyList())
-                    GalleryUiState.NoneSelected(newCluster)
+                    Timber.e(cause, "Failed to collect cluster state; retrying")
+                    true
                 }
-            }
+                .collect { clusters ->
+                    val updatedCluster = clusters.firstOrNull { it.id == clusterId }?.toUiModel()
+
+                    _uiState.update {
+                        val newCluster = updatedCluster ?: it.cluster.copy(mediaList = emptyList())
+                        GalleryUiState.NoneSelected(newCluster)
+                    }
+                }
         }
     }
 
     companion object {
-        private val EMPTY_CLUSTER = ClusterUiModel(
+        private val EMPTY_CLUSTER = MediaClusterUiModel(
             id = 0L,
             title = "",
             mediaList = emptyList(),

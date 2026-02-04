@@ -17,7 +17,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 import timber.log.Timber
 
-
 @HiltWorker
 class ClusteringWorker @AssistedInject constructor(
     @Assisted private val context: Context,
@@ -33,12 +32,10 @@ class ClusteringWorker @AssistedInject constructor(
         return startClustering()
     }
 
-    override suspend fun getForegroundInfo(): ForegroundInfo {
-        return ForegroundInfo(
-            getNotificationId(),
-            createNotificationBuilder().build(),
-        )
-    }
+    override suspend fun getForegroundInfo(): ForegroundInfo = ForegroundInfo(
+        getNotificationId(),
+        createNotificationBuilder().build(),
+    )
 
     private fun initNotification() {
         createNotificationChannel()
@@ -53,25 +50,21 @@ class ClusteringWorker @AssistedInject constructor(
         notificationManager.createNotificationChannel(channel)
     }
 
-    private fun createNotificationBuilder(): NotificationCompat.Builder {
-        return NotificationCompat.Builder(context, CHANNEL_ID)
-            .setColor(
-                ContextCompat.getColor(
-                    context,
-                    android.R.color.darker_gray,
-                ),
-            )
-            .setPriority(NotificationCompat.PRIORITY_HIGH)
-            .setSmallIcon(android.R.mipmap.sym_def_app_icon)
-            .setOnlyAlertOnce(true)
-    }
+    private fun createNotificationBuilder(): NotificationCompat.Builder = NotificationCompat.Builder(context, CHANNEL_ID)
+        .setColor(
+            ContextCompat.getColor(
+                context,
+                android.R.color.darker_gray,
+            ),
+        )
+        .setPriority(NotificationCompat.PRIORITY_HIGH)
+        .setSmallIcon(android.R.mipmap.sym_def_app_icon)
+        .setOnlyAlertOnce(true)
 
-    private fun createProgressNotificationBuilder(): NotificationCompat.Builder {
-        return createNotificationBuilder()
-            .setAutoCancel(false)
-            .setContentTitle(context.getString(string.clustering_worker_progress_title))
-            .setOngoing(true)
-    }
+    private fun createProgressNotificationBuilder(): NotificationCompat.Builder = createNotificationBuilder()
+        .setAutoCancel(false)
+        .setContentTitle(context.getString(string.clustering_worker_progress_title))
+        .setOngoing(true)
 
     private fun showFailUploadNotification() {
         val notification = createNotificationBuilder()
@@ -99,9 +92,7 @@ class ClusteringWorker @AssistedInject constructor(
         showFailUploadNotification()
     }
 
-    private fun getNotificationId(): Int {
-        return 1071724654
-    }
+    private fun getNotificationId(): Int = 1071724654
 
     companion object {
         private const val CHANNEL_ID = "channel_id::clustering_worker"

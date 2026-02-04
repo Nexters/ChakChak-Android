@@ -43,16 +43,16 @@ fun ChacAppNavigation() {
             modifier = Modifier.padding(innerPadding),
             entryProvider = entryProvider {
                 albumEntries(
-                    onOpenGallery = { cluster ->
+                    onClickSavePartial = { cluster ->
                         backStack.add(AlbumNavKey.Gallery(cluster))
                     },
-                    onOpenSaveCompleted = { title, savedCount ->
+                    onSaveCompleted = { title, savedCount ->
                         backStack.add(AlbumNavKey.SaveCompleted(title, savedCount))
                     },
                     onCloseSaveCompleted = { backStack.popToClustering() },
-                    onPopToGallery = { backStack.pop() },
-                    onPopToClustering = { backStack.popToClustering() },
-                    onBack = { backStack.pop() },
+                    onClickToGallery = { backStack.pop() },
+                    onClickToList = { backStack.popToClustering() },
+                    onClickBack = { backStack.pop() },
                 )
             },
         )
