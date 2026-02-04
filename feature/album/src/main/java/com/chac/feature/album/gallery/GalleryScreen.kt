@@ -2,6 +2,7 @@ package com.chac.feature.album.gallery
 
 import android.provider.MediaStore
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -15,6 +16,7 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -45,6 +47,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
@@ -52,6 +55,13 @@ import androidx.core.net.toUri
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.chac.core.designsystem.ui.component.ChacImage
+import com.chac.core.designsystem.ui.icon.Alert
+import com.chac.core.designsystem.ui.icon.Back
+import com.chac.core.designsystem.ui.icon.ChacIcons
+import com.chac.core.designsystem.ui.icon.CheckSelected
+import com.chac.core.designsystem.ui.icon.CheckUnselected
+import com.chac.core.designsystem.ui.theme.ChacColors
+import com.chac.core.designsystem.ui.theme.ChacTextStyles
 import com.chac.core.designsystem.ui.theme.ChacTheme
 import com.chac.core.permission.compose.rememberWriteRequestLauncher
 import com.chac.core.resources.R
@@ -152,8 +162,8 @@ private fun GalleryScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(horizontal = 20.dp)
-            .padding(top = 12.dp, bottom = 20.dp),
+            .background(ChacColors.Background)
+            .padding(bottom = 20.dp),
     ) {
         GalleryTopBar(
             onBack = {
@@ -164,47 +174,79 @@ private fun GalleryScreen(
                 }
             },
         )
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(20.dp))
         Row(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 20.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.Top,
         ) {
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = title,
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.onSurface,
+                    style = ChacTextStyles.SubTitle01,
+                    color = ChacColors.Text01,
                 )
                 Spacer(modifier = Modifier.height(4.dp))
-                Text(
-                    text = stringResource(
-                        R.string.gallery_selected_count,
-                        selectedCount,
-                        totalCount,
-                    ),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
+                Row {
+                    Text(
+                        text = selectedCount.toString(),
+                        style = ChacTextStyles.Number,
+                        color = ChacColors.Text02,
+                    )
+                    Text(
+                        text = stringResource(R.string.gallery_slash),
+                        style = ChacTextStyles.Number,
+                        color = ChacColors.Etc,
+                        modifier = Modifier.padding(horizontal = 4.dp),
+                    )
+                    Text(
+                        text = totalCount.toString(),
+                        style = ChacTextStyles.Number,
+                        color = ChacColors.Text02,
+                    )
+                }
             }
-            OutlinedButton(
-                onClick = {
-                    if (isAllSelected) {
-                        onClearSelection()
-                    } else {
-                        onSelectAll()
-                    }
-                },
-                contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp),
-                shape = RoundedCornerShape(8.dp),
-            ) {
-                Text(
-                    text = stringResource(R.string.gallery_select_all),
-                    style = MaterialTheme.typography.labelMedium,
-                )
+            if (isAllSelected) {
+                Box(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(16.dp))
+                        .background(color = ChacColors.BackgroundPopup)
+                        .border(width = 1.dp, color = ChacColors.Stroke01, shape = RoundedCornerShape(16.dp))
+                        .clickable {
+                            onClearSelection()
+                        }
+                        .padding(horizontal = 12.dp, vertical = 7.dp),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Text(
+                        text = stringResource(R.string.gallery_unselect_all),
+                        style = ChacTextStyles.Caption,
+                        color = ChacColors.Text02,
+                    )
+                }
+            } else {
+                Box(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(16.dp))
+                        .background(color = ChacColors.BackgroundPopup)
+                        .clickable {
+                            onSelectAll()
+                        }
+                        .padding(horizontal = 12.dp, vertical = 7.dp),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Text(
+                        text = stringResource(R.string.gallery_select_all),
+                        style = ChacTextStyles.Caption,
+                        color = ChacColors.Text04Caption,
+                    )
+                }
             }
+
         }
-        Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(20.dp))
         LazyVerticalGrid(
             columns = GridCells.Fixed(3),
             modifier = Modifier
@@ -212,7 +254,7 @@ private fun GalleryScreen(
                 .fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(10.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp),
-            contentPadding = PaddingValues(bottom = 8.dp),
+            contentPadding = PaddingValues(horizontal = 20.dp),
         ) {
             items(mediaList, key = { it.id }) { media ->
                 GalleryPhotoItem(
@@ -222,24 +264,31 @@ private fun GalleryScreen(
                 )
             }
         }
-        Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(20.dp))
         Button(
             onClick = onSave,
             enabled = uiState is GalleryUiState.SomeSelected,
             modifier = Modifier
+                .padding(horizontal = 20.dp)
                 .fillMaxWidth()
-                .height(52.dp),
+                .height(54.dp),
             shape = RoundedCornerShape(12.dp),
             colors = ButtonDefaults.buttonColors(
-                disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant,
-                disabledContentColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                containerColor = ChacColors.Primary,
+                contentColor = ChacColors.TextBtn01,
+                disabledContainerColor = ChacColors.Disable,
+                disabledContentColor = ChacColors.TextBtn03,
             ),
         ) {
             val buttonText = when {
                 uiState is GalleryUiState.SomeSelected -> stringResource(R.string.gallery_save_album_count, selectedCount)
                 else -> stringResource(R.string.gallery_select_prompt)
             }
-            Text(text = buttonText)
+            Text(
+                text = buttonText,
+                style = ChacTextStyles.Btn,
+                color = ChacColors.TextBtn01,
+            )
         }
     }
 
@@ -269,74 +318,70 @@ private fun GalleryExitDialog(
     Dialog(onDismissRequest = onDismiss) {
         Surface(
             shape = RoundedCornerShape(20.dp),
-            color = MaterialTheme.colorScheme.surface,
-            tonalElevation = 6.dp,
+            color = ChacColors.BackgroundPopup,
         ) {
             Column(
                 modifier = modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 24.dp, vertical = 20.dp),
+                    .padding(20.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-                Box(
-                    modifier = Modifier
-                        .size(52.dp)
-                        .background(
-                            color = MaterialTheme.colorScheme.surfaceVariant,
-                            shape = CircleShape,
-                        ),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Text(
-                        text = "!",
-                        style = MaterialTheme.typography.titleLarge,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        fontWeight = FontWeight.SemiBold,
-                    )
-                }
-                Spacer(modifier = Modifier.height(12.dp))
+                Image(
+                    imageVector = ChacIcons.Alert,
+                    contentDescription = null,
+                    modifier = Modifier.size(50.dp),
+                )
+                Spacer(modifier = Modifier.height(16.dp))
                 Text(
                     text = stringResource(R.string.gallery_exit_title),
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    fontWeight = FontWeight.SemiBold,
+                    style = ChacTextStyles.Headline02,
+                    color = ChacColors.Text01,
                 )
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(10.dp))
                 Text(
                     text = stringResource(R.string.gallery_exit_message),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    style = ChacTextStyles.Body,
+                    color = ChacColors.Text03,
+                    textAlign = TextAlign.Center
                 )
                 Spacer(modifier = Modifier.height(20.dp))
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
                     Button(
                         onClick = onDismiss,
                         modifier = Modifier
                             .weight(1f)
-                            .height(44.dp),
+                            .height(54.dp),
                         shape = RoundedCornerShape(12.dp),
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = MaterialTheme.colorScheme.surfaceVariant,
-                            contentColor = MaterialTheme.colorScheme.onSurface,
+                            containerColor = ChacColors.Sub04,
+                            contentColor = ChacColors.Primary,
                         ),
                     ) {
-                        Text(text = stringResource(R.string.gallery_exit_cancel))
+                        Text(
+                            text = stringResource(R.string.gallery_exit_cancel),
+                            style = ChacTextStyles.Btn,
+                            color = ChacColors.Primary,
+                        )
                     }
                     Button(
                         onClick = onConfirm,
                         modifier = Modifier
                             .weight(1f)
-                            .height(44.dp),
+                            .height(54.dp),
                         shape = RoundedCornerShape(12.dp),
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = MaterialTheme.colorScheme.onSurface,
-                            contentColor = MaterialTheme.colorScheme.surface,
+                            containerColor = ChacColors.Primary,
+                            contentColor = ChacColors.TextBtn01,
                         ),
                     ) {
-                        Text(text = stringResource(R.string.gallery_exit_confirm))
+                        Text(
+                            text = stringResource(R.string.gallery_exit_confirm),
+                            style = ChacTextStyles.Btn,
+                            color = ChacColors.TextBtn01,
+                        )
                     }
                 }
             }
@@ -355,7 +400,9 @@ private fun GalleryTopBar(
     onBack: () -> Unit,
 ) {
     Box(
-        modifier = modifier.fillMaxWidth(),
+        modifier = modifier
+            .fillMaxWidth()
+            .heightIn(52.dp),
         contentAlignment = Alignment.Center,
     ) {
         IconButton(
@@ -363,14 +410,16 @@ private fun GalleryTopBar(
             modifier = Modifier.align(Alignment.CenterStart),
         ) {
             Icon(
-                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                imageVector = ChacIcons.Back,
                 contentDescription = stringResource(R.string.gallery_back_cd),
+                tint = ChacColors.Text01,
+                modifier = Modifier.size(24.dp),
             )
         }
         Text(
             text = stringResource(R.string.gallery_top_bar_title),
-            style = MaterialTheme.typography.titleMedium,
-            color = MaterialTheme.colorScheme.onSurface,
+            style = ChacTextStyles.Title,
+            color = ChacColors.Text01,
         )
     }
 }
@@ -392,39 +441,34 @@ private fun GalleryPhotoItem(
     Box(
         modifier = modifier
             .aspectRatio(1f)
-            .clip(RoundedCornerShape(12.dp))
-            .background(MaterialTheme.colorScheme.surfaceVariant)
+            .clip(RoundedCornerShape(16.dp))
+            .then(
+                if (isSelected) {
+                    Modifier.border(
+                        width = 1.dp,
+                        color = ChacColors.Primary,
+                        shape = RoundedCornerShape(16.dp),
+                    )
+                } else {
+                    Modifier
+                },
+            )
+            .background(ChacColors.BackgroundPopup)
             .clickable(onClick = onToggle),
     ) {
         ChacImage(
             model = media.uriString,
             modifier = Modifier.matchParentSize(),
         )
-        Box(
+        Icon(
+            imageVector = if (isSelected) ChacIcons.CheckSelected else ChacIcons.CheckUnselected,
+            contentDescription = null,
             modifier = Modifier
-                .align(Alignment.TopEnd)
+                .align(Alignment.BottomEnd)
                 .padding(6.dp)
-                .size(20.dp)
-                .background(
-                    color = MaterialTheme.colorScheme.surface,
-                    shape = CircleShape,
-                )
-                .border(
-                    width = 1.dp,
-                    color = MaterialTheme.colorScheme.outline,
-                    shape = CircleShape,
-                ),
-            contentAlignment = Alignment.Center,
-        ) {
-            if (isSelected) {
-                Icon(
-                    imageVector = Icons.Filled.Check,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.size(12.dp),
-                )
-            }
-        }
+                .size(20.dp),
+            tint = androidx.compose.ui.graphics.Color.Unspecified,
+        )
     }
 }
 
@@ -446,7 +490,37 @@ private fun GalleryScreenPreview() {
                         )
                     },
                     saveStatus = SaveUiStatus.Default,
+                )
+            ),
+            onToggleMedia = {},
+            onSelectAll = {},
+            onClearSelection = {},
+            onSave = {},
+            onBack = {},
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun GalleryScreenAllSelectedPreview() {
+    ChacTheme {
+        GalleryScreen(
+            uiState = GalleryUiState.SomeSelected(
+                cluster = ClusterUiModel(
+                    id = 1L,
+                    title = "Jeju Trip",
+                    mediaList = List(40) { index ->
+                        MediaUiModel(
+                            id = index.toLong(),
+                            uriString = "content://sample/$index",
+                            dateTaken = 0L,
+                            mediaType = MediaType.IMAGE,
+                        )
+                    },
+                    saveStatus = SaveUiStatus.Default,
                 ),
+                selectedIds = (0L until 40L).toSet(),
             ),
             onToggleMedia = {},
             onSelectAll = {},

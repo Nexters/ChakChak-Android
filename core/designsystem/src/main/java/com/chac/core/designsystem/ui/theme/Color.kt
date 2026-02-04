@@ -44,4 +44,6 @@ object ChacColors {
     // Utility whites (alpha)
     val White80 = Color(0xCCFFFFFF) // token name: "ffffff - 80"
     val White40 = Color(0x66FFFFFF) // token name: "ffffff - 40"
+    val Etc =  Color(0xFF666666)
+    val Black40 = Color(0x66000000)
 }
