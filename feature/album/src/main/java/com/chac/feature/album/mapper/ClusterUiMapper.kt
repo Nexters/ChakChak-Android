@@ -15,6 +15,10 @@ internal fun MediaCluster.toUiModel(): MediaClusterUiModel = MediaClusterUiModel
     id = id,
     title = title,
     mediaList = mediaList.map { it.toUiModel() },
+    thumbnailUriStrings = listOfNotNull(
+        mediaList.getOrNull(0)?.uriString,
+        mediaList.getOrNull(1)?.uriString,
+    ),
     saveStatus = when (saveStatus) {
         SaveStatus.Default -> SaveUiStatus.Default
         SaveStatus.Saving -> SaveUiStatus.Saving

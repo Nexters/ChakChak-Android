@@ -131,7 +131,10 @@ private fun ClusterCard(
                 horizontalArrangement = Arrangement.spacedBy(16.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                ClusterThumbnailStack(mediaList = cluster.mediaList)
+                ClusterThumbnailStack(
+                    thumbnailUriStrings = cluster.thumbnailUriStrings,
+                    mediaCount = cluster.mediaList.size,
+                )
 
                 Column(
                     modifier = Modifier.weight(1f),
@@ -223,11 +226,13 @@ private fun SaveStatusdBadge(
 /**
  * 겹친 사진 더미 형태의 썸네일 플레이스홀더를 표시한다
  *
- * @param mediaList 이미지 리스트
+ * @param thumbnailUriStrings 썸네일 URI 문자열 목록
+ * @param mediaCount 미디어 개수
  */
 @Composable
 private fun ClusterThumbnailStack(
-    mediaList: List<MediaUiModel>,
+    thumbnailUriStrings: List<String>,
+    mediaCount: Int,
     modifier: Modifier = Modifier,
 ) {
     val shape = RoundedCornerShape(12.dp)
@@ -235,7 +240,7 @@ private fun ClusterThumbnailStack(
 
     Box(modifier = modifier) {
         offsets.forEachIndexed { index, offset ->
-            val media = mediaList.getOrNull(index)
+            val mediaUri = thumbnailUriStrings.getOrNull(index)
 
             Box(
                 modifier = Modifier
@@ -245,9 +250,9 @@ private fun ClusterThumbnailStack(
                     .background(MaterialTheme.colorScheme.surface)
                     .zIndex(offsets.lastIndex - index.toFloat()), // 이미지 중첩 렌더링 순서 보정
             ) {
-                if (media != null) {
+                if (mediaUri != null) {
                     ChacImage(
-                        model = media.uriString,
+                        model = mediaUri,
                         modifier = Modifier.matchParentSize(),
                         contentScale = ContentScale.Crop,
                     )
@@ -276,7 +281,7 @@ private fun ClusterThumbnailStack(
                 .zIndex(offsets.size.toFloat()), // 이미지보다 위에 렌더링하기 위한 zIndex 설정
         ) {
             Text(
-                text = "+${formatCount(mediaList.size)}",
+                text = "+${formatCount(mediaCount)}",
                 style = ChacTextStyles.SubNumber,
                 color = ChacColors.TextBtn01,
             )
@@ -376,18 +381,30 @@ private fun ClusterListPreview() {
                 id = 1L,
                 title = "Jeju Trip",
                 mediaList = sampleMedia(128),
+                thumbnailUriStrings = listOf(
+                    "content://sample/0",
+                    "content://sample/1",
+                ),
                 saveStatus = SaveUiStatus.Default,
             ),
             MediaClusterUiModel(
                 id = 2L,
                 title = "강남구",
                 mediaList = sampleMedia(77),
+                thumbnailUriStrings = listOf(
+                    "content://sample/0",
+                    "content://sample/1",
+                ),
                 saveStatus = SaveUiStatus.Saving,
             ),
             MediaClusterUiModel(
                 id = 3L,
                 title = "서초동",
                 mediaList = sampleMedia(34),
+                thumbnailUriStrings = listOf(
+                    "content://sample/0",
+                    "content://sample/1",
+                ),
                 saveStatus = SaveUiStatus.SaveCompleted,
             ),
         )

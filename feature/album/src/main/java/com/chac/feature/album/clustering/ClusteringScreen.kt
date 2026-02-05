@@ -420,12 +420,20 @@ private class ClusteringUiStatePreviewProvider : PreviewParameterProvider<Cluste
             id = 1L,
             title = "Jeju Trip",
             mediaList = sampleMedia,
+            thumbnailUriStrings = listOf(
+                "content://sample/0",
+                "content://sample/1",
+            ),
             saveStatus = SaveUiStatus.Default,
         ),
         MediaClusterUiModel(
             id = 2L,
             title = "서초동",
             mediaList = sampleMedia,
+            thumbnailUriStrings = listOf(
+                "content://sample/0",
+                "content://sample/1",
+            ),
             saveStatus = SaveUiStatus.SaveCompleted,
         ),
     )

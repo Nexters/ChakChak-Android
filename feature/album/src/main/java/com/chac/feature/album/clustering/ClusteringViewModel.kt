@@ -98,7 +98,7 @@ class ClusteringViewModel @Inject constructor(
                     }
                     .collect { cluster ->
                         val updatedClusters = currentClusters() + cluster.toUiModel()
-                        _uiState.value = ClusteringUiState.Loading(updatedClusters)
+                        _uiState.value = ClusteringUiState.Loading(mergeThumbnails(updatedClusters))
                     }
 
                 // 클러스터링이 완료 되면 Completed 상태로 변경
@@ -125,7 +125,7 @@ class ClusteringViewModel @Inject constructor(
                     // 초기 스트림 수집 중에는 중복 갱신을 피한다.
                     if (clusterCollectJob != null) return@collect
 
-                    val uiClusters = clusters.map { it.toUiModel() }
+                    val uiClusters = mergeThumbnails(clusters.map { it.toUiModel() })
                     if (_uiState.value is ClusteringUiState.WithClusters) {
                         _uiState.value = ClusteringUiState.Completed(uiClusters)
                     }
@@ -149,5 +149,29 @@ class ClusteringViewModel @Inject constructor(
         is ClusteringUiState.WithClusters -> state.clusters
         ClusteringUiState.PermissionChecking -> emptyList()
         ClusteringUiState.PermissionDenied -> emptyList()
+    }
+
+    /**
+     * 저장 이후 mediaList가 비어도 썸네일이 유지되도록 이전 썸네일을 병합한다.
+     *
+     * @param newClusters 최신 클러스터 목록
+     * @return 썸네일이 보존된 클러스터 목록
+     */
+    private fun mergeThumbnails(
+        newClusters: List<MediaClusterUiModel>,
+    ): List<MediaClusterUiModel> {
+        val previousThumbnails = currentClusters().associateBy(
+            keySelector = { it.id },
+            valueTransform = { it.thumbnailUriStrings },
+        )
+
+        return newClusters.map { cluster ->
+            if (cluster.thumbnailUriStrings.isNotEmpty()) {
+                cluster
+            } else {
+                val fallback = previousThumbnails[cluster.id]
+                if (fallback != null) cluster.copy(thumbnailUriStrings = fallback) else cluster
+            }
+        }
     }
 }
