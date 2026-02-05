@@ -135,7 +135,6 @@ private fun ClusterCard(
                     thumbnailUriStrings = cluster.thumbnailUriStrings,
                     mediaCount = cluster.mediaList.size,
                 )
-
                 Column(
                     modifier = Modifier.weight(1f),
                     verticalArrangement = Arrangement.spacedBy(8.dp),
