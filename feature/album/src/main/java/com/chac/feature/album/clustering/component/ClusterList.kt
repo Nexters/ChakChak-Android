@@ -1,6 +1,8 @@
 package com.chac.feature.album.clustering.component
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -13,16 +15,15 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -35,26 +36,41 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import com.chac.core.designsystem.ui.component.ChacImage
+import com.chac.core.designsystem.ui.icon.ArrowRight
+import com.chac.core.designsystem.ui.icon.ChacIcons
+import com.chac.core.designsystem.ui.icon.SaveAll
+import com.chac.core.designsystem.ui.icon.SaveCompletedBadge
+import com.chac.core.designsystem.ui.theme.ChacColors
+import com.chac.core.designsystem.ui.theme.ChacTextStyles
 import com.chac.core.designsystem.ui.theme.ChacTheme
 import com.chac.core.resources.R
 import com.chac.domain.album.media.model.MediaType
-import com.chac.feature.album.model.SaveUiStatus
 import com.chac.feature.album.model.MediaClusterUiModel
 import com.chac.feature.album.model.MediaUiModel
+import com.chac.feature.album.model.SaveUiStatus
 
 /**
  * 클러스터 목록을 표시한다
  *
  * @param clusters 클러스터 UI 모델 목록
- * @param isLoading 로딩 중 여부
- * @param onClickSavePartial '사진 정리하기' 버튼 클릭 이벤트
- * @param onClickSaveAll '그대로 저장' 버튼 클릭 이벤트
+ * @param clusterCardBackgroundColor 각 클러스터 카드 배경색을 반환하는 함수.
+ * 리스트 외부에서 배경색 정책을 주입할 수 있도록 노출해, 화면/상태별로 규칙을 변경할 때 사용한다.
+ * @param onClickSavePartial '사진 정리하기' 버튼 클릭 이벤트 콜백
+ * @param onClickSaveAll '그대로 저장' 버튼 클릭 이벤트 콜백
  */
 @Composable
 fun ClusterList(
     clusters: List<MediaClusterUiModel>,
-    isLoading: Boolean,
     modifier: Modifier = Modifier,
+    clusterCardBackgroundColor: (MediaClusterUiModel, Int) -> Color = { _, index ->
+        val colors = listOf(
+            ChacColors.Primary,
+            ChacColors.Sub01,
+            ChacColors.Sub02,
+            ChacColors.Sun03,
+        )
+        colors[index % colors.size]
+    },
     onClickSavePartial: (MediaClusterUiModel) -> Unit,
     onClickSaveAll: (MediaClusterUiModel) -> Unit,
 ) {
@@ -63,17 +79,13 @@ fun ClusterList(
         verticalArrangement = Arrangement.spacedBy(12.dp),
         contentPadding = PaddingValues(bottom = 40.dp),
     ) {
-        items(items = clusters, key = { it.id }) { cluster ->
+        itemsIndexed(items = clusters, key = { _, item -> item.id }) { index, cluster ->
             ClusterCard(
                 cluster = cluster,
+                backgroundColor = clusterCardBackgroundColor(cluster, index),
                 onClickSavePartial = { onClickSavePartial(cluster) },
                 onClickSaveAll = { onClickSaveAll(cluster) },
             )
-        }
-        if (isLoading) {
-            item {
-                LoadingFooter()
-            }
         }
     }
 }
@@ -82,29 +94,31 @@ fun ClusterList(
  * 클러스터 정보를 카드로 표시한다
  *
  * @param cluster 표시할 클러스터 모델
- * @param onClickSavePartial '사진 정리하기' 버튼 클릭 이벤트
- * @param onClickSaveAll '그대로 저장'버튼 클릭 이벤트
+ * @param backgroundColor 카드 배경색
+ * @param onClickSavePartial '사진 정리하기' 버튼 클릭 이벤트 콜백
+ * @param onClickSaveAll '그대로 저장' 버튼 클릭 이벤트 콜백
  */
 @Composable
 private fun ClusterCard(
     cluster: MediaClusterUiModel,
+    backgroundColor: Color,
     modifier: Modifier = Modifier,
     onClickSavePartial: () -> Unit,
     onClickSaveAll: () -> Unit,
 ) {
     val isDimmed = cluster.saveStatus != SaveUiStatus.Default
-    val cardShape = RoundedCornerShape(12.dp)
-    val badgeText = when (cluster.saveStatus) {
+    val saveStatusText = when (cluster.saveStatus) {
+        SaveUiStatus.Default -> null
         SaveUiStatus.SaveCompleted -> stringResource(R.string.clustering_save_completed_badge)
         SaveUiStatus.Saving -> stringResource(R.string.clustering_saveing_badge)
-        SaveUiStatus.Default -> null
     }
+    val cardShape = RoundedCornerShape(16.dp)
 
     Box(modifier = modifier.fillMaxWidth()) {
         Card(
             modifier = Modifier.fillMaxWidth(),
             colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                containerColor = backgroundColor,
             ),
             shape = cardShape,
         ) {
@@ -113,44 +127,41 @@ private fun ClusterCard(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(16.dp),
+                    .padding(all = 20.dp),
                 horizontalArrangement = Arrangement.spacedBy(16.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 ClusterThumbnailStack(mediaList = cluster.mediaList)
+
                 Column(
                     modifier = Modifier.weight(1f),
-                    verticalArrangement = Arrangement.spacedBy(6.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
                     Text(
                         text = displayTitle,
-                        style = MaterialTheme.typography.titleMedium,
-                        color = MaterialTheme.colorScheme.onSurface,
+                        style = ChacTextStyles.ContentTitle,
+                        color = ChacColors.Text01,
                         maxLines = 2,
                         overflow = TextOverflow.Ellipsis,
                     )
-                    Text(
-                        text = stringResource(
-                            R.string.clustering_photo_count,
-                            formatCount(cluster.mediaList.size),
-                        ),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Button(
-                        onClick = onClickSavePartial,
-                        modifier = Modifier.widthIn(min = 140.dp),
-                        enabled = !isDimmed,
+
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(space = 8.dp),
                     ) {
-                        Text(text = stringResource(R.string.clustering_action_organize))
-                    }
-                    TextButton(
-                        onClick = onClickSaveAll,
-                        modifier = Modifier.align(Alignment.Start),
-                        enabled = !isDimmed,
-                    ) {
-                        Text(text = stringResource(R.string.clustering_action_keep))
+                        SaveAllCircleButton(
+                            enabled = !isDimmed,
+                            onClick = onClickSaveAll,
+                        )
+
+                        SavePartialPillButton(
+                            enabled = !isDimmed,
+                            onClick = onClickSavePartial,
+                            modifier = Modifier.weight(1f),
+                        )
                     }
                 }
             }
@@ -160,28 +171,52 @@ private fun ClusterCard(
             Box(
                 modifier = Modifier
                     .matchParentSize()
-                    .background(MaterialTheme.colorScheme.scrim.copy(alpha = 0.45f), cardShape),
+                    .background(ChacColors.Token00000040, cardShape),
             )
         }
 
-        if (badgeText != null) {
-            Box(
+        if (saveStatusText != null) {
+            SaveStatusdBadge(
+                text = saveStatusText,
                 modifier = Modifier
                     .align(Alignment.TopStart)
-                    .padding(start = 16.dp, top = 12.dp)
-                    .background(
-                        color = MaterialTheme.colorScheme.surface,
-                        shape = RoundedCornerShape(6.dp),
-                    )
-                    .padding(horizontal = 8.dp, vertical = 4.dp),
-            ) {
-                Text(
-                    text = badgeText,
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
+                    .padding(12.dp)
+                    .zIndex(1f),
+            )
         }
+    }
+}
+
+@Composable
+private fun SaveStatusdBadge(
+    text: String,
+    modifier: Modifier = Modifier,
+) {
+    Row(
+        modifier = modifier
+            .border(
+                width = 1.dp,
+                color = ChacColors.Stroke01,
+                shape = CircleShape,
+            )
+            .clip(CircleShape)
+            .background(ChacColors.Background)
+            .padding(horizontal = 12.dp, vertical = 7.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(6.dp),
+    ) {
+        Icon(
+            imageVector = ChacIcons.SaveCompletedBadge,
+            contentDescription = null,
+            modifier = Modifier.size(16.dp),
+            tint = Color.Unspecified,
+        )
+
+        Text(
+            text = text,
+            style = ChacTextStyles.Caption,
+            color = ChacColors.Sub01,
+        )
     }
 }
 
@@ -228,6 +263,96 @@ private fun ClusterThumbnailStack(
                 }
             }
         }
+
+        Box(
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .padding(6.dp)
+                .background(
+                    color = ChacColors.Token00000070,
+                    shape = CircleShape,
+                )
+                .padding(horizontal = 8.dp)
+                .zIndex(offsets.size.toFloat()), // 이미지보다 위에 렌더링하기 위한 zIndex 설정
+        ) {
+            Text(
+                text = "+${formatCount(mediaList.size)}",
+                style = ChacTextStyles.SubNumber,
+                color = ChacColors.TextBtn01,
+            )
+        }
+    }
+}
+
+/**
+ * 클러스터의 모든 항목을 저장하는 원형 버튼을 표시한다.
+ *
+ * @param enabled 버튼 활성화 여부
+ * @param onClick 버튼 클릭 이벤트 콜백
+ */
+@Composable
+private fun SaveAllCircleButton(
+    enabled: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Box(
+        modifier = modifier
+            .clip(CircleShape)
+            .background(color = ChacColors.Ffffff40)
+            .clickable(
+                enabled = enabled,
+                onClick = onClick,
+            )
+            .padding(all = 14.dp),
+        contentAlignment = Alignment.Center,
+    ) {
+        Icon(
+            imageVector = ChacIcons.SaveAll,
+            contentDescription = null,
+            tint = ChacColors.TextBtn01,
+        )
+    }
+}
+
+/**
+ * 클러스터의 일부 항목을 정리해 저장하는 필 버튼을 표시한다.
+ *
+ * @param enabled 버튼 활성화 여부
+ * @param onClick 버튼 클릭 이벤트 콜백
+ */
+@Composable
+private fun SavePartialPillButton(
+    enabled: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Row(
+        modifier = modifier
+            .height(40.dp)
+            .clip(CircleShape)
+            .background(ChacColors.Ffffff80)
+            .clickable(
+                enabled = enabled,
+                onClick = onClick,
+            )
+            .padding(horizontal = 28.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.Center,
+    ) {
+        Text(
+            text = stringResource(R.string.clustering_action_organize),
+            style = ChacTextStyles.SubBtn,
+            color = ChacColors.TextBtn02,
+        )
+
+        Spacer(modifier = Modifier.size(8.dp))
+
+        Icon(
+            imageVector = ChacIcons.ArrowRight,
+            contentDescription = null,
+            tint = ChacColors.TextBtn02,
+        )
     }
 }
 
@@ -245,23 +370,30 @@ private fun ClusterListPreview() {
                 )
             }
         }
+
         val sampleClusters = listOf(
             MediaClusterUiModel(
                 id = 1L,
                 title = "Jeju Trip",
-                mediaList = sampleMedia(34),
+                mediaList = sampleMedia(128),
                 saveStatus = SaveUiStatus.Default,
             ),
             MediaClusterUiModel(
                 id = 2L,
+                title = "강남구",
+                mediaList = sampleMedia(77),
+                saveStatus = SaveUiStatus.Saving,
+            ),
+            MediaClusterUiModel(
+                id = 3L,
                 title = "서초동",
                 mediaList = sampleMedia(34),
                 saveStatus = SaveUiStatus.SaveCompleted,
             ),
         )
+
         ClusterList(
             clusters = sampleClusters,
-            isLoading = true,
             onClickSavePartial = {},
             onClickSaveAll = {},
         )
