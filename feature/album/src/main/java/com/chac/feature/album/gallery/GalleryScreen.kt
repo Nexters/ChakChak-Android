@@ -218,7 +218,7 @@ private fun GalleryScreen(
                         .background(color = ChacColors.BackgroundPopup)
                         .border(width = 1.dp, color = ChacColors.Stroke01, shape = RoundedCornerShape(16.dp))
                         .clickable {
-                            onClickSelectAll(isAllSelected)
+                            onClickSelectAll(false)
                         }
                         .padding(horizontal = 12.dp, vertical = 7.dp),
                     contentAlignment = Alignment.Center,
