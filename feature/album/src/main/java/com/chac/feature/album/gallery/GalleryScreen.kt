@@ -359,7 +359,7 @@ private fun GalleryExitDialog(
                         shape = RoundedCornerShape(12.dp),
                         colors = ButtonDefaults.buttonColors(
                             containerColor = ChacColors.Sub04,
-                            contentColor = ChacColors.Primary,
+                            contentColor = ChacColors.TextBtn02,
                         ),
                     ) {
                         Text(
