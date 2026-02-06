@@ -492,6 +492,10 @@ private fun GalleryScreenPreview() {
                             mediaType = MediaType.IMAGE,
                         )
                     },
+                    thumbnailUriStrings = listOf(
+                        "content://sample/0",
+                        "content://sample/1",
+                    ),
                     saveStatus = SaveUiStatus.Default,
                 ),
             ),

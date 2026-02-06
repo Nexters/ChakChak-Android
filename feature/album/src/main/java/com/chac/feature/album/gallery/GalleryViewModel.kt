@@ -170,7 +170,14 @@ class GalleryViewModel @Inject constructor(
                     val updatedCluster = clusters.firstOrNull { it.id == clusterId }?.toUiModel()
 
                     _uiState.update {
-                        val newCluster = updatedCluster ?: it.cluster.copy(mediaList = emptyList())
+                        val newCluster = when {
+                            updatedCluster == null -> it.cluster.copy(mediaList = emptyList())
+                            updatedCluster.thumbnailUriStrings.isEmpty() && it.cluster.thumbnailUriStrings.isNotEmpty() ->
+                                updatedCluster.copy(
+                                    thumbnailUriStrings = it.cluster.thumbnailUriStrings,
+                                )
+                            else -> updatedCluster
+                        }
                         GalleryUiState.NoneSelected(newCluster)
                     }
                 }
@@ -182,6 +189,7 @@ class GalleryViewModel @Inject constructor(
             id = 0L,
             title = "",
             mediaList = emptyList(),
+            thumbnailUriStrings = emptyList(),
             saveStatus = SaveUiStatus.Default,
         )
     }
