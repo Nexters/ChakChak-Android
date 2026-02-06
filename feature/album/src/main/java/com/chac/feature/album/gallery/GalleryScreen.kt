@@ -344,7 +344,7 @@ private fun GalleryExitDialog(
                     text = stringResource(R.string.gallery_exit_message),
                     style = ChacTextStyles.Body,
                     color = ChacColors.Text03,
-                    textAlign = TextAlign.Center
+                    textAlign = TextAlign.Center,
                 )
                 Spacer(modifier = Modifier.height(30.dp))
                 Row(
@@ -446,11 +446,12 @@ private fun GalleryPhotoItem(
             .clip(RoundedCornerShape(12.dp))
             .then(
                 if (isSelected) {
-                    Modifier.border(
-                        width = 1.dp,
-                        color = ChacColors.Primary,
-            .clip(RoundedCornerShape(12.dp))
-                    )
+                    Modifier
+                        .border(
+                            width = 1.dp,
+                            color = ChacColors.Primary,
+                            shape = RoundedCornerShape(12.dp),
+                        )
                 } else {
                     Modifier
                 },
@@ -492,7 +493,7 @@ private fun GalleryScreenPreview() {
                         )
                     },
                     saveStatus = SaveUiStatus.Default,
-                )
+                ),
             ),
             onToggleMedia = {},
             onClickSelectAll = {},
