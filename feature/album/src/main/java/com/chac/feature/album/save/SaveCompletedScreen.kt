@@ -1,33 +1,36 @@
 package com.chac.feature.album.save
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
+import androidx.compose.material3.IconButtonColors
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.chac.core.designsystem.ui.icon.ChacIcons
+import com.chac.core.designsystem.ui.icon.Close
+import com.chac.core.designsystem.ui.theme.ChacColors
+import com.chac.core.designsystem.ui.theme.ChacTextStyles
 import com.chac.core.designsystem.ui.theme.ChacTheme
 import com.chac.core.resources.R
 
@@ -51,7 +54,7 @@ fun SaveCompletedRoute(
     SaveCompletedScreen(
         title = title,
         savedCount = savedCount,
-        onClose = onClose,
+        onClickClose = onClose,
         onClickToGallery = onClickToGallery,
         onClickToList = onClickToList,
     )
@@ -62,7 +65,7 @@ fun SaveCompletedRoute(
  *
  * @param title 저장된 앨범 제목
  * @param savedCount 저장된 사진 개수
- * @param onClose 닫기 버튼 클릭 이벤트 콜백
+ * @param onClickClose 닫기 버튼 클릭 이벤트 콜백
  * @param onClickToGallery '갤러리로' 버튼 클릭 이벤트 콜백
  * @param onClickToList '목록으로' 버튼 클릭 이벤트 콜백
  */
@@ -70,85 +73,117 @@ fun SaveCompletedRoute(
 private fun SaveCompletedScreen(
     title: String,
     savedCount: Int,
-    onClose: () -> Unit,
+    onClickClose: () -> Unit,
     onClickToGallery: () -> Unit,
     onClickToList: () -> Unit,
 ) {
-    Surface(modifier = Modifier.fillMaxSize()) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(color = ChacColors.Background)
+            .padding(horizontal = 20.dp)
+            .padding(bottom = 20.dp),
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 14.dp),
+            horizontalArrangement = Arrangement.End,
+        ) {
+            IconButton(
+                onClick = onClickClose,
+                modifier = Modifier.offset(x = 12.dp), // IconButton로 인한 패딩만큼 오른쪽으로 이동
+                colors = IconButtonColors(
+                    containerColor = Color.Unspecified,
+                    contentColor = ChacColors.Text01,
+                    disabledContainerColor = Color.Unspecified,
+                    disabledContentColor = Color.Unspecified,
+                ),
+            ) {
+                Icon(
+                    imageVector = ChacIcons.Close,
+                    contentDescription = stringResource(R.string.save_completed_close_cd),
+                )
+            }
+        }
+
         Column(
             modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = 24.dp, vertical = 20.dp),
+                .fillMaxWidth()
+                .weight(1f),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.End,
-            ) {
-                IconButton(onClick = onClose) {
-                    Icon(
-                        imageVector = Icons.Filled.Close,
-                        contentDescription = stringResource(R.string.save_completed_close_cd),
-                    )
-                }
-            }
+            val topSpaceRatio = 0.2f
+
+            Spacer(Modifier.weight(topSpaceRatio))
+
             Column(
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxWidth(),
-                verticalArrangement = Arrangement.Center,
+                modifier = Modifier.weight(1f - topSpaceRatio),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-                Box(
-                    modifier = Modifier
-                        .size(110.dp)
-                        .background(
-                            color = MaterialTheme.colorScheme.surfaceVariant,
-                            shape = RoundedCornerShape(12.dp),
-                        ),
+                Image(
+                    painter = painterResource(id = R.drawable.im_album_save_success),
+                    contentDescription = null,
+                    modifier = Modifier.offset(x = 7.dp), // 시각적인 중심점 보정
                 )
-                Spacer(modifier = Modifier.height(24.dp))
+
+                Spacer(modifier = Modifier.height(26.dp))
+
                 Text(
                     text = stringResource(R.string.save_completed_title),
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.onSurface,
+                    style = ChacTextStyles.Headline02,
+                    color = ChacColors.Text01,
                     textAlign = TextAlign.Center,
                 )
-                Spacer(modifier = Modifier.height(8.dp))
+
+                Spacer(modifier = Modifier.height(10.dp))
+
                 Text(
                     text = stringResource(R.string.save_completed_message, savedCount),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    style = ChacTextStyles.Body,
+                    color = ChacColors.Text03,
                     textAlign = TextAlign.Center,
                 )
             }
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
+        }
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            Button(
+                onClick = onClickToGallery,
+                modifier = Modifier
+                    .weight(1f)
+                    .height(54.dp),
+                shape = RoundedCornerShape(12.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = ChacColors.Sub04,
+                    contentColor = ChacColors.TextBtn02,
+                ),
             ) {
-                Button(
-                    onClick = onClickToGallery,
-                    modifier = Modifier
-                        .weight(1f)
-                        .height(52.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.surfaceVariant,
-                        contentColor = MaterialTheme.colorScheme.onSurface,
-                    ),
-                ) {
-                    Text(text = stringResource(R.string.save_completed_gallery_action))
-                }
-                Button(
-                    onClick = onClickToList,
-                    modifier = Modifier
-                        .weight(1f)
-                        .height(52.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.onSurface,
-                        contentColor = MaterialTheme.colorScheme.surface,
-                    ),
-                ) {
-                    Text(text = stringResource(R.string.save_completed_list_action))
-                }
+                Text(
+                    text = stringResource(R.string.save_completed_sub_button_title),
+                    style = ChacTextStyles.Btn,
+                )
+            }
+
+            Button(
+                onClick = onClickToList,
+                modifier = Modifier
+                    .weight(1f)
+                    .height(54.dp),
+                shape = RoundedCornerShape(12.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = ChacColors.Primary,
+                    contentColor = ChacColors.TextBtn01,
+                ),
+            ) {
+                Text(
+                    text = stringResource(R.string.save_completed_main_button_title),
+                    style = ChacTextStyles.Btn,
+                )
             }
         }
     }

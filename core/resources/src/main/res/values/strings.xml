@@ -31,9 +31,9 @@
     <string name="gallery_exit_message">선택된 내용은 저장되지 않습니다.\n페이지를 나가겠어요?</string>
     <string name="gallery_exit_cancel">취소</string>
     <string name="gallery_exit_confirm">확인</string>
-    <string name="save_completed_title">앨범 저장 완료</string>
-    <string name="save_completed_message">총 %1$d장의 사진이 포함된 앨범을\n갤러리에 저장했어요!</string>
-    <string name="save_completed_gallery_action">갤러리로</string>
-    <string name="save_completed_list_action">목록으로</string>
+    <string name="save_completed_title">저장 완료</string>
+    <string name="save_completed_message">총 %1$d장의 사진이 포함된 앨범을\n갤러리에 저장했어요.</string>
+    <string name="save_completed_sub_button_title">갤러리로</string>
+    <string name="save_completed_main_button_title">메인으로</string>
     <string name="save_completed_close_cd">저장 완료 닫기</string>
 </resources>
