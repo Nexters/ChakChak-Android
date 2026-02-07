@@ -11,6 +11,7 @@ kotlinxCoroutinesCore = "1.10.2"
 # AndroidX Core & Lifecycle
 coreKtx = "1.17.0"
 lifecycleRuntimeKtx = "2.10.0"
+coreSplashscreen = "1.2.0"
 activityCompose = "1.12.2"
 work = "2.11.0"
 
@@ -52,6 +53,7 @@ kotlinx-coroutines-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-cor
 
 # AndroidX Core
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
+androidx-core-splashscreen = { group = "androidx.core", name = "core-splashscreen", version.ref = "coreSplashscreen" }
 
 # Androidx Lifecycle
 androidx-lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycleRuntimeKtx" }

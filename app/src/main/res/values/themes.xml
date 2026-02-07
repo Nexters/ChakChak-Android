@@ -2,4 +2,11 @@
 <resources>
 
     <style name="Theme.Chac" parent="android:Theme.Material.Light.NoActionBar" />
+
+    <style name="Theme.Chac.WithSplashScreen" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">@color/splash_purple</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash_logo</item>
+        <item name="windowSplashScreenIconBackgroundColor">@android:color/transparent</item>
+        <item name="postSplashScreenTheme">@style/Theme.Chac</item>
+    </style>
 </resources>
