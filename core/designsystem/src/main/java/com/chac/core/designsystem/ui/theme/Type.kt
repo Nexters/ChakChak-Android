@@ -32,7 +32,7 @@ object ChacTextStyles {
         fontFamily = Pretendard,
         fontWeight = FontWeight.SemiBold, // 600
         fontSize = 18.sp,
-        lineHeight = 19.8.sp,
+        lineHeight = 20.sp,
         letterSpacing = 0.sp,
     )
 
@@ -135,9 +135,9 @@ object ChacTextStyles {
     val SubNumber = TextStyle(
         fontFamily = Montserrat,
         fontWeight = FontWeight.SemiBold, // 600
-        fontSize = 13.sp,
-        lineHeight = 18.85.sp,
-        letterSpacing = 0.13.sp,
+        fontSize = 12.sp,
+        lineHeight = 17.4.sp,
+        letterSpacing = 0.12.sp,
     )
 
     val SplashName = TextStyle(

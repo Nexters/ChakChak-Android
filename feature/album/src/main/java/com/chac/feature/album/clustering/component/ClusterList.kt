@@ -59,9 +59,9 @@ fun ClusterList(
     modifier: Modifier = Modifier,
     clusterCardBackgroundColor: (MediaClusterUiModel, Int) -> Color = { _, index ->
         val colors = listOf(
-            ChacColors.ClusterCard01,
-            ChacColors.ClusterCard02,
-            ChacColors.ClusterCard03,
+            ChacColors.Primary,
+            ChacColors.PointColor01,
+            ChacColors.PointColor02,
         )
         colors[index % colors.size]
     },
