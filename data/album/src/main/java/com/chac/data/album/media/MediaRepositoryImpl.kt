@@ -11,7 +11,7 @@ import com.chac.domain.album.media.model.MediaLocation
 import com.chac.domain.album.media.repository.MediaRepository
 import com.chac.domain.album.media.model.MediaSortOrder
 import com.chac.domain.album.media.model.MediaType
-import com.chac.domain.album.media.model.SaveStatus
+
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -75,11 +75,17 @@ internal class MediaRepositoryImpl @Inject constructor(
         timeBasedClusters.values.forEach { mediaInTimeCluster ->
             val locationBasedClusters = locationBasedClusteringStrategy.cluster(mediaInTimeCluster)
             locationBasedClusters.forEach { (keyTime, mediaList) ->
-                val title = getClusterTitle(mediaList)
+                val address = getClusterAddress(mediaList)
+                val formattedDate = if (mediaList.isNotEmpty()) {
+                    timeFormatProvider.formatClusterTime(mediaList.first().dateTaken)
+                } else {
+                    ""
+                }
                 val cluster = MediaCluster(
                     id = keyTime,
                     mediaList = mediaList,
-                    title = title,
+                    address = address,
+                    formattedDate = formattedDate,
                 )
                 mediaClusters.add(cluster)
                 onCluster(cluster)
@@ -115,74 +121,31 @@ internal class MediaRepositoryImpl @Inject constructor(
         val mediaList = cluster.mediaList
         if (mediaList.isEmpty()) return emptyList()
 
-        // 같은 미디어는 하나의 클러스터에만 속한다는 전제 하에 대상 클러스터만 갱신한다.
         val targetClusterId = cluster.id
-        val previousStatus = _clusteredMediaState.value
-            ?.firstOrNull { it.id == targetClusterId }
-            ?.saveStatus
-        if (previousStatus != null) {
-            // 대상 클러스터를 Saving 상태로 전환한다.
-            _clusteredMediaState.update { clusters ->
-                clusters?.map { cached ->
-                    if (cached.id == targetClusterId) {
-                        cached.copy(saveStatus = SaveStatus.Saving)
-                    } else {
-                        cached
-                    }
-                }
-            }
-        }
 
         // 앨범을 저장하고 저장된 미디어 리스트를 반환받는다.
-        val savedMedia = dataSource.saveAlbum(cluster.title, mediaList)
-
-        if (savedMedia.isEmpty()) {
-            if (previousStatus != null) {
-                // 저장 결과가 없으면 이전 상태로 되돌린다.
-                _clusteredMediaState.update { clusters ->
-                    clusters?.map { cached ->
-                        if (cached.id != targetClusterId) return@map cached
-                        if (cached.saveStatus == previousStatus) {
-                            cached
-                        } else {
-                            cached.copy(saveStatus = previousStatus)
-                        }
-                    }
-                }
-            }
-
-            return emptyList()
-        }
+        val albumTitle = "${cluster.formattedDate} ${cluster.address}".trim()
+        val savedMedia = dataSource.saveAlbum(albumTitle, mediaList)
+        if (savedMedia.isEmpty()) return emptyList()
 
         val savedIds = savedMedia.map { it.id }.toHashSet()
-        // 대상 클러스터만 저장된 항목을 제거하고 완료 상태로 전환한다.
+        // 대상 클러스터에서 저장된 항목을 제거한다.
         _clusteredMediaState.update { clusters ->
-            clusters?.map { cached ->
-                if (cached.id != targetClusterId) return@map cached
-                val filtered = cached.mediaList.filterNot { it.id in savedIds }
-                cached.copy(
-                    mediaList = filtered,
-                    saveStatus = SaveStatus.SaveCompleted,
-                )
+            clusters?.mapNotNull { cached ->
+                if (cached.id != targetClusterId) return@mapNotNull cached
+                val remaining = cached.mediaList.filterNot { it.id in savedIds }
+                if (remaining.isEmpty()) null else cached.copy(mediaList = remaining)
             }
         }
 
         return savedMedia
     }
 
-    private suspend fun getClusterTitle(mediaList: List<Media>): String {
+    private suspend fun getClusterAddress(mediaList: List<Media>): String {
         if (mediaList.isEmpty()) return ""
-        val address = getClusterCentroid(mediaList)
+        return getClusterCentroid(mediaList)
             ?.let { centroid -> reverseGeocoder.reverseGeocode(centroid).orEmpty() }
             .orEmpty()
-
-        val formattedTime = timeFormatProvider.formatClusterTime(mediaList.first().dateTaken)
-
-        return if (address.isBlank()) {
-            formattedTime
-        } else {
-            "$formattedTime $address"
-        }
     }
 
     private suspend fun getClusterCentroid(mediaList: List<Media>): MediaLocation? {

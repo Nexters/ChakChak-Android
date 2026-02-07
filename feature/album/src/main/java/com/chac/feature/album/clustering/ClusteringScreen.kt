@@ -52,7 +52,6 @@ import com.chac.feature.album.clustering.component.TotalPhotoSummary
 import com.chac.feature.album.clustering.model.ClusteringUiState
 import com.chac.feature.album.model.MediaClusterUiModel
 import com.chac.feature.album.model.MediaUiModel
-import com.chac.feature.album.model.SaveUiStatus
 
 /**
  * 클러스터링 화면 라우트
@@ -346,23 +345,23 @@ private class ClusteringUiStatePreviewProvider : PreviewParameterProvider<Cluste
     private val sampleClusters = listOf(
         MediaClusterUiModel(
             id = 1L,
-            title = "Jeju Trip",
+            address = "Jeju Trip",
+            formattedDate = "2024.01.15",
             mediaList = sampleMedia,
             thumbnailUriStrings = listOf(
                 "content://sample/0",
                 "content://sample/1",
             ),
-            saveStatus = SaveUiStatus.Default,
         ),
         MediaClusterUiModel(
             id = 2L,
-            title = "서초동",
+            address = "서초동",
+            formattedDate = "2024.03.10",
             mediaList = sampleMedia,
             thumbnailUriStrings = listOf(
                 "content://sample/0",
                 "content://sample/1",
             ),
-            saveStatus = SaveUiStatus.SaveCompleted,
         ),
     )
 

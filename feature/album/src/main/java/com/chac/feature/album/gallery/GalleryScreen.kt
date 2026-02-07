@@ -25,6 +25,7 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Surface
@@ -62,7 +63,6 @@ import com.chac.domain.album.media.model.MediaType
 import com.chac.feature.album.gallery.model.GalleryUiState
 import com.chac.feature.album.model.MediaClusterUiModel
 import com.chac.feature.album.model.MediaUiModel
-import com.chac.feature.album.model.SaveUiStatus
 
 /**
  * 갤러리 화면 라우트
@@ -140,7 +140,9 @@ private fun GalleryScreen(
 ) {
     var isExitDialogVisible by remember { mutableStateOf(false) }
     val cluster = uiState.cluster
-    val title = cluster.title
+    val title = cluster.address.ifBlank {
+        cluster.formattedDate.ifBlank { stringResource(R.string.clustering_default_album_title) }
+    }
     val mediaList = cluster.mediaList
     val selectedMediaIds = when (uiState) {
         is GalleryUiState.SomeSelected -> uiState.selectedIds
@@ -155,134 +157,148 @@ private fun GalleryScreen(
         isExitDialogVisible = true
     }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(ChacColors.Background)
-            .padding(bottom = 20.dp),
-    ) {
-        GalleryTopBar(
-            onClickBack = {
-                if (uiState is GalleryUiState.SomeSelected) {
-                    isExitDialogVisible = true
-                } else {
-                    onClickBack()
-                }
-            },
-        )
-        Spacer(modifier = Modifier.height(20.dp))
-        Row(
+    Box(modifier = Modifier.fillMaxSize()) {
+        Column(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 20.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.Top,
+                .fillMaxSize()
+                .background(ChacColors.Background)
+                .padding(bottom = 20.dp),
         ) {
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = title,
-                    style = ChacTextStyles.SubTitle01,
-                    color = ChacColors.Text01,
-                )
-                Spacer(modifier = Modifier.height(4.dp))
-                Row {
-                    Text(
-                        text = selectedCount.toString(),
-                        style = ChacTextStyles.Number,
-                        color = ChacColors.Text02,
-                    )
-                    Text(
-                        text = stringResource(R.string.gallery_slash),
-                        style = ChacTextStyles.Number,
-                        color = ChacColors.Etc,
-                        modifier = Modifier.padding(horizontal = 4.dp),
-                    )
-                    Text(
-                        text = totalCount.toString(),
-                        style = ChacTextStyles.Number,
-                        color = ChacColors.Text02,
-                    )
-                }
-            }
-            if (isAllSelected) {
-                Box(
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(16.dp))
-                        .background(color = ChacColors.BackgroundPopup)
-                        .border(width = 1.dp, color = ChacColors.Stroke01, shape = RoundedCornerShape(16.dp))
-                        .clickable {
-                            onClickSelectAll(false)
-                        }
-                        .padding(horizontal = 12.dp, vertical = 7.dp),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Text(
-                        text = stringResource(R.string.gallery_unselect_all),
-                        style = ChacTextStyles.Caption,
-                        color = ChacColors.Text02,
-                    )
-                }
-            } else {
-                Box(
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(16.dp))
-                        .background(color = ChacColors.BackgroundPopup)
-                        .clickable {
-                            onClickSelectAll(true)
-                        }
-                        .padding(horizontal = 12.dp, vertical = 7.dp),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Text(
-                        text = stringResource(R.string.gallery_select_all),
-                        style = ChacTextStyles.Caption,
-                        color = ChacColors.Text04Caption,
-                    )
-                }
-            }
-        }
-        Spacer(modifier = Modifier.height(20.dp))
-        LazyVerticalGrid(
-            columns = GridCells.Fixed(3),
-            modifier = Modifier
-                .weight(1f)
-                .fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(10.dp),
-            verticalArrangement = Arrangement.spacedBy(10.dp),
-            contentPadding = PaddingValues(horizontal = 20.dp),
-        ) {
-            items(mediaList, key = { it.id }) { media ->
-                GalleryPhotoItem(
-                    media = media,
-                    isSelected = selectedMediaIds.contains(media.id),
-                    onToggle = { onToggleMedia(media) },
-                )
-            }
-        }
-        Spacer(modifier = Modifier.height(20.dp))
-        Button(
-            onClick = onClickSave,
-            enabled = uiState is GalleryUiState.SomeSelected,
-            modifier = Modifier
-                .padding(horizontal = 20.dp)
-                .fillMaxWidth()
-                .height(54.dp),
-            shape = RoundedCornerShape(12.dp),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = ChacColors.Primary,
-                contentColor = ChacColors.TextBtn01,
-                disabledContainerColor = ChacColors.Disable,
-                disabledContentColor = ChacColors.TextBtn03,
-            ),
-        ) {
-            val buttonText = when {
-                uiState is GalleryUiState.SomeSelected -> stringResource(R.string.gallery_save_album_count, selectedCount)
-                else -> stringResource(R.string.gallery_select_prompt)
-            }
-            Text(
-                text = buttonText,
-                style = ChacTextStyles.Btn,
+            GalleryTopBar(
+                onClickBack = {
+                    if (uiState is GalleryUiState.SomeSelected) {
+                        isExitDialogVisible = true
+                    } else {
+                        onClickBack()
+                    }
+                },
             )
+            Spacer(modifier = Modifier.height(20.dp))
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 20.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.Top,
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = title,
+                        style = ChacTextStyles.SubTitle01,
+                        color = ChacColors.Text01,
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Row {
+                        Text(
+                            text = selectedCount.toString(),
+                            style = ChacTextStyles.Number,
+                            color = ChacColors.Text02,
+                        )
+                        Text(
+                            text = stringResource(R.string.gallery_slash),
+                            style = ChacTextStyles.Number,
+                            color = ChacColors.Etc,
+                            modifier = Modifier.padding(horizontal = 4.dp),
+                        )
+                        Text(
+                            text = totalCount.toString(),
+                            style = ChacTextStyles.Number,
+                            color = ChacColors.Text02,
+                        )
+                    }
+                }
+                if (isAllSelected) {
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(16.dp))
+                            .background(color = ChacColors.BackgroundPopup)
+                            .border(
+                                width = 1.dp,
+                                color = ChacColors.Stroke01,
+                                shape = RoundedCornerShape(16.dp),
+                            )
+                            .clickable { onClickSelectAll(false) }
+                            .padding(horizontal = 12.dp, vertical = 7.dp),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Text(
+                            text = stringResource(R.string.gallery_unselect_all),
+                            style = ChacTextStyles.Caption,
+                            color = ChacColors.Text02,
+                        )
+                    }
+                } else {
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(16.dp))
+                            .background(color = ChacColors.BackgroundPopup)
+                            .clickable { onClickSelectAll(true) }
+                            .padding(horizontal = 12.dp, vertical = 7.dp),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Text(
+                            text = stringResource(R.string.gallery_select_all),
+                            style = ChacTextStyles.Caption,
+                            color = ChacColors.Text04Caption,
+                        )
+                    }
+                }
+            }
+            Spacer(modifier = Modifier.height(20.dp))
+            LazyVerticalGrid(
+                columns = GridCells.Fixed(3),
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(10.dp),
+                verticalArrangement = Arrangement.spacedBy(10.dp),
+                contentPadding = PaddingValues(horizontal = 20.dp),
+            ) {
+                items(mediaList, key = { it.id }) { media ->
+                    GalleryPhotoItem(
+                        media = media,
+                        isSelected = selectedMediaIds.contains(media.id),
+                        onToggle = { onToggleMedia(media) },
+                    )
+                }
+            }
+            Spacer(modifier = Modifier.height(20.dp))
+            Button(
+                onClick = onClickSave,
+                enabled = uiState is GalleryUiState.SomeSelected,
+                modifier = Modifier
+                    .padding(horizontal = 20.dp)
+                    .fillMaxWidth()
+                    .height(54.dp),
+                shape = RoundedCornerShape(12.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = ChacColors.Primary,
+                    contentColor = ChacColors.TextBtn01,
+                    disabledContainerColor = ChacColors.Disable,
+                    disabledContentColor = ChacColors.TextBtn03,
+                ),
+            ) {
+                val buttonText = when {
+                    uiState is GalleryUiState.SomeSelected ->
+                        stringResource(R.string.gallery_save_album_count, selectedCount)
+                    else -> stringResource(R.string.gallery_select_prompt)
+                }
+                Text(
+                    text = buttonText,
+                    style = ChacTextStyles.Btn,
+                )
+            }
+        }
+
+        if (uiState is GalleryUiState.Saving) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(ChacColors.Token00000040),
+                contentAlignment = Alignment.Center,
+            ) {
+                CircularProgressIndicator(color = ChacColors.Primary)
+            }
         }
     }
 
@@ -475,7 +491,8 @@ private fun GalleryScreenPreview() {
             uiState = GalleryUiState.NoneSelected(
                 cluster = MediaClusterUiModel(
                     id = 1L,
-                    title = "Jeju Trip",
+                    address = "Jeju Trip",
+                    formattedDate = "2024.01.15",
                     mediaList = List(40) { index ->
                         MediaUiModel(
                             id = index.toLong(),
@@ -488,7 +505,6 @@ private fun GalleryScreenPreview() {
                         "content://sample/0",
                         "content://sample/1",
                     ),
-                    saveStatus = SaveUiStatus.Default,
                 ),
             ),
             onToggleMedia = {},
@@ -507,7 +523,8 @@ private fun GalleryScreenAllSelectedPreview() {
             uiState = GalleryUiState.SomeSelected(
                 cluster = MediaClusterUiModel(
                     id = 1L,
-                    title = "Jeju Trip",
+                    address = "Jeju Trip",
+                    formattedDate = "2024.01.15",
                     mediaList = List(40) { index ->
                         MediaUiModel(
                             id = index.toLong(),
@@ -520,7 +537,6 @@ private fun GalleryScreenAllSelectedPreview() {
                         "content://sample/0",
                         "content://sample/1",
                     ),
-                    saveStatus = SaveUiStatus.Default,
                 ),
                 selectedIds = (0L until 40L).toSet(),
             ),

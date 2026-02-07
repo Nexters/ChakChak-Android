@@ -8,7 +8,7 @@ import com.chac.domain.album.media.usecase.StartClusteringUseCase
 import com.chac.feature.album.clustering.model.ClusteringUiState
 import com.chac.feature.album.mapper.toUiModel
 import com.chac.feature.album.model.MediaClusterUiModel
-import com.chac.feature.album.model.SaveUiStatus
+
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -135,10 +135,10 @@ class ClusteringViewModel @Inject constructor(
     }
 
     /**
-     * 클러스터 갱신 시 썸네일과 저장 상태를 보존하도록 이전 상태를 병합한다.
+     * 클러스터 갱신 시 썸네일을 보존하도록 이전 상태를 병합한다.
      *
      * @param newClusters 최신 클러스터 목록
-     * @return 썸네일과 저장 상태가 보존된 클러스터 목록
+     * @return 썸네일이 보존된 클러스터 목록
      */
     private fun mergeThumbnails(
         newClusters: List<MediaClusterUiModel>,
@@ -150,16 +150,8 @@ class ClusteringViewModel @Inject constructor(
             val mergedThumbnails = cluster.thumbnailUriStrings.ifEmpty {
                 previous?.thumbnailUriStrings.orEmpty()
             }
-            val mergedSaveStatus = if (cluster.saveStatus != SaveUiStatus.Default) {
-                cluster.saveStatus
-            } else {
-                previous?.saveStatus ?: cluster.saveStatus
-            }
 
-            cluster.copy(
-                thumbnailUriStrings = mergedThumbnails,
-                saveStatus = mergedSaveStatus,
-            )
+            cluster.copy(thumbnailUriStrings = mergedThumbnails)
         }
     }
 }

@@ -30,9 +30,9 @@ object ChacTextStyles {
 
     val Headline02 = TextStyle(
         fontFamily = Pretendard,
-        fontWeight = FontWeight.Bold, // 700
+        fontWeight = FontWeight.SemiBold, // 600
         fontSize = 18.sp,
-        lineHeight = 21.6.sp,
+        lineHeight = 20.sp,
         letterSpacing = 0.sp,
     )
 
@@ -124,12 +124,20 @@ object ChacTextStyles {
         letterSpacing = 0.sp,
     )
 
+    val DateText = TextStyle(
+        fontFamily = Pretendard,
+        fontWeight = FontWeight.Medium, // 500
+        fontSize = 13.sp,
+        lineHeight = 13.sp,
+        letterSpacing = 0.sp,
+    )
+
     val SubNumber = TextStyle(
         fontFamily = Montserrat,
         fontWeight = FontWeight.SemiBold, // 600
-        fontSize = 13.sp,
-        lineHeight = 18.85.sp,
-        letterSpacing = 0.13.sp,
+        fontSize = 12.sp,
+        lineHeight = 17.4.sp,
+        letterSpacing = 0.12.sp,
     )
 
     val SplashName = TextStyle(

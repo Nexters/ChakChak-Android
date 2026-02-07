@@ -10,7 +10,7 @@ import com.chac.feature.album.mapper.toDomain
 import com.chac.feature.album.mapper.toUiModel
 import com.chac.feature.album.model.MediaClusterUiModel
 import com.chac.feature.album.model.MediaUiModel
-import com.chac.feature.album.model.SaveUiStatus
+
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
@@ -125,10 +125,10 @@ class GalleryViewModel @Inject constructor(
                 }
                 if (result.isSuccess) {
                     saveCompletedEventsChannel.trySend(
-                        SaveCompletedEvent(savingState.cluster.title, result.getOrNull() ?: 0),
+                        SaveCompletedEvent(savingState.cluster.address, result.getOrNull() ?: 0),
                     )
                 } else {
-                    GalleryUiState.SomeSelected(savingState.cluster, selectedIds)
+                    _uiState.value = GalleryUiState.SomeSelected(savingState.cluster, selectedIds)
                     Timber.e(result.exceptionOrNull(), "Failed to save selected media")
                 }
             } finally {
@@ -187,10 +187,10 @@ class GalleryViewModel @Inject constructor(
     companion object {
         private val EMPTY_CLUSTER = MediaClusterUiModel(
             id = 0L,
-            title = "",
+            address = "",
+            formattedDate = "",
             mediaList = emptyList(),
             thumbnailUriStrings = emptyList(),
-            saveStatus = SaveUiStatus.Default,
         )
     }
 }
