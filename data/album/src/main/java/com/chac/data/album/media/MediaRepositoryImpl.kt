@@ -11,7 +11,6 @@ import com.chac.domain.album.media.model.MediaLocation
 import com.chac.domain.album.media.repository.MediaRepository
 import com.chac.domain.album.media.model.MediaSortOrder
 import com.chac.domain.album.media.model.MediaType
-
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -49,11 +48,11 @@ internal class MediaRepositoryImpl @Inject constructor(
             return@flow
         }
 
-        val result = createClusteredMedia { cluster ->
+        createClusteredMedia { cluster ->
             emit(cluster)
+            // 클러스터링 중에도 saveAlbum()이 상태를 수정할 수 있도록 점진적으로 반영한다.
+            _clusteredMediaState.update { (it ?: emptyList()) + cluster }
         }
-
-        _clusteredMediaState.value = result
     }
 
     private suspend fun createClusteredMedia(
@@ -122,14 +121,12 @@ internal class MediaRepositoryImpl @Inject constructor(
         if (mediaList.isEmpty()) return emptyList()
 
         val targetClusterId = cluster.id
-
-        // 앨범을 저장하고 저장된 미디어 리스트를 반환받는다.
         val albumTitle = "${cluster.formattedDate} ${cluster.address}".trim()
         val savedMedia = dataSource.saveAlbum(albumTitle, mediaList)
         if (savedMedia.isEmpty()) return emptyList()
 
         val savedIds = savedMedia.map { it.id }.toHashSet()
-        // 대상 클러스터에서 저장된 항목을 제거한다.
+        // 대상 클러스터에서 저장된 항목을 제거하고, 비어 있으면 클러스터 자체를 삭제한다.
         _clusteredMediaState.update { clusters ->
             clusters?.mapNotNull { cached ->
                 if (cached.id != targetClusterId) return@mapNotNull cached

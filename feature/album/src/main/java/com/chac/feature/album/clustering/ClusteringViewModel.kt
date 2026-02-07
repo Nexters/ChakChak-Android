@@ -8,12 +8,12 @@ import com.chac.domain.album.media.usecase.StartClusteringUseCase
 import com.chac.feature.album.clustering.model.ClusteringUiState
 import com.chac.feature.album.mapper.toUiModel
 import com.chac.feature.album.model.MediaClusterUiModel
-
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.retryWhen
 import kotlinx.coroutines.launch
 import timber.log.Timber
@@ -93,8 +93,10 @@ class ClusteringViewModel @Inject constructor(
                         _uiState.value = ClusteringUiState.Loading(mergeThumbnails(updatedClusters))
                     }
 
-                // 클러스터링이 완료 되면 Completed 상태로 변경
-                _uiState.value = ClusteringUiState.Completed(currentClusters())
+                // 클러스터링 중 저장이 발생했을 수 있으므로 최신 상태를 반영한다.
+                val latestClusters = getClusteredMediaStateUseCase().first()
+                val uiClusters = mergeThumbnails(latestClusters.map { it.toUiModel() })
+                _uiState.value = ClusteringUiState.Completed(uiClusters)
             } finally {
                 clusterCollectJob = null
             }
@@ -114,12 +116,12 @@ class ClusteringViewModel @Inject constructor(
                     true
                 }
                 .collect { clusters ->
-                    // 초기 스트림 수집 중에는 중복 갱신을 피한다.
-                    if (clusterCollectJob != null) return@collect
-
                     val uiClusters = mergeThumbnails(clusters.map { it.toUiModel() })
-                    if (_uiState.value is ClusteringUiState.WithClusters) {
-                        _uiState.value = ClusteringUiState.Completed(uiClusters)
+                    // 현재 상태 타입(Loading/Completed)을 유지하면서 클러스터 목록만 갱신한다.
+                    _uiState.value = when (_uiState.value) {
+                        is ClusteringUiState.Loading -> ClusteringUiState.Loading(uiClusters)
+                        is ClusteringUiState.Completed -> ClusteringUiState.Completed(uiClusters)
+                        else -> return@collect
                     }
                 }
         }
@@ -150,7 +152,6 @@ class ClusteringViewModel @Inject constructor(
             val mergedThumbnails = cluster.thumbnailUriStrings.ifEmpty {
                 previous?.thumbnailUriStrings.orEmpty()
             }
-
             cluster.copy(thumbnailUriStrings = mergedThumbnails)
         }
     }
