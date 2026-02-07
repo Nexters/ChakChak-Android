@@ -47,7 +47,6 @@ object ChacColors {
     val PointColor01 = Color(0xFF14BCCC)
     val PointColor02 = Color(0xFFFC66FF)
 
-
     // Utility colors with alpha
     val Ffffff80 = Color(0xCCFFFFFF)
     val Ffffff40 = Color(0x66FFFFFF)
