@@ -58,11 +58,13 @@ import com.chac.feature.album.model.MediaUiModel
  *
  * @param viewModel 클러스터링 화면 ViewModel
  * @param onClickCluster 클러스터 카드 클릭 이벤트 콜백
+ * @param onClickSettings 설정 버튼 클릭 이벤트 콜백
  */
 @Composable
 fun ClusteringRoute(
     viewModel: ClusteringViewModel = hiltViewModel(),
     onClickCluster: (MediaClusterUiModel) -> Unit,
+    onClickSettings: () -> Unit,
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
@@ -105,6 +107,7 @@ fun ClusteringRoute(
     ClusteringScreen(
         uiState = uiState,
         onClickCluster = onClickCluster,
+        onClickSettings = onClickSettings,
     )
 }
 
@@ -113,11 +116,13 @@ fun ClusteringRoute(
  *
  * @param uiState 클러스터링 화면 상태
  * @param onClickCluster 클러스터 카드 클릭 이벤트 콜백
+ * @param onClickSettings 설정 버튼 클릭 이벤트 콜백
  */
 @Composable
 private fun ClusteringScreen(
     uiState: ClusteringUiState,
     onClickCluster: (MediaClusterUiModel) -> Unit,
+    onClickSettings: () -> Unit = {},
 ) {
     val context = LocalContext.current
     val clusters = (uiState as? ClusteringUiState.WithClusters)?.clusters.orEmpty()
@@ -128,7 +133,7 @@ private fun ClusteringScreen(
             .background(ChacColors.Background)
             .padding(horizontal = 20.dp),
     ) {
-        ClusteringTopBar()
+        ClusteringTopBar(onClickSettings = onClickSettings)
 
         Column(
             modifier = Modifier

@@ -46,4 +46,8 @@ sealed interface AlbumNavKey : NavKey {
         val title: String,
         val savedCount: Int,
     ) : AlbumNavKey
+
+    /** 설정 화면 */
+    @Serializable
+    data object Settings : AlbumNavKey
 }
