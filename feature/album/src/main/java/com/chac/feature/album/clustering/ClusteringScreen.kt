@@ -144,33 +144,21 @@ private fun ClusteringScreen(
                     PermissionRequiredState { moveToPermissionSetting(context) }
                 }
 
-                is ClusteringUiState.Loading -> {
+                is ClusteringUiState.WithClusters -> {
+                    val isGenerating = uiState is ClusteringUiState.Loading
+
                     CommonSectionOfPermissionGranted(
-                        isGenerating = true,
+                        isGenerating = isGenerating,
                         clusters = clusters,
                     )
 
                     Box(Modifier.weight(1f)) {
                         if (clusters.isEmpty()) {
-                            LoadingState()
-                        } else {
-                            ClusterList(
-                                clusters = clusters,
-                                onClickCluster = onClickCluster,
-                            )
-                        }
-                    }
-                }
-
-                is ClusteringUiState.Completed -> {
-                    CommonSectionOfPermissionGranted(
-                        isGenerating = false,
-                        clusters = clusters,
-                    )
-
-                    Box(Modifier.weight(1f)) {
-                        if (clusters.isEmpty()) {
-                            EmptyState()
+                            if (isGenerating) {
+                                LoadingState()
+                            } else {
+                                EmptyState()
+                            }
                         } else {
                             ClusterList(
                                 clusters = clusters,
