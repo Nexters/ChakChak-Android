@@ -5,6 +5,7 @@ plugins {
     alias(libs.plugins.chac.android.application)
     alias(libs.plugins.chac.android.compose)
     alias(libs.plugins.chac.android.hilt)
+    alias(libs.plugins.oss.licenses)
 }
 
 android {
@@ -54,4 +55,7 @@ dependencies {
     // Hilt work
     implementation(libs.hilt.ext.work)
     ksp(libs.hilt.ext.compiler)
+
+    // OSS Licenses
+    implementation(libs.play.services.oss.licenses)
 }

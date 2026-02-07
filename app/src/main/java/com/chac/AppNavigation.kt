@@ -49,6 +49,9 @@ fun ChacAppNavigation() {
                     onClickMediaPreview = { cluster, mediaId ->
                         backStack.add(AlbumNavKey.MediaPreview(cluster, mediaId))
                     },
+                    onClickSettings = {
+                        backStack.add(AlbumNavKey.Settings)
+                    },
                     onSaveCompleted = { title, savedCount ->
                         backStack.add(AlbumNavKey.SaveCompleted(title, savedCount))
                     },

@@ -20,6 +20,9 @@ dependencies {
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.kotlinx.serialization.json)
 
+    // OSS Licenses
+    implementation(libs.play.services.oss.licenses)
+
     testImplementation(libs.junit)
     testImplementation(libs.kotlinx.serialization.json)
 }
