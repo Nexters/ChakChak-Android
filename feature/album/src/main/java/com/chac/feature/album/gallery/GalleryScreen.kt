@@ -62,7 +62,7 @@ import com.chac.domain.album.media.model.MediaType
 import com.chac.feature.album.gallery.model.GalleryUiState
 import com.chac.feature.album.model.MediaClusterUiModel
 import com.chac.feature.album.model.MediaUiModel
-import com.chac.feature.album.model.SaveUiStatus
+
 
 /**
  * 갤러리 화면 라우트
@@ -488,7 +488,7 @@ private fun GalleryScreenPreview() {
                         "content://sample/0",
                         "content://sample/1",
                     ),
-                    saveStatus = SaveUiStatus.Default,
+
                 ),
             ),
             onToggleMedia = {},
@@ -520,7 +520,7 @@ private fun GalleryScreenAllSelectedPreview() {
                         "content://sample/0",
                         "content://sample/1",
                     ),
-                    saveStatus = SaveUiStatus.Default,
+
                 ),
                 selectedIds = (0L until 40L).toSet(),
             ),

@@ -1,7 +1,6 @@
 package com.chac.feature.album.clustering.component
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -38,7 +37,6 @@ import androidx.compose.ui.zIndex
 import com.chac.core.designsystem.ui.component.ChacImage
 import com.chac.core.designsystem.ui.icon.ArrowRight
 import com.chac.core.designsystem.ui.icon.ChacIcons
-import com.chac.core.designsystem.ui.icon.SaveCompletedBadge
 import com.chac.core.designsystem.ui.theme.ChacColors
 import com.chac.core.designsystem.ui.theme.ChacTextStyles
 import com.chac.core.designsystem.ui.theme.ChacTheme
@@ -46,7 +44,7 @@ import com.chac.core.resources.R
 import com.chac.domain.album.media.model.MediaType
 import com.chac.feature.album.model.MediaClusterUiModel
 import com.chac.feature.album.model.MediaUiModel
-import com.chac.feature.album.model.SaveUiStatus
+
 
 /**
  * 클러스터 목록을 표시한다
@@ -100,22 +98,13 @@ private fun ClusterCard(
     modifier: Modifier = Modifier,
     onClick: () -> Unit,
 ) {
-    val isDimmed = cluster.saveStatus != SaveUiStatus.Default
-    val saveStatusText = when (cluster.saveStatus) {
-        SaveUiStatus.Default -> null
-        SaveUiStatus.SaveCompleted -> stringResource(R.string.clustering_save_completed_badge)
-        SaveUiStatus.Saving -> stringResource(R.string.clustering_saveing_badge)
-    }
     val cardShape = RoundedCornerShape(16.dp)
 
     Box(modifier = modifier.fillMaxWidth()) {
         Card(
             modifier = Modifier
                 .fillMaxWidth()
-                .clickable(
-                    enabled = !isDimmed,
-                    onClick = onClick,
-                ),
+                .clickable(onClick = onClick),
             colors = CardDefaults.cardColors(
                 containerColor = backgroundColor,
             ),
@@ -149,30 +138,9 @@ private fun ClusterCard(
 
                     Spacer(modifier = Modifier.height(12.dp))
 
-                    SavePartialPillButton(
-                        enabled = !isDimmed,
-                        onClick = onClick,
-                    )
+                    SavePartialPillButton(onClick = onClick)
                 }
             }
-        }
-
-        if (isDimmed) {
-            Box(
-                modifier = Modifier
-                    .matchParentSize()
-                    .background(ChacColors.Token00000040, cardShape),
-            )
-        }
-
-        if (saveStatusText != null) {
-            SaveStatusdBadge(
-                text = saveStatusText,
-                modifier = Modifier
-                    .align(Alignment.TopStart)
-                    .padding(12.dp)
-                    .zIndex(1f),
-            )
         }
     }
 }
@@ -185,7 +153,6 @@ private fun ClusterCard(
  */
 @Composable
 private fun SavePartialPillButton(
-    enabled: Boolean,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -194,10 +161,7 @@ private fun SavePartialPillButton(
             .height(40.dp)
             .clip(CircleShape)
             .background(ChacColors.Ffffff80)
-            .clickable(
-                enabled = enabled,
-                onClick = onClick,
-            )
+            .clickable(onClick = onClick)
             .padding(horizontal = 28.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Center,
@@ -214,39 +178,6 @@ private fun SavePartialPillButton(
             imageVector = ChacIcons.ArrowRight,
             contentDescription = null,
             tint = ChacColors.TextBtn02,
-        )
-    }
-}
-
-@Composable
-private fun SaveStatusdBadge(
-    text: String,
-    modifier: Modifier = Modifier,
-) {
-    Row(
-        modifier = modifier
-            .border(
-                width = 1.dp,
-                color = ChacColors.Stroke01,
-                shape = CircleShape,
-            )
-            .clip(CircleShape)
-            .background(ChacColors.Background)
-            .padding(horizontal = 12.dp, vertical = 7.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(6.dp),
-    ) {
-        Icon(
-            imageVector = ChacIcons.SaveCompletedBadge,
-            contentDescription = null,
-            modifier = Modifier.size(16.dp),
-            tint = Color.Unspecified,
-        )
-
-        Text(
-            text = text,
-            style = ChacTextStyles.Caption,
-            color = ChacColors.Sub01,
         )
     }
 }
@@ -341,7 +272,6 @@ private fun ClusterListPreview() {
                     "content://sample/0",
                     "content://sample/1",
                 ),
-                saveStatus = SaveUiStatus.Default,
             ),
             MediaClusterUiModel(
                 id = 2L,
@@ -351,7 +281,6 @@ private fun ClusterListPreview() {
                     "content://sample/0",
                     "content://sample/1",
                 ),
-                saveStatus = SaveUiStatus.Saving,
             ),
             MediaClusterUiModel(
                 id = 3L,
@@ -361,7 +290,6 @@ private fun ClusterListPreview() {
                     "content://sample/0",
                     "content://sample/1",
                 ),
-                saveStatus = SaveUiStatus.SaveCompleted,
             ),
         )
 

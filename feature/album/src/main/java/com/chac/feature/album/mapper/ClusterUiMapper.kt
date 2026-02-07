@@ -1,8 +1,6 @@
 package com.chac.feature.album.mapper
 
-import com.chac.domain.album.media.model.SaveStatus
 import com.chac.domain.album.media.model.MediaCluster
-import com.chac.feature.album.model.SaveUiStatus
 import com.chac.feature.album.model.MediaClusterUiModel
 
 /**
@@ -19,11 +17,6 @@ internal fun MediaCluster.toUiModel(): MediaClusterUiModel = MediaClusterUiModel
         mediaList.getOrNull(0)?.uriString,
         mediaList.getOrNull(1)?.uriString,
     ),
-    saveStatus = when (saveStatus) {
-        SaveStatus.Default -> SaveUiStatus.Default
-        SaveStatus.Saving -> SaveUiStatus.Saving
-        SaveStatus.SaveCompleted -> SaveUiStatus.SaveCompleted
-    },
 )
 
 /**

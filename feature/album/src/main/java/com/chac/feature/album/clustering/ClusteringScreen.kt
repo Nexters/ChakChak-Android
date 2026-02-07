@@ -52,7 +52,7 @@ import com.chac.feature.album.clustering.component.TotalPhotoSummary
 import com.chac.feature.album.clustering.model.ClusteringUiState
 import com.chac.feature.album.model.MediaClusterUiModel
 import com.chac.feature.album.model.MediaUiModel
-import com.chac.feature.album.model.SaveUiStatus
+
 
 /**
  * 클러스터링 화면 라우트
@@ -352,7 +352,6 @@ private class ClusteringUiStatePreviewProvider : PreviewParameterProvider<Cluste
                 "content://sample/0",
                 "content://sample/1",
             ),
-            saveStatus = SaveUiStatus.Default,
         ),
         MediaClusterUiModel(
             id = 2L,
@@ -362,7 +361,6 @@ private class ClusteringUiStatePreviewProvider : PreviewParameterProvider<Cluste
                 "content://sample/0",
                 "content://sample/1",
             ),
-            saveStatus = SaveUiStatus.SaveCompleted,
         ),
     )
 

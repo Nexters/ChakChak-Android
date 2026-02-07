@@ -10,7 +10,7 @@ import com.chac.feature.album.mapper.toDomain
 import com.chac.feature.album.mapper.toUiModel
 import com.chac.feature.album.model.MediaClusterUiModel
 import com.chac.feature.album.model.MediaUiModel
-import com.chac.feature.album.model.SaveUiStatus
+
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
@@ -190,7 +190,6 @@ class GalleryViewModel @Inject constructor(
             title = "",
             mediaList = emptyList(),
             thumbnailUriStrings = emptyList(),
-            saveStatus = SaveUiStatus.Default,
         )
     }
 }
