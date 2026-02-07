@@ -52,9 +52,13 @@ dependencies {
     implementation(libs.androidx.core.splashscreen)
     implementation(libs.timber)
 
-    // Hilt work
+    // Hilt
+    implementation(libs.hilt.navigation.compose)
     implementation(libs.hilt.ext.work)
     ksp(libs.hilt.ext.compiler)
+
+    // DataStore
+    implementation(libs.androidx.datastore.preferences)
 
     // OSS Licenses
     implementation(libs.play.services.oss.licenses)
