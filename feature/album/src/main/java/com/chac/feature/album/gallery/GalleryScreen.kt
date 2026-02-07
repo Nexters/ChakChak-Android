@@ -25,6 +25,7 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Surface
@@ -156,134 +157,148 @@ private fun GalleryScreen(
         isExitDialogVisible = true
     }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(ChacColors.Background)
-            .padding(bottom = 20.dp),
-    ) {
-        GalleryTopBar(
-            onClickBack = {
-                if (uiState is GalleryUiState.SomeSelected) {
-                    isExitDialogVisible = true
-                } else {
-                    onClickBack()
-                }
-            },
-        )
-        Spacer(modifier = Modifier.height(20.dp))
-        Row(
+    Box(modifier = Modifier.fillMaxSize()) {
+        Column(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 20.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.Top,
+                .fillMaxSize()
+                .background(ChacColors.Background)
+                .padding(bottom = 20.dp),
         ) {
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = title,
-                    style = ChacTextStyles.SubTitle01,
-                    color = ChacColors.Text01,
-                )
-                Spacer(modifier = Modifier.height(4.dp))
-                Row {
-                    Text(
-                        text = selectedCount.toString(),
-                        style = ChacTextStyles.Number,
-                        color = ChacColors.Text02,
-                    )
-                    Text(
-                        text = stringResource(R.string.gallery_slash),
-                        style = ChacTextStyles.Number,
-                        color = ChacColors.Etc,
-                        modifier = Modifier.padding(horizontal = 4.dp),
-                    )
-                    Text(
-                        text = totalCount.toString(),
-                        style = ChacTextStyles.Number,
-                        color = ChacColors.Text02,
-                    )
-                }
-            }
-            if (isAllSelected) {
-                Box(
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(16.dp))
-                        .background(color = ChacColors.BackgroundPopup)
-                        .border(width = 1.dp, color = ChacColors.Stroke01, shape = RoundedCornerShape(16.dp))
-                        .clickable {
-                            onClickSelectAll(false)
-                        }
-                        .padding(horizontal = 12.dp, vertical = 7.dp),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Text(
-                        text = stringResource(R.string.gallery_unselect_all),
-                        style = ChacTextStyles.Caption,
-                        color = ChacColors.Text02,
-                    )
-                }
-            } else {
-                Box(
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(16.dp))
-                        .background(color = ChacColors.BackgroundPopup)
-                        .clickable {
-                            onClickSelectAll(true)
-                        }
-                        .padding(horizontal = 12.dp, vertical = 7.dp),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Text(
-                        text = stringResource(R.string.gallery_select_all),
-                        style = ChacTextStyles.Caption,
-                        color = ChacColors.Text04Caption,
-                    )
-                }
-            }
-        }
-        Spacer(modifier = Modifier.height(20.dp))
-        LazyVerticalGrid(
-            columns = GridCells.Fixed(3),
-            modifier = Modifier
-                .weight(1f)
-                .fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(10.dp),
-            verticalArrangement = Arrangement.spacedBy(10.dp),
-            contentPadding = PaddingValues(horizontal = 20.dp),
-        ) {
-            items(mediaList, key = { it.id }) { media ->
-                GalleryPhotoItem(
-                    media = media,
-                    isSelected = selectedMediaIds.contains(media.id),
-                    onToggle = { onToggleMedia(media) },
-                )
-            }
-        }
-        Spacer(modifier = Modifier.height(20.dp))
-        Button(
-            onClick = onClickSave,
-            enabled = uiState is GalleryUiState.SomeSelected,
-            modifier = Modifier
-                .padding(horizontal = 20.dp)
-                .fillMaxWidth()
-                .height(54.dp),
-            shape = RoundedCornerShape(12.dp),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = ChacColors.Primary,
-                contentColor = ChacColors.TextBtn01,
-                disabledContainerColor = ChacColors.Disable,
-                disabledContentColor = ChacColors.TextBtn03,
-            ),
-        ) {
-            val buttonText = when {
-                uiState is GalleryUiState.SomeSelected -> stringResource(R.string.gallery_save_album_count, selectedCount)
-                else -> stringResource(R.string.gallery_select_prompt)
-            }
-            Text(
-                text = buttonText,
-                style = ChacTextStyles.Btn,
+            GalleryTopBar(
+                onClickBack = {
+                    if (uiState is GalleryUiState.SomeSelected) {
+                        isExitDialogVisible = true
+                    } else {
+                        onClickBack()
+                    }
+                },
             )
+            Spacer(modifier = Modifier.height(20.dp))
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 20.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.Top,
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = title,
+                        style = ChacTextStyles.SubTitle01,
+                        color = ChacColors.Text01,
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Row {
+                        Text(
+                            text = selectedCount.toString(),
+                            style = ChacTextStyles.Number,
+                            color = ChacColors.Text02,
+                        )
+                        Text(
+                            text = stringResource(R.string.gallery_slash),
+                            style = ChacTextStyles.Number,
+                            color = ChacColors.Etc,
+                            modifier = Modifier.padding(horizontal = 4.dp),
+                        )
+                        Text(
+                            text = totalCount.toString(),
+                            style = ChacTextStyles.Number,
+                            color = ChacColors.Text02,
+                        )
+                    }
+                }
+                if (isAllSelected) {
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(16.dp))
+                            .background(color = ChacColors.BackgroundPopup)
+                            .border(
+                                width = 1.dp,
+                                color = ChacColors.Stroke01,
+                                shape = RoundedCornerShape(16.dp),
+                            )
+                            .clickable { onClickSelectAll(false) }
+                            .padding(horizontal = 12.dp, vertical = 7.dp),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Text(
+                            text = stringResource(R.string.gallery_unselect_all),
+                            style = ChacTextStyles.Caption,
+                            color = ChacColors.Text02,
+                        )
+                    }
+                } else {
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(16.dp))
+                            .background(color = ChacColors.BackgroundPopup)
+                            .clickable { onClickSelectAll(true) }
+                            .padding(horizontal = 12.dp, vertical = 7.dp),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Text(
+                            text = stringResource(R.string.gallery_select_all),
+                            style = ChacTextStyles.Caption,
+                            color = ChacColors.Text04Caption,
+                        )
+                    }
+                }
+            }
+            Spacer(modifier = Modifier.height(20.dp))
+            LazyVerticalGrid(
+                columns = GridCells.Fixed(3),
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(10.dp),
+                verticalArrangement = Arrangement.spacedBy(10.dp),
+                contentPadding = PaddingValues(horizontal = 20.dp),
+            ) {
+                items(mediaList, key = { it.id }) { media ->
+                    GalleryPhotoItem(
+                        media = media,
+                        isSelected = selectedMediaIds.contains(media.id),
+                        onToggle = { onToggleMedia(media) },
+                    )
+                }
+            }
+            Spacer(modifier = Modifier.height(20.dp))
+            Button(
+                onClick = onClickSave,
+                enabled = uiState is GalleryUiState.SomeSelected,
+                modifier = Modifier
+                    .padding(horizontal = 20.dp)
+                    .fillMaxWidth()
+                    .height(54.dp),
+                shape = RoundedCornerShape(12.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = ChacColors.Primary,
+                    contentColor = ChacColors.TextBtn01,
+                    disabledContainerColor = ChacColors.Disable,
+                    disabledContentColor = ChacColors.TextBtn03,
+                ),
+            ) {
+                val buttonText = when {
+                    uiState is GalleryUiState.SomeSelected ->
+                        stringResource(R.string.gallery_save_album_count, selectedCount)
+                    else -> stringResource(R.string.gallery_select_prompt)
+                }
+                Text(
+                    text = buttonText,
+                    style = ChacTextStyles.Btn,
+                )
+            }
+        }
+
+        if (uiState is GalleryUiState.Saving) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(ChacColors.Token00000040),
+                contentAlignment = Alignment.Center,
+            ) {
+                CircularProgressIndicator(color = ChacColors.Primary)
+            }
         }
     }
 

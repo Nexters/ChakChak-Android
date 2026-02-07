@@ -128,7 +128,7 @@ class GalleryViewModel @Inject constructor(
                         SaveCompletedEvent(savingState.cluster.address, result.getOrNull() ?: 0),
                     )
                 } else {
-                    GalleryUiState.SomeSelected(savingState.cluster, selectedIds)
+                    _uiState.value = GalleryUiState.SomeSelected(savingState.cluster, selectedIds)
                     Timber.e(result.exceptionOrNull(), "Failed to save selected media")
                 }
             } finally {
