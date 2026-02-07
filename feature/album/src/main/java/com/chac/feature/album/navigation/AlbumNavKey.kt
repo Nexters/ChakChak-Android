@@ -50,4 +50,8 @@ sealed interface AlbumNavKey : NavKey {
     /** 설정 화면 */
     @Serializable
     data object Settings : AlbumNavKey
+
+    /** 온보딩 화면 */
+    @Serializable
+    data object Onboarding : AlbumNavKey
 }

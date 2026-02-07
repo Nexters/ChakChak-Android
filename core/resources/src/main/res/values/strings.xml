@@ -35,4 +35,14 @@
     <string name="settings_back_cd">뒤로가기</string>
     <string name="settings_oss_licenses">오픈소스 라이선스</string>
     <string name="settings_privacy_policy">개인정보 처리방침</string>
+    <string name="settings_onboarding">온보딩 다시보기</string>
+    <string name="onboarding_start">시작하기</string>
+    <string name="onboarding_next">다음</string>
+    <string name="onboarding_skip">건너뛰기</string>
+    <string name="onboarding_page1_title">사진을 자동으로 정리해요</string>
+    <string name="onboarding_page1_description">위치와 시간을 기반으로\n사진을 자동으로 분류합니다.</string>
+    <string name="onboarding_page2_title">앨범을 한눈에 확인해요</string>
+    <string name="onboarding_page2_description">분류된 사진을 앨범별로\n한눈에 확인할 수 있습니다.</string>
+    <string name="onboarding_page3_title">갤러리에 바로 저장해요</string>
+    <string name="onboarding_page3_description">원하는 사진을 선택해서\n갤러리에 저장할 수 있습니다.</string>
 </resources>
