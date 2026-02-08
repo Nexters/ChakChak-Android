@@ -43,11 +43,11 @@ fun ChacAppNavigation() {
             modifier = Modifier.padding(innerPadding),
             entryProvider = entryProvider {
                 albumEntries(
-                    onClickCluster = { cluster ->
-                        backStack.add(AlbumNavKey.Gallery(cluster))
+                    onClickCluster = { clusterId ->
+                        backStack.add(AlbumNavKey.Gallery(clusterId))
                     },
-                    onClickMediaPreview = { cluster, mediaId ->
-                        backStack.add(AlbumNavKey.MediaPreview(cluster, mediaId))
+                    onLongClickMediaItem = { clusterId, mediaId ->
+                        backStack.add(AlbumNavKey.MediaPreview(clusterId, mediaId))
                     },
                     onClickSettings = {
                         backStack.add(AlbumNavKey.Settings)

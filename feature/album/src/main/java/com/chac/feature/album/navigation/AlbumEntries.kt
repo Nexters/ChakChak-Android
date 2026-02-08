@@ -5,15 +5,14 @@ import androidx.navigation3.runtime.NavKey
 import com.chac.feature.album.clustering.ClusteringRoute
 import com.chac.feature.album.gallery.GalleryRoute
 import com.chac.feature.album.gallery.component.MediaPreviewRoute
-import com.chac.feature.album.model.MediaClusterUiModel
 import com.chac.feature.album.save.SaveCompletedRoute
 import com.chac.feature.album.settings.SettingsRoute
 
 /**
  * 앨범 목적지를 Navigation3 entry provider에 등록한다
  *
- * @param onClickCluster 클러스터 카드 클릭 이벤트 콜백
- * @param onClickMediaPreview 미디어 미리보기 화면 이동 콜백
+ * @param onClickCluster 클러스터 카드 클릭 이벤트 콜백 (clusterId)
+ * @param onLongClickMediaItem 미디어 아이템의 롱클릭 이벤트 콜백
  * @param onClickSettings 설정 화면 이동 콜백
  * @param onSaveCompleted 저장 완료 이후 동작을 전달하는 콜백
  * @param onCloseSaveCompleted 저장 완료 화면 닫기 버튼 클릭 이벤트 콜백
@@ -21,8 +20,8 @@ import com.chac.feature.album.settings.SettingsRoute
  * @param onClickBack 뒤로가기 버튼 클릭 이벤트 콜백
  */
 fun EntryProviderScope<NavKey>.albumEntries(
-    onClickCluster: (MediaClusterUiModel) -> Unit,
-    onClickMediaPreview: (MediaClusterUiModel, Long) -> Unit,
+    onClickCluster: (Long) -> Unit,
+    onLongClickMediaItem: (Long, Long) -> Unit,
     onClickSettings: () -> Unit,
     onSaveCompleted: (String, Int) -> Unit,
     onCloseSaveCompleted: () -> Unit,
@@ -37,15 +36,15 @@ fun EntryProviderScope<NavKey>.albumEntries(
     }
     entry<AlbumNavKey.Gallery> { key ->
         GalleryRoute(
-            cluster = key.cluster,
+            clusterId = key.clusterId,
             onSaveCompleted = onSaveCompleted,
-            onClickMediaPreview = onClickMediaPreview,
+            onLongClickMediaItem = onLongClickMediaItem,
             onClickBack = onClickBack,
         )
     }
     entry<AlbumNavKey.MediaPreview> { key ->
         MediaPreviewRoute(
-            cluster = key.cluster,
+            clusterId = key.clusterId,
             mediaId = key.mediaId,
             onDismiss = onClickBack,
         )

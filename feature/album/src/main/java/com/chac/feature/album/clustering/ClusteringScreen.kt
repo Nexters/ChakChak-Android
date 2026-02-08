@@ -63,7 +63,7 @@ import com.chac.feature.album.model.MediaUiModel
 @Composable
 fun ClusteringRoute(
     viewModel: ClusteringViewModel = hiltViewModel(),
-    onClickCluster: (MediaClusterUiModel) -> Unit,
+    onClickCluster: (Long) -> Unit,
     onClickSettings: () -> Unit,
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -121,7 +121,7 @@ fun ClusteringRoute(
 @Composable
 private fun ClusteringScreen(
     uiState: ClusteringUiState,
-    onClickCluster: (MediaClusterUiModel) -> Unit,
+    onClickCluster: (Long) -> Unit,
     onClickSettings: () -> Unit = {},
 ) {
     val context = LocalContext.current

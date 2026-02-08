@@ -1,7 +1,6 @@
 package com.chac.feature.album.navigation
 
 import androidx.navigation3.runtime.NavKey
-import com.chac.feature.album.model.MediaClusterUiModel
 import kotlinx.serialization.Serializable
 
 /** 앨범 기능에서 사용하는 NavKey 정의 */
@@ -14,24 +13,22 @@ sealed interface AlbumNavKey : NavKey {
     /**
      * 갤러리 화면
      *
-     * @param cluster 갤러리에 표시할 클러스터
+     * @param clusterId 갤러리에 표시할 클러스터 ID
      */
     @Serializable
     data class Gallery(
-        val cluster: MediaClusterUiModel,
+        val clusterId: Long,
     ) : AlbumNavKey
-
-    // TODO: Gallery와 함께 cluster 대신 clusterId로 조회하는 방식으로 전환
 
     /**
      * 미디어 미리보기 화면
      *
-     * @param cluster 클러스터
+     * @param clusterId 클러스터 ID
      * @param mediaId 최초 표시할 미디어 식별자
      */
     @Serializable
     data class MediaPreview(
-        val cluster: MediaClusterUiModel,
+        val clusterId: Long,
         val mediaId: Long,
     ) : AlbumNavKey
 

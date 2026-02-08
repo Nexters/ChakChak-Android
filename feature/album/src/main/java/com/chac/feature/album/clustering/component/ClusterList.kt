@@ -71,7 +71,7 @@ fun ClusterList(
         )
         colors[index % colors.size]
     },
-    onClickCluster: (MediaClusterUiModel) -> Unit,
+    onClickCluster: (Long) -> Unit,
 ) {
     val listState = rememberLazyListState()
 
@@ -92,7 +92,7 @@ fun ClusterList(
             ClusterCard(
                 cluster = cluster,
                 backgroundColor = clusterCardBackgroundColor(cluster, index),
-                onClick = { onClickCluster(cluster) },
+                onClick = { onClickCluster(cluster.id) },
             )
         }
     }

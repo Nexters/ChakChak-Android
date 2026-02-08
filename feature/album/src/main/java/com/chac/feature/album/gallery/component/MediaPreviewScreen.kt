@@ -39,26 +39,25 @@ import com.chac.core.designsystem.ui.theme.ChacColors
 import com.chac.core.designsystem.ui.theme.ChacTextStyles
 import com.chac.core.designsystem.ui.theme.ChacTheme
 import com.chac.domain.album.media.model.MediaType
-import com.chac.feature.album.model.MediaClusterUiModel
 import com.chac.feature.album.model.MediaUiModel
 
 /**
  * 미디어 미리보기 화면 라우트
  *
- * @param cluster 클러스터
+ * @param clusterId 클러스터 ID
  * @param mediaId 최초 표시할 미디어 식별자
  * @param viewModel 미리보기 화면 뷰모델
  * @param onDismiss 닫기 콜백
  */
 @Composable
 fun MediaPreviewRoute(
-    cluster: MediaClusterUiModel,
+    clusterId: Long,
     mediaId: Long,
     viewModel: MediaPreviewViewModel = hiltViewModel(),
     onDismiss: () -> Unit,
 ) {
-    LaunchedEffect(viewModel) {
-        viewModel.initialize(cluster, mediaId)
+    LaunchedEffect(viewModel, clusterId, mediaId) {
+        viewModel.initialize(clusterId, mediaId)
     }
 
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()

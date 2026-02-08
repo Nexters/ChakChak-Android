@@ -42,6 +42,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -71,17 +72,18 @@ import com.chac.feature.album.model.MediaUiModel
 /**
  * 갤러리 화면 라우트
  *
- * @param cluster 화면에 표시할 클러스터
+ * @param clusterId 화면에 표시할 클러스터 ID
  * @param viewModel 갤러리 화면의 뷰모델
  * @param onSaveCompleted 저장 완료 이후 동작을 전달하는 콜백
+ * @param onLongClickMediaItem 미디어 아이템의 롱클릭 이벤트 콜백
  * @param onClickBack 뒤로가기 버튼 클릭 이벤트 콜백
  */
 @Composable
 fun GalleryRoute(
-    cluster: MediaClusterUiModel,
+    clusterId: Long,
     viewModel: GalleryViewModel = hiltViewModel(),
     onSaveCompleted: (String, Int) -> Unit,
-    onClickMediaPreview: (MediaClusterUiModel, Long) -> Unit,
+    onLongClickMediaItem: (Long, Long) -> Unit,
     onClickBack: () -> Unit,
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -91,8 +93,8 @@ fun GalleryRoute(
         onGranted = { viewModel.saveSelectedMedia() },
     )
 
-    LaunchedEffect(viewModel) {
-        viewModel.initialize(cluster)
+    LaunchedEffect(viewModel, clusterId) {
+        viewModel.initialize(clusterId)
 
         viewModel.saveCompletedEvents.collect { event ->
             onSaveCompleted(event.title, event.savedCount)
@@ -101,6 +103,7 @@ fun GalleryRoute(
 
     GalleryScreen(
         uiState = uiState,
+        clusterId = clusterId,
         onToggleMedia = viewModel::toggleSelection,
         onClickSelectAll = { selected: Boolean ->
             if (selected) {
@@ -122,7 +125,7 @@ fun GalleryRoute(
 
             writeRequestLauncher(intentSender)
         },
-        onClickMediaPreview = onClickMediaPreview,
+        onLongClickMediaItem = onLongClickMediaItem,
         onClickBack = onClickBack,
     )
 }
@@ -134,16 +137,17 @@ fun GalleryRoute(
  * @param onToggleMedia 미디어 선택 상태 토글 콜백
  * @param onClickSelectAll 전체 선택 버튼 클릭 이벤트 콜백
  * @param onClickSave 저장 버튼 클릭 이벤트 콜백
- * @param onClickMediaPreview 미디어 미리보기 화면 이동 콜백
+ * @param onLongClickMediaItem 미디어 아이템의 롱클릭 이벤트 콜백
  * @param onClickBack 뒤로가기 버튼 클릭 이벤트 콜백
  */
 @Composable
 private fun GalleryScreen(
     uiState: GalleryUiState,
+    clusterId: Long,
     onToggleMedia: (MediaUiModel) -> Unit,
     onClickSelectAll: (Boolean) -> Unit,
     onClickSave: () -> Unit,
-    onClickMediaPreview: (MediaClusterUiModel, Long) -> Unit,
+    onLongClickMediaItem: (Long, Long) -> Unit,
     onClickBack: () -> Unit,
 ) {
     var isExitDialogVisible by remember { mutableStateOf(false) }
@@ -276,7 +280,7 @@ private fun GalleryScreen(
                         isSelected = selectedMediaIds.contains(media.id),
                         onToggle = { onToggleMedia(media) },
                         onLongClick = {
-                            onClickMediaPreview(cluster, media.id)
+                            onLongClickMediaItem(clusterId, media.id)
                         },
                     )
                 }
@@ -505,7 +509,7 @@ private fun GalleryPhotoItem(
                 .align(Alignment.BottomEnd)
                 .padding(6.dp)
                 .size(20.dp),
-            tint = androidx.compose.ui.graphics.Color.Unspecified,
+            tint = Color.Unspecified,
         )
     }
 }
@@ -534,10 +538,11 @@ private fun GalleryScreenPreview() {
                     ),
                 ),
             ),
+            clusterId = 1L,
             onToggleMedia = {},
             onClickSelectAll = {},
             onClickSave = {},
-            onClickMediaPreview = { _, _ -> },
+            onLongClickMediaItem = { _, _ -> },
             onClickBack = {},
         )
     }
@@ -568,10 +573,11 @@ private fun GalleryScreenAllSelectedPreview() {
                 ),
                 selectedIds = (0L until 40L).toSet(),
             ),
+            clusterId = 1L,
             onToggleMedia = {},
             onClickSelectAll = {},
             onClickSave = {},
-            onClickMediaPreview = { _, _ -> },
+            onLongClickMediaItem = { _, _ -> },
             onClickBack = {},
         )
     }

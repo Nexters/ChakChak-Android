@@ -17,6 +17,7 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.retryWhen
 import kotlinx.coroutines.flow.update
@@ -51,13 +52,19 @@ class GalleryViewModel @Inject constructor(
     /**
      * 최초 상태값을 초기화한다.
      *
-     * @param cluster 화면에 표시할 클러스터
+     * @param clusterId 화면에 표시할 클러스터 ID
      */
-    fun initialize(cluster: MediaClusterUiModel) {
-        if (_uiState.value.cluster != EMPTY_CLUSTER) return
+    fun initialize(clusterId: Long) {
+        if (this.clusterId != null) return
 
-        clusterId = cluster.id
-        _uiState.value = GalleryUiState.NoneSelected(cluster = cluster)
+        this.clusterId = clusterId
+
+        // 현재 스냅샷에 이미 값이 있으면 즉시 세팅하고, 이후 변경은 observeClusterState()가 동기화한다.
+        viewModelScope.launch {
+            val clusters = getClusteredMediaStateUseCase().first()
+            val cluster = clusters.firstOrNull { it.id == clusterId }?.toUiModel() ?: return@launch
+            _uiState.value = GalleryUiState.NoneSelected(cluster = cluster)
+        }
     }
 
     /**
@@ -167,7 +174,8 @@ class GalleryViewModel @Inject constructor(
                     true
                 }
                 .collect { clusters ->
-                    val updatedCluster = clusters.firstOrNull { it.id == clusterId }?.toUiModel()
+                    val id = clusterId ?: return@collect
+                    val updatedCluster = clusters.firstOrNull { it.id == id }?.toUiModel()
 
                     _uiState.update { current ->
                         val newCluster = when {
