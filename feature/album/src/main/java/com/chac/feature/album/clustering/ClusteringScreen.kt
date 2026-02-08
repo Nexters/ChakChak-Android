@@ -57,12 +57,14 @@ import com.chac.feature.album.model.MediaUiModel
  * 클러스터링 화면 라우트
  *
  * @param viewModel 클러스터링 화면 ViewModel
+ * @param onClickAllPhotos '모든 사진' 버튼 클릭 이벤트 콜백
  * @param onClickCluster 클러스터 카드 클릭 이벤트 콜백
  * @param onClickSettings 설정 버튼 클릭 이벤트 콜백
  */
 @Composable
 fun ClusteringRoute(
     viewModel: ClusteringViewModel = hiltViewModel(),
+    onClickAllPhotos: () -> Unit,
     onClickCluster: (MediaClusterUiModel) -> Unit,
     onClickSettings: () -> Unit,
 ) {
@@ -106,6 +108,7 @@ fun ClusteringRoute(
 
     ClusteringScreen(
         uiState = uiState,
+        onClickAllPhotos = onClickAllPhotos,
         onClickCluster = onClickCluster,
         onClickSettings = onClickSettings,
     )
@@ -115,12 +118,14 @@ fun ClusteringRoute(
  * 클러스터링 목록 화면.
  *
  * @param uiState 클러스터링 화면 상태
+ * @param onClickAllPhotos '모든 사진' 버튼 클릭 이벤트 콜백
  * @param onClickCluster 클러스터 카드 클릭 이벤트 콜백
  * @param onClickSettings 설정 버튼 클릭 이벤트 콜백
  */
 @Composable
 private fun ClusteringScreen(
     uiState: ClusteringUiState,
+    onClickAllPhotos: () -> Unit,
     onClickCluster: (MediaClusterUiModel) -> Unit,
     onClickSettings: () -> Unit = {},
 ) {
@@ -152,7 +157,9 @@ private fun ClusteringScreen(
 
                     CommonSectionOfPermissionGranted(
                         isGenerating = isGenerating,
+                        allPhotosCount = uiState.allPhotosCount,
                         clusters = clusters,
+                        onClickAllPhotos = onClickAllPhotos,
                     )
 
                     Box(Modifier.weight(1f)) {
@@ -179,16 +186,18 @@ private fun ClusteringScreen(
  * 권한이 허용된 화면의 공통 영역
  *
  * @param isGenerating 클러스터 리스트가 로딩상태인지 여부
+ * @param allPhotosCount 전체 사진 개수
  * @param clusters 클러스터 리스트
+ * @param onClickAllPhotos 전체 사진 보기 버튼 클릭 이벤트 콜백
  */
 @Composable
 private fun CommonSectionOfPermissionGranted(
     isGenerating: Boolean,
+    allPhotosCount: Int,
     clusters: List<MediaClusterUiModel>,
     modifier: Modifier = Modifier,
+    onClickAllPhotos: () -> Unit,
 ) {
-    val totalCount = clusters.sumOf { it.mediaList.size }
-
     Column(modifier = modifier) {
         Text(
             text = stringResource(R.string.clustering_top_title),
@@ -198,7 +207,10 @@ private fun CommonSectionOfPermissionGranted(
 
         Spacer(modifier = Modifier.height(20.dp))
 
-        TotalPhotoSummary(totalCount = totalCount)
+        TotalPhotoSummary(
+            totalCount = allPhotosCount,
+            onClick = onClickAllPhotos,
+        )
 
         Spacer(modifier = Modifier.height(40.dp))
 
@@ -331,6 +343,7 @@ private fun ClusteringScreenPreview(
     ChacTheme {
         ClusteringScreen(
             uiState = uiState,
+            onClickAllPhotos = {},
             onClickCluster = {},
         )
     }
@@ -372,10 +385,10 @@ private class ClusteringUiStatePreviewProvider : PreviewParameterProvider<Cluste
 
     override val values: Sequence<ClusteringUiState> = sequenceOf(
         ClusteringUiState.PermissionChecking,
-        ClusteringUiState.Loading(emptyList()),
-        ClusteringUiState.Loading(sampleClusters),
-        ClusteringUiState.Completed(sampleClusters),
-        ClusteringUiState.Completed(emptyList()),
+        ClusteringUiState.Loading(emptyList(), allPhotosCount = 40),
+        ClusteringUiState.Loading(sampleClusters, allPhotosCount = 40),
+        ClusteringUiState.Completed(sampleClusters, allPhotosCount = 40),
+        ClusteringUiState.Completed(emptyList(), allPhotosCount = 40),
         ClusteringUiState.PermissionDenied,
     )
 }

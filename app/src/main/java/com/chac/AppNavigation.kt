@@ -16,6 +16,7 @@ import androidx.navigation3.runtime.SaveableStateHolderNavEntryDecorator
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.ui.NavDisplay
+import com.chac.feature.album.model.MediaClusterUiModel
 import com.chac.feature.album.navigation.AlbumNavKey
 import com.chac.feature.album.navigation.albumEntries
 
@@ -43,6 +44,9 @@ fun ChacAppNavigation() {
             modifier = Modifier.padding(innerPadding),
             entryProvider = entryProvider {
                 albumEntries(
+                    onClickAllPhotos = {
+                        backStack.add(AlbumNavKey.Gallery(MediaClusterUiModel.allPhotos))
+                    },
                     onClickCluster = { cluster ->
                         backStack.add(AlbumNavKey.Gallery(cluster))
                     },

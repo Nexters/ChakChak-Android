@@ -12,6 +12,7 @@ import com.chac.feature.album.settings.SettingsRoute
 /**
  * 앨범 목적지를 Navigation3 entry provider에 등록한다
  *
+ * @param onClickAllPhotos '모든 사진' 버튼 클릭 이벤트 콜백
  * @param onClickCluster 클러스터 카드 클릭 이벤트 콜백
  * @param onClickMediaPreview 미디어 미리보기 화면 이동 콜백
  * @param onClickSettings 설정 화면 이동 콜백
@@ -21,6 +22,7 @@ import com.chac.feature.album.settings.SettingsRoute
  * @param onClickBack 뒤로가기 버튼 클릭 이벤트 콜백
  */
 fun EntryProviderScope<NavKey>.albumEntries(
+    onClickAllPhotos: () -> Unit,
     onClickCluster: (MediaClusterUiModel) -> Unit,
     onClickMediaPreview: (MediaClusterUiModel, Long) -> Unit,
     onClickSettings: () -> Unit,
@@ -31,6 +33,7 @@ fun EntryProviderScope<NavKey>.albumEntries(
 ) {
     entry(AlbumNavKey.Clustering) { _ ->
         ClusteringRoute(
+            onClickAllPhotos = onClickAllPhotos,
             onClickCluster = onClickCluster,
             onClickSettings = onClickSettings,
         )

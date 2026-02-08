@@ -11,6 +11,11 @@ sealed interface ClusteringUiState {
          * 화면에 표시할 클러스터 목록.
          */
         val clusters: List<MediaClusterUiModel>
+
+        /**
+         * 클러스터링 대상이 되는 전체 사진 개수.
+         */
+        val allPhotosCount: Int
     }
 
     /**
@@ -20,6 +25,7 @@ sealed interface ClusteringUiState {
      */
     data class Loading(
         override val clusters: List<MediaClusterUiModel>,
+        override val allPhotosCount: Int,
     ) : WithClusters
 
     /**
@@ -29,6 +35,7 @@ sealed interface ClusteringUiState {
      */
     data class Completed(
         override val clusters: List<MediaClusterUiModel>,
+        override val allPhotosCount: Int,
     ) : WithClusters
 
     /**
