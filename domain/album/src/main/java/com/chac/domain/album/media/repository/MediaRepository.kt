@@ -31,4 +31,13 @@ interface MediaRepository {
      * @return 저장된 미디어 리스트
      */
     suspend fun saveAlbum(cluster: MediaCluster): List<Media>
+
+    /**
+     * 지정한 앨범명으로 미디어를 저장한다.
+     *
+     * @param title 저장할 앨범명
+     * @param mediaList 저장할 미디어 목록
+     * @return 저장된 미디어 리스트
+     */
+    suspend fun saveAlbum(title: String, mediaList: List<Media>): List<Media>
 }

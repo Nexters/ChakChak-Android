@@ -117,19 +117,26 @@ internal class MediaRepositoryImpl @Inject constructor(
     override suspend fun saveAlbum(
         cluster: MediaCluster,
     ): List<Media> {
-        val mediaList = cluster.mediaList
+        val albumTitle = "${cluster.formattedDate} ${cluster.address}".trim()
+        return saveAlbum(
+            title = albumTitle,
+            mediaList = cluster.mediaList,
+        )
+    }
+
+    override suspend fun saveAlbum(
+        title: String,
+        mediaList: List<Media>,
+    ): List<Media> {
         if (mediaList.isEmpty()) return emptyList()
 
-        val targetClusterId = cluster.id
-        val albumTitle = "${cluster.formattedDate} ${cluster.address}".trim()
-        val savedMedia = dataSource.saveAlbum(albumTitle, mediaList)
+        val savedMedia = dataSource.saveAlbum(title, mediaList)
         if (savedMedia.isEmpty()) return emptyList()
 
         val savedIds = savedMedia.map { it.id }.toHashSet()
-        // 대상 클러스터에서 저장된 항목을 제거하고, 비어 있으면 클러스터 자체를 삭제한다.
+        // 저장된 미디어는 어떤 클러스터에 속해 있든 제거하고, 비면 클러스터 자체를 삭제한다.
         _clusteredMediaState.update { clusters ->
             clusters?.mapNotNull { cached ->
-                if (cached.id != targetClusterId) return@mapNotNull cached
                 val remaining = cached.mediaList.filterNot { it.id in savedIds }
                 if (remaining.isEmpty()) null else cached.copy(mediaList = remaining)
             }
