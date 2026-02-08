@@ -10,6 +10,10 @@ sealed interface AlbumNavKey : NavKey {
     @Serializable
     data object Clustering : AlbumNavKey
 
+    /** "모든 사진" 갤러리 화면 */
+    @Serializable
+    data object AllPhotosGallery : AlbumNavKey
+
     /**
      * 갤러리 화면
      *

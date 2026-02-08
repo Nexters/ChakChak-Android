@@ -3,6 +3,7 @@ package com.chac.feature.album.gallery
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.chac.domain.album.media.usecase.GetClusteredMediaStateUseCase
+import com.chac.domain.album.media.usecase.GetAllMediaUseCase
 import com.chac.domain.album.media.usecase.SaveAlbumUseCase
 import com.chac.feature.album.gallery.model.GalleryUiState
 import com.chac.feature.album.gallery.model.SaveCompletedEvent
@@ -32,6 +33,7 @@ class GalleryViewModel @Inject constructor(
     /** 앨범 저장 유즈케이스 */
     private val saveAlbumUseCase: SaveAlbumUseCase,
     private val getClusteredMediaStateUseCase: GetClusteredMediaStateUseCase,
+    private val getAllMediaUseCase: GetAllMediaUseCase,
 ) : ViewModel() {
     /** 갤러리 화면 UI 상태 */
     private val _uiState = MutableStateFlow<GalleryUiState>(GalleryUiState.NoneSelected(EMPTY_CLUSTER))
@@ -44,6 +46,7 @@ class GalleryViewModel @Inject constructor(
     private var clusterStateCollectJob: Job? = null
     private var clusterId: Long? = null
     private var saveJob: Job? = null
+    private var initialized = false
 
     init {
         observeClusterState()
@@ -55,7 +58,8 @@ class GalleryViewModel @Inject constructor(
      * @param clusterId 화면에 표시할 클러스터 ID
      */
     fun initialize(clusterId: Long) {
-        if (this.clusterId != null) return
+        if (initialized) return
+        initialized = true
 
         this.clusterId = clusterId
 
@@ -63,6 +67,31 @@ class GalleryViewModel @Inject constructor(
         viewModelScope.launch {
             val clusters = getClusteredMediaStateUseCase().first()
             val cluster = clusters.firstOrNull { it.id == clusterId }?.toUiModel() ?: return@launch
+            _uiState.value = GalleryUiState.NoneSelected(cluster = cluster)
+        }
+    }
+
+    /** "모든 사진" 화면을 초기화한다. */
+    fun initializeAllPhotos() {
+        if (initialized) return
+        initialized = true
+
+        // cluster state 동기화는 clusterId가 있을 때만 적용한다.
+        clusterId = null
+
+        viewModelScope.launch {
+            val media = runCatching { getAllMediaUseCase() }.getOrElse { emptyList() }
+            val uiMedia = media.map { it.toUiModel() }
+            val cluster = MediaClusterUiModel(
+                id = ALL_PHOTOS_ID,
+                address = "모든 사진",
+                formattedDate = "",
+                mediaList = uiMedia,
+                thumbnailUriStrings = listOfNotNull(
+                    uiMedia.getOrNull(0)?.uriString,
+                    uiMedia.getOrNull(1)?.uriString,
+                ),
+            )
             _uiState.value = GalleryUiState.NoneSelected(cluster = cluster)
         }
     }
@@ -206,6 +235,7 @@ class GalleryViewModel @Inject constructor(
     }
 
     companion object {
+        private const val ALL_PHOTOS_ID = -1L
         private val EMPTY_CLUSTER = MediaClusterUiModel(
             id = 0L,
             address = "",

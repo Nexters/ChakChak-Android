@@ -141,7 +141,7 @@ fun GalleryRoute(
  * @param onClickBack 뒤로가기 버튼 클릭 이벤트 콜백
  */
 @Composable
-private fun GalleryScreen(
+internal fun GalleryScreen(
     uiState: GalleryUiState,
     clusterId: Long,
     onToggleMedia: (MediaUiModel) -> Unit,

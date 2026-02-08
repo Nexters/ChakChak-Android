@@ -2,6 +2,7 @@ package com.chac.feature.album.clustering.component
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -32,6 +33,7 @@ import java.util.Locale
 @Composable
 fun TotalPhotoSummary(
     totalCount: Int,
+    onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Row(
@@ -41,6 +43,7 @@ fun TotalPhotoSummary(
                 color = ChacColors.BackgroundPopup,
                 shape = RoundedCornerShape(16.dp),
             )
+            .clickable(onClick = onClick)
             .padding(all = 20.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
@@ -102,7 +105,10 @@ internal fun formatCount(count: Int): String = String.format(Locale.getDefault()
 private fun TotalPhotoSummaryPreview() {
     ChacTheme {
         Box(modifier = Modifier.padding(16.dp)) {
-            TotalPhotoSummary(totalCount = 99_990)
+            TotalPhotoSummary(
+                totalCount = 99_990,
+                onClick = {},
+            )
         }
     }
 }

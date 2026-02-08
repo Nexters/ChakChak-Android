@@ -64,6 +64,7 @@ import com.chac.feature.album.model.MediaUiModel
 fun ClusteringRoute(
     viewModel: ClusteringViewModel = hiltViewModel(),
     onClickCluster: (Long) -> Unit,
+    onClickAllPhotos: () -> Unit,
     onClickSettings: () -> Unit,
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -107,6 +108,7 @@ fun ClusteringRoute(
     ClusteringScreen(
         uiState = uiState,
         onClickCluster = onClickCluster,
+        onClickAllPhotos = onClickAllPhotos,
         onClickSettings = onClickSettings,
     )
 }
@@ -122,6 +124,7 @@ fun ClusteringRoute(
 private fun ClusteringScreen(
     uiState: ClusteringUiState,
     onClickCluster: (Long) -> Unit,
+    onClickAllPhotos: () -> Unit,
     onClickSettings: () -> Unit = {},
 ) {
     val context = LocalContext.current
@@ -153,6 +156,8 @@ private fun ClusteringScreen(
                     CommonSectionOfPermissionGranted(
                         isGenerating = isGenerating,
                         clusters = clusters,
+                        allPhotosCount = uiState.allPhotosCount,
+                        onClickAllPhotos = onClickAllPhotos,
                     )
 
                     Box(Modifier.weight(1f)) {
@@ -185,10 +190,10 @@ private fun ClusteringScreen(
 private fun CommonSectionOfPermissionGranted(
     isGenerating: Boolean,
     clusters: List<MediaClusterUiModel>,
+    allPhotosCount: Int,
+    onClickAllPhotos: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val totalCount = clusters.sumOf { it.mediaList.size }
-
     Column(modifier = modifier) {
         Text(
             text = stringResource(R.string.clustering_top_title),
@@ -198,7 +203,10 @@ private fun CommonSectionOfPermissionGranted(
 
         Spacer(modifier = Modifier.height(20.dp))
 
-        TotalPhotoSummary(totalCount = totalCount)
+        TotalPhotoSummary(
+            totalCount = allPhotosCount,
+            onClick = onClickAllPhotos,
+        )
 
         Spacer(modifier = Modifier.height(40.dp))
 
@@ -332,6 +340,7 @@ private fun ClusteringScreenPreview(
         ClusteringScreen(
             uiState = uiState,
             onClickCluster = {},
+            onClickAllPhotos = {},
         )
     }
 }
@@ -372,10 +381,10 @@ private class ClusteringUiStatePreviewProvider : PreviewParameterProvider<Cluste
 
     override val values: Sequence<ClusteringUiState> = sequenceOf(
         ClusteringUiState.PermissionChecking,
-        ClusteringUiState.Loading(emptyList()),
-        ClusteringUiState.Loading(sampleClusters),
-        ClusteringUiState.Completed(sampleClusters),
-        ClusteringUiState.Completed(emptyList()),
+        ClusteringUiState.Loading(emptyList(), allPhotosCount = 128),
+        ClusteringUiState.Loading(sampleClusters, allPhotosCount = 128),
+        ClusteringUiState.Completed(sampleClusters, allPhotosCount = 128),
+        ClusteringUiState.Completed(emptyList(), allPhotosCount = 128),
         ClusteringUiState.PermissionDenied,
     )
 }
