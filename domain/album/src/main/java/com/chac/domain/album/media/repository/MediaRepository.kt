@@ -15,6 +15,9 @@ interface MediaRepository {
     /** 캐시된 전체 클러스터 스냅샷을 제공하는 상태 Flow (계산 전에는 null) */
     val clusteredMediaState: StateFlow<List<MediaCluster>?>
 
+    /** 캐시된 전체 미디어 스냅샷을 제공하는 상태 Flow (계산 전에는 null) */
+    val allMediaState: StateFlow<List<Media>?>
+
     suspend fun getMedia(
         startTime: Long = 0,
         endTime: Long = System.currentTimeMillis(),

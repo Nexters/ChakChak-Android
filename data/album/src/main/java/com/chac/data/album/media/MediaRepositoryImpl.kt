@@ -38,6 +38,10 @@ internal class MediaRepositoryImpl @Inject constructor(
     private val _clusteredMediaState = MutableStateFlow<List<MediaCluster>?>(null)
     override val clusteredMediaState: StateFlow<List<MediaCluster>?> = _clusteredMediaState
 
+    /** 캐시된 전체 미디어 스냅샷을 외부에 전달하는 상태 Flow (계산 전에는 null) */
+    private val _allMediaState = MutableStateFlow<List<Media>?>(null)
+    override val allMediaState: StateFlow<List<Media>?> = _allMediaState
+
     override fun getClusteredMediaStream(): Flow<MediaCluster> = flow {
         // 현재 스냅샷이 있으면 재계산 없이 그대로 방출한다.
         val cached = _clusteredMediaState.value
@@ -61,7 +65,9 @@ internal class MediaRepositoryImpl @Inject constructor(
         val starTime = System.currentTimeMillis()
         Timber.d("MediaRepositoryImpl, getClusteredMedia call")
 
-        val timeBasedClusters = timeBasedClusteringStrategy.cluster(getMedia())
+        val allMedia = getMedia()
+        _allMediaState.value = allMedia
+        val timeBasedClusters = timeBasedClusteringStrategy.cluster(allMedia)
 
         val step1Time = System.currentTimeMillis()
         Timber.d(
@@ -133,6 +139,9 @@ internal class MediaRepositoryImpl @Inject constructor(
                 val remaining = cached.mediaList.filterNot { it.id in savedIds }
                 if (remaining.isEmpty()) null else cached.copy(mediaList = remaining)
             }
+        }
+        _allMediaState.update { cached ->
+            cached?.filterNot { it.id in savedIds }
         }
 
         return savedMedia
