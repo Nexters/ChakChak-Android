@@ -152,6 +152,7 @@ private fun ClusteringScreen(
 
                     CommonSectionOfPermissionGranted(
                         isGenerating = isGenerating,
+                        totalPhotoCount = uiState.totalPhotoCount,
                         clusters = clusters,
                     )
 
@@ -179,16 +180,16 @@ private fun ClusteringScreen(
  * 권한이 허용된 화면의 공통 영역
  *
  * @param isGenerating 클러스터 리스트가 로딩상태인지 여부
+ * @param totalPhotoCount 전체 사진 개수
  * @param clusters 클러스터 리스트
  */
 @Composable
 private fun CommonSectionOfPermissionGranted(
     isGenerating: Boolean,
+    totalPhotoCount: Int,
     clusters: List<MediaClusterUiModel>,
     modifier: Modifier = Modifier,
 ) {
-    val totalCount = clusters.sumOf { it.mediaList.size }
-
     Column(modifier = modifier) {
         Text(
             text = stringResource(R.string.clustering_top_title),
@@ -198,7 +199,7 @@ private fun CommonSectionOfPermissionGranted(
 
         Spacer(modifier = Modifier.height(20.dp))
 
-        TotalPhotoSummary(totalCount = totalCount)
+        TotalPhotoSummary(totalCount = totalPhotoCount)
 
         Spacer(modifier = Modifier.height(40.dp))
 
@@ -372,10 +373,10 @@ private class ClusteringUiStatePreviewProvider : PreviewParameterProvider<Cluste
 
     override val values: Sequence<ClusteringUiState> = sequenceOf(
         ClusteringUiState.PermissionChecking,
-        ClusteringUiState.Loading(emptyList()),
-        ClusteringUiState.Loading(sampleClusters),
-        ClusteringUiState.Completed(sampleClusters),
-        ClusteringUiState.Completed(emptyList()),
+        ClusteringUiState.Loading(totalPhotoCount = 0, clusters = emptyList()),
+        ClusteringUiState.Loading(totalPhotoCount = 34, clusters = sampleClusters),
+        ClusteringUiState.Completed(totalPhotoCount = 34, clusters = sampleClusters),
+        ClusteringUiState.Completed(totalPhotoCount = 0, clusters = emptyList()),
         ClusteringUiState.PermissionDenied,
     )
 }
