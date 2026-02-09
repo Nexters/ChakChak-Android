@@ -83,10 +83,14 @@ fun GalleryRoute(
     clusterId: Long,
     viewModel: GalleryViewModel = hiltViewModel(),
     onSaveCompleted: (String, Int) -> Unit,
-    onLongClickMediaItem: (Long, Long) -> Unit,
+    onLongClickMediaItem: (Long?, Long) -> Unit,
     onClickBack: () -> Unit,
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val cluster = uiState.cluster
+    val title = cluster.address.ifBlank {
+        cluster.formattedDate.ifBlank { stringResource(R.string.clustering_default_album_title) }
+    }
     val context = LocalContext.current
 
     val writeRequestLauncher = rememberWriteRequestLauncher(
@@ -103,7 +107,7 @@ fun GalleryRoute(
 
     GalleryScreen(
         uiState = uiState,
-        clusterId = clusterId,
+        title = title,
         onToggleMedia = viewModel::toggleSelection,
         onClickSelectAll = { selected: Boolean ->
             if (selected) {
@@ -125,7 +129,42 @@ fun GalleryRoute(
 
             writeRequestLauncher(intentSender)
         },
-        onLongClickMediaItem = onLongClickMediaItem,
+        onLongClickMediaItem = { mediaId ->
+            onLongClickMediaItem(clusterId, mediaId)
+        },
+        onClickBack = onClickBack,
+    )
+}
+
+/**
+ * 전체 사진 갤러리 화면 라우트
+ *
+ * @param viewModel 갤러리 화면의 뷰모델
+ * @param onLongClickMediaItem 미디어 아이템의 롱클릭 이벤트 콜백
+ * @param onClickBack 뒤로가기 버튼 클릭 이벤트 콜백
+ */
+@Composable
+fun AllPhotosGalleryRoute(
+    viewModel: GalleryViewModel = hiltViewModel(),
+    onLongClickMediaItem: (Long?, Long) -> Unit,
+    onClickBack: () -> Unit,
+) {
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+
+    LaunchedEffect(viewModel) {
+        viewModel.initializeAllPhotos()
+    }
+
+    GalleryScreen(
+        uiState = uiState,
+        title = stringResource(R.string.clustering_total_photo_title),
+        onToggleMedia = {},
+        onClickSelectAll = {},
+        onClickSave = {},
+        onLongClickMediaItem = { mediaId ->
+            // 전체 사진 모드에서는 전체 사진 목록 기준으로 미리보기를 표시한다.
+            onLongClickMediaItem(null, mediaId)
+        },
         onClickBack = onClickBack,
     )
 }
@@ -134,6 +173,7 @@ fun GalleryRoute(
  * 갤러리 화면
  *
  * @param uiState 갤러리 화면 UI 상태
+ * @param title 화면의 타이틀
  * @param onToggleMedia 미디어 선택 상태 토글 콜백
  * @param onClickSelectAll 전체 선택 버튼 클릭 이벤트 콜백
  * @param onClickSave 저장 버튼 클릭 이벤트 콜백
@@ -143,21 +183,17 @@ fun GalleryRoute(
 @Composable
 private fun GalleryScreen(
     uiState: GalleryUiState,
-    clusterId: Long,
+    title: String,
     onToggleMedia: (MediaUiModel) -> Unit,
     onClickSelectAll: (Boolean) -> Unit,
     onClickSave: () -> Unit,
-    onLongClickMediaItem: (Long, Long) -> Unit,
+    onLongClickMediaItem: (Long) -> Unit,
     onClickBack: () -> Unit,
 ) {
     var isExitDialogVisible by remember { mutableStateOf(false) }
     val gridState = rememberLazyGridState()
 
-    val cluster = uiState.cluster
-    val title = cluster.address.ifBlank {
-        cluster.formattedDate.ifBlank { stringResource(R.string.clustering_default_album_title) }
-    }
-    val mediaList = cluster.mediaList
+    val mediaList = uiState.cluster.mediaList
     val selectedMediaIds = when (uiState) {
         is GalleryUiState.SomeSelected -> uiState.selectedIds
         is GalleryUiState.Saving -> uiState.selectedIds
@@ -279,9 +315,7 @@ private fun GalleryScreen(
                         media = media,
                         isSelected = selectedMediaIds.contains(media.id),
                         onToggle = { onToggleMedia(media) },
-                        onLongClick = {
-                            onLongClickMediaItem(clusterId, media.id)
-                        },
+                        onLongClick = { onLongClickMediaItem(media.id) },
                     )
                 }
             }
@@ -306,6 +340,7 @@ private fun GalleryScreen(
                 val buttonText = when {
                     uiState is GalleryUiState.SomeSelected ->
                         stringResource(R.string.gallery_save_album_count, selectedCount)
+
                     else -> stringResource(R.string.gallery_select_prompt)
                 }
                 Text(
@@ -538,11 +573,11 @@ private fun GalleryScreenPreview() {
                     ),
                 ),
             ),
-            clusterId = 1L,
+            title = "Jeju Trip",
             onToggleMedia = {},
             onClickSelectAll = {},
             onClickSave = {},
-            onLongClickMediaItem = { _, _ -> },
+            onLongClickMediaItem = {},
             onClickBack = {},
         )
     }
@@ -573,11 +608,11 @@ private fun GalleryScreenAllSelectedPreview() {
                 ),
                 selectedIds = (0L until 40L).toSet(),
             ),
-            clusterId = 1L,
+            title = stringResource(R.string.clustering_total_photo_title),
             onToggleMedia = {},
             onClickSelectAll = {},
             onClickSave = {},
-            onLongClickMediaItem = { _, _ -> },
+            onLongClickMediaItem = {},
             onClickBack = {},
         )
     }

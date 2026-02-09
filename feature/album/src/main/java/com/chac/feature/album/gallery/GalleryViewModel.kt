@@ -2,6 +2,7 @@ package com.chac.feature.album.gallery
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.chac.domain.album.media.usecase.GetAllMediaStateUseCase
 import com.chac.domain.album.media.usecase.GetClusteredMediaStateUseCase
 import com.chac.domain.album.media.usecase.SaveAlbumUseCase
 import com.chac.feature.album.gallery.model.GalleryUiState
@@ -32,6 +33,7 @@ class GalleryViewModel @Inject constructor(
     /** 앨범 저장 유즈케이스 */
     private val saveAlbumUseCase: SaveAlbumUseCase,
     private val getClusteredMediaStateUseCase: GetClusteredMediaStateUseCase,
+    private val getAllMediaStateUseCase: GetAllMediaStateUseCase,
 ) : ViewModel() {
     /** 갤러리 화면 UI 상태 */
     private val _uiState = MutableStateFlow<GalleryUiState>(GalleryUiState.NoneSelected(EMPTY_CLUSTER))
@@ -44,6 +46,7 @@ class GalleryViewModel @Inject constructor(
     private var clusterStateCollectJob: Job? = null
     private var clusterId: Long? = null
     private var saveJob: Job? = null
+    private var allMediaCollectJob: Job? = null
 
     init {
         observeClusterState()
@@ -64,6 +67,45 @@ class GalleryViewModel @Inject constructor(
             val clusters = getClusteredMediaStateUseCase().first()
             val cluster = clusters.firstOrNull { it.id == clusterId }?.toUiModel() ?: return@launch
             _uiState.value = GalleryUiState.NoneSelected(cluster = cluster)
+        }
+    }
+
+    /**
+     * 전체 사진 모드로 상태값을 초기화한다.
+     */
+    fun initializeAllPhotos() {
+        if (allMediaCollectJob != null) return
+
+        // 전체 사진 목록은 별도 StateFlow로 동기화한다.
+        _uiState.value = GalleryUiState.NoneSelected(cluster = EMPTY_CLUSTER)
+
+        allMediaCollectJob = viewModelScope.launch {
+            getAllMediaStateUseCase()
+                .retryWhen { cause, _ ->
+                    if (cause is CancellationException) return@retryWhen false
+
+                    Timber.e(cause, "Failed to collect all media state; retrying")
+                    true
+                }
+                .collect { mediaList ->
+                    val uiMediaList = mediaList.map { it.toUiModel() }
+                    _uiState.update { current ->
+                        val newCluster = current.cluster.copy(mediaList = uiMediaList)
+                        when (current) {
+                            is GalleryUiState.NoneSelected -> GalleryUiState.NoneSelected(newCluster)
+                            is GalleryUiState.SomeSelected -> {
+                                val validIds = uiMediaList.map { it.id }.toSet()
+                                val kept = current.selectedIds.intersect(validIds)
+                                if (kept.isEmpty()) {
+                                    GalleryUiState.NoneSelected(newCluster)
+                                } else {
+                                    GalleryUiState.SomeSelected(newCluster, kept)
+                                }
+                            }
+                            is GalleryUiState.Saving -> GalleryUiState.Saving(newCluster, current.selectedIds)
+                        }
+                    }
+                }
         }
     }
 

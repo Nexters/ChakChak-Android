@@ -10,6 +10,10 @@ sealed interface AlbumNavKey : NavKey {
     @Serializable
     data object Clustering : AlbumNavKey
 
+    /** 전체 사진 갤러리 화면 */
+    @Serializable
+    data object AllPhotosGallery : AlbumNavKey
+
     /**
      * 갤러리 화면
      *
@@ -29,6 +33,16 @@ sealed interface AlbumNavKey : NavKey {
     @Serializable
     data class MediaPreview(
         val clusterId: Long,
+        val mediaId: Long,
+    ) : AlbumNavKey
+
+    /**
+     * 전체 사진 미디어 미리보기 화면
+     *
+     * @param mediaId 최초 표시할 미디어 식별자
+     */
+    @Serializable
+    data class AllPhotosMediaPreview(
         val mediaId: Long,
     ) : AlbumNavKey
 
