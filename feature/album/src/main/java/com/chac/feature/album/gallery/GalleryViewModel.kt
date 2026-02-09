@@ -168,13 +168,14 @@ class GalleryViewModel @Inject constructor(
                 val selectedCluster = domainCluster.copy(
                     mediaList = domainCluster.mediaList.filter { it.id in selectedIds },
                 )
+                val defaultAlbumTitle = "${savingState.cluster.formattedDate} ${savingState.cluster.address}".trim()
                 val result = runCatching {
-                    val savedMediaList = saveAlbumUseCase(selectedCluster)
+                    val savedMediaList = saveAlbumUseCase(selectedCluster, defaultAlbumTitle)
                     savedMediaList.size
                 }
                 if (result.isSuccess) {
                     saveCompletedEventsChannel.trySend(
-                        SaveCompletedEvent(savingState.cluster.address, result.getOrNull() ?: 0),
+                        SaveCompletedEvent(defaultAlbumTitle, result.getOrNull() ?: 0),
                     )
                 } else {
                     _uiState.value = GalleryUiState.SomeSelected(savingState.cluster, selectedIds)

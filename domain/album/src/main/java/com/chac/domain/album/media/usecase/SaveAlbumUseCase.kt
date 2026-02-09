@@ -15,5 +15,6 @@ class SaveAlbumUseCase @Inject constructor(
 ) {
     suspend operator fun invoke(
         cluster: MediaCluster,
-    ): List<Media> = mediaRepository.saveAlbum(cluster)
+        albumTitle: String,
+    ): List<Media> = mediaRepository.saveAlbum(cluster, albumTitle)
 }

@@ -122,12 +122,11 @@ internal class MediaRepositoryImpl @Inject constructor(
 
     override suspend fun saveAlbum(
         cluster: MediaCluster,
+        albumTitle: String,
     ): List<Media> {
         val mediaList = cluster.mediaList
         if (mediaList.isEmpty()) return emptyList()
 
-        val targetClusterId = cluster.id
-        val albumTitle = "${cluster.formattedDate} ${cluster.address}".trim()
         val savedMedia = dataSource.saveAlbum(albumTitle, mediaList)
         if (savedMedia.isEmpty()) return emptyList()
 
@@ -135,7 +134,7 @@ internal class MediaRepositoryImpl @Inject constructor(
         // 대상 클러스터에서 저장된 항목을 제거하고, 비어 있으면 클러스터 자체를 삭제한다.
         _clusteredMediaState.update { clusters ->
             clusters?.mapNotNull { cached ->
-                if (cached.id != targetClusterId) return@mapNotNull cached
+                // 선택된 미디어가 여러 클러스터에 걸쳐 있을 수 있으므로, 모든 클러스터에서 제거한다.
                 val remaining = cached.mediaList.filterNot { it.id in savedIds }
                 if (remaining.isEmpty()) null else cached.copy(mediaList = remaining)
             }
