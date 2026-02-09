@@ -31,6 +31,7 @@
     <string name="save_completed_message">총 %1$d장의 사진이 포함된 앨범을\n갤러리에 저장했어요.</string>
     <string name="save_completed_main_button_title">메인으로</string>
     <string name="save_completed_close_cd">저장 완료 닫기</string>
+    <string name="common_next">다음</string>
     <string name="settings_title">설정</string>
     <string name="settings_back_cd">뒤로가기</string>
     <string name="settings_oss_licenses">오픈소스 라이선스</string>

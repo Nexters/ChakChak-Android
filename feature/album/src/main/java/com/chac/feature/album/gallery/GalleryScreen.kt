@@ -338,9 +338,7 @@ private fun GalleryScreen(
                 ),
             ) {
                 val buttonText = when {
-                    uiState is GalleryUiState.SomeSelected ->
-                        stringResource(R.string.gallery_save_album_count, selectedCount)
-
+                    uiState is GalleryUiState.SomeSelected -> stringResource(R.string.common_next)
                     else -> stringResource(R.string.gallery_select_prompt)
                 }
                 Text(
