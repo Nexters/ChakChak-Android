@@ -39,7 +39,7 @@ class ClusteringWorker @AssistedInject constructor(
 
     override suspend fun getForegroundInfo(): ForegroundInfo = ForegroundInfo(
         getNotificationId(),
-        createNotificationBuilder().build(),
+        createProgressNotificationBuilder().build(),
         ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC,
     )
 
@@ -64,18 +64,22 @@ class ClusteringWorker @AssistedInject constructor(
             ),
         )
         .setPriority(NotificationCompat.PRIORITY_HIGH)
-        .setSmallIcon(android.R.mipmap.sym_def_app_icon)
+        .setSmallIcon(getNotificationIconRes())
         .setOnlyAlertOnce(true)
 
     private fun createProgressNotificationBuilder(): NotificationCompat.Builder = createNotificationBuilder()
         .setAutoCancel(false)
         .setContentTitle(context.getString(string.clustering_worker_progress_title))
+        .setContentText(context.getString(string.clustering_worker_progress_message))
+        .setTicker(context.getString(string.clustering_worker_progress_title))
         .setOngoing(true)
 
     private fun showFailUploadNotification() {
         val notification = createNotificationBuilder()
             .setAutoCancel(false)
             .setContentTitle(context.getString(string.clustering_worker_fail_title))
+            .setContentText(context.getString(string.clustering_worker_fail_message))
+            .setTicker(context.getString(string.clustering_worker_fail_title))
             .build()
         notificationManager.cancel(getNotificationId())
         notificationManager.notify(getNotificationId(), notification)
@@ -100,6 +104,11 @@ class ClusteringWorker @AssistedInject constructor(
     }
 
     private fun getNotificationId(): Int = 1071724654
+
+    private fun getNotificationIconRes(): Int {
+        val appIconRes = context.applicationInfo.icon
+        return if (appIconRes != 0) appIconRes else android.R.mipmap.sym_def_app_icon
+    }
 
     companion object {
         private const val CHANNEL_ID = "channel_id::clustering_worker"
