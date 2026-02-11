@@ -3,6 +3,7 @@ package com.chac.data.album.media.clustering.worker
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
+import android.content.pm.ServiceInfo
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import androidx.hilt.work.HiltWorker
@@ -10,10 +11,12 @@ import androidx.work.CoroutineWorker
 import androidx.work.ForegroundInfo
 import androidx.work.WorkerParameters
 import com.chac.core.resources.R.string
+import com.chac.domain.album.media.usecase.GetClusteredMediaStreamUseCase
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.withContext
 import timber.log.Timber
 
@@ -21,6 +24,7 @@ import timber.log.Timber
 class ClusteringWorker @AssistedInject constructor(
     @Assisted private val context: Context,
     @Assisted private val workerParams: WorkerParameters,
+    private val getClusteredMediaStreamUseCase: GetClusteredMediaStreamUseCase,
 ) : CoroutineWorker(context, workerParams) {
     private val notificationManager by lazy {
         context.getSystemService(NotificationManager::class.java)
@@ -28,6 +32,7 @@ class ClusteringWorker @AssistedInject constructor(
 
     override suspend fun doWork(): Result {
         initNotification()
+        setForeground(getForegroundInfo())
 
         return startClustering()
     }
@@ -35,6 +40,7 @@ class ClusteringWorker @AssistedInject constructor(
     override suspend fun getForegroundInfo(): ForegroundInfo = ForegroundInfo(
         getNotificationId(),
         createNotificationBuilder().build(),
+        ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC,
     )
 
     private fun initNotification() {
@@ -77,18 +83,19 @@ class ClusteringWorker @AssistedInject constructor(
 
     private suspend fun startClustering(): Result = withContext(Dispatchers.IO) {
         notificationManager.notify(getNotificationId(), createProgressNotificationBuilder().build())
-        runCatching {
-            // TODO 여기에 클러스터링 업뎃해주는 코드가 들어가야함
-            delay(5000)
-        }.onFailure {
-            handleError(it)
+        return@withContext try {
+            getClusteredMediaStreamUseCase().collect {}
+            notificationManager.cancel(getNotificationId())
+            Result.success()
+        } catch (throwable: Throwable) {
+            if (throwable is CancellationException) throw throwable
+            handleError(throwable)
+            Result.failure()
         }
-        notificationManager.cancel(getNotificationId())
-        return@withContext Result.success()
     }
 
     private fun handleError(throwable: Throwable) {
-        Timber.e("ClusteringWorker handleError - ${throwable.message}")
+        Timber.e(throwable, "ClusteringWorker handleError")
         showFailUploadNotification()
     }
 

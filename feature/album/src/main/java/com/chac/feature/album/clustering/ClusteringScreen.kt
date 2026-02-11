@@ -1,7 +1,5 @@
 package com.chac.feature.album.clustering
 
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -42,6 +40,7 @@ import com.chac.core.designsystem.ui.theme.ChacTheme
 import com.chac.core.permission.MediaWithLocationPermissionUtil
 import com.chac.core.permission.MediaWithLocationPermissionUtil.launchMediaWithLocationPermission
 import com.chac.core.permission.compose.moveToPermissionSetting
+import com.chac.core.permission.compose.rememberAwaitNotificationPermissionResult
 import com.chac.core.permission.compose.rememberRegisterMediaWithLocationPermission
 import com.chac.core.resources.R
 import com.chac.domain.album.media.model.MediaType
@@ -72,34 +71,29 @@ fun ClusteringRoute(
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
 
-    val permission = rememberRegisterMediaWithLocationPermission(
-        onGranted = { viewModel.onPermissionChanged(true) },
-        onDenied = { viewModel.onPermissionChanged(false) },
-        onPermanentlyDenied = { viewModel.onPermissionChanged(false) },
+    val mediaWithLocationPermission = rememberRegisterMediaWithLocationPermission(
+        onGranted = { viewModel.onMediaWithLocationPermissionChanged(true) },
+        onDenied = { viewModel.onMediaWithLocationPermissionChanged(false) },
+        onPermanentlyDenied = { viewModel.onMediaWithLocationPermissionChanged(false) },
     )
 
-    // 알림 권한 요청 런처
-    val requestPermissionLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.RequestPermission(),
-        onResult = { isGranted ->
-            // TODO 여기다가 알림 권한 on off에 따른 ui 처리해두면됨
-        },
-    )
+    val awaitNotificationPermissionResult = rememberAwaitNotificationPermissionResult()
 
+    // 알림 권한 요청을 기다린 뒤, 미디어/위치 권한 요청을 진행한다.
     LaunchedEffect(Unit) {
-        val hasPermission = MediaWithLocationPermissionUtil.checkPermission(context)
-        viewModel.onPermissionChanged(hasPermission)
-        if (!hasPermission) {
-            permission.launchMediaWithLocationPermission()
-        }
+        awaitNotificationPermissionResult()
 
-//        requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+        val hasMediaWithLocationPermission = MediaWithLocationPermissionUtil.checkPermission(context)
+        viewModel.onMediaWithLocationPermissionChanged(hasMediaWithLocationPermission)
+        if (!hasMediaWithLocationPermission) {
+            mediaWithLocationPermission.launchMediaWithLocationPermission()
+        }
     }
 
     DisposableEffect(lifecycleOwner, context) {
         val observer = LifecycleEventObserver { _, event ->
             if (event == Lifecycle.Event.ON_RESUME) {
-                viewModel.onPermissionChanged(MediaWithLocationPermissionUtil.checkPermission(context))
+                viewModel.onMediaWithLocationPermissionChanged(MediaWithLocationPermissionUtil.checkPermission(context))
             }
         }
         lifecycleOwner.lifecycle.addObserver(observer)
