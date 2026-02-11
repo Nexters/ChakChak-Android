@@ -15,6 +15,9 @@ interface MediaRepository {
     /** 캐시된 전체 클러스터 스냅샷을 제공하는 상태 Flow (계산 전에는 null) */
     val clusteredMediaState: StateFlow<List<MediaCluster>?>
 
+    /** 캐시된 전체 미디어 스냅샷을 제공하는 상태 Flow (계산 전에는 null) */
+    val allMediaState: StateFlow<List<Media>?>
+
     suspend fun getMedia(
         startTime: Long = 0,
         endTime: Long = System.currentTimeMillis(),
@@ -28,7 +31,8 @@ interface MediaRepository {
      * 앨범으로 미디어를 저장한다
      *
      * @param cluster 저장할 클러스터
+     * @param albumTitle 저장할 앨범 제목
      * @return 저장된 미디어 리스트
      */
-    suspend fun saveAlbum(cluster: MediaCluster): List<Media>
+    suspend fun saveAlbum(cluster: MediaCluster, albumTitle: String): List<Media>
 }

@@ -38,6 +38,13 @@ internal class MediaRepositoryImpl @Inject constructor(
     private val _clusteredMediaState = MutableStateFlow<List<MediaCluster>?>(null)
     override val clusteredMediaState: StateFlow<List<MediaCluster>?> = _clusteredMediaState
 
+    /** 캐시된 전체 미디어 스냅샷을 외부에 전달하는 상태 Flow (계산 전에는 null) */
+    private val _allMediaState = MutableStateFlow<List<Media>?>(null)
+    override val allMediaState: StateFlow<List<Media>?> = _allMediaState
+
+    /** 저장 처리로 인해 제거된 미디어 ID를 누적한다. (클러스터 생성 중 재노출 방지) */
+    private val removedMediaIdsState = MutableStateFlow<Set<Long>>(emptySet())
+
     override fun getClusteredMediaStream(): Flow<MediaCluster> = flow {
         // 현재 스냅샷이 있으면 재계산 없이 그대로 방출한다.
         val cached = _clusteredMediaState.value
@@ -49,9 +56,14 @@ internal class MediaRepositoryImpl @Inject constructor(
         }
 
         createClusteredMedia { cluster ->
-            emit(cluster)
+            val removedIds = removedMediaIdsState.value
+            val filteredMedia = cluster.mediaList.filterNot { it.id in removedIds }
+            if (filteredMedia.isEmpty()) return@createClusteredMedia
+
+            val filteredCluster = cluster.copy(mediaList = filteredMedia)
+            emit(filteredCluster)
             // 클러스터링 중에도 saveAlbum()이 상태를 수정할 수 있도록 점진적으로 반영한다.
-            _clusteredMediaState.update { (it ?: emptyList()) + cluster }
+            _clusteredMediaState.update { (it ?: emptyList()) + filteredCluster }
         }
     }
 
@@ -61,7 +73,9 @@ internal class MediaRepositoryImpl @Inject constructor(
         val starTime = System.currentTimeMillis()
         Timber.d("MediaRepositoryImpl, getClusteredMedia call")
 
-        val timeBasedClusters = timeBasedClusteringStrategy.cluster(getMedia())
+        val allMedia = getMedia()
+        _allMediaState.value = allMedia
+        val timeBasedClusters = timeBasedClusteringStrategy.cluster(allMedia)
 
         val step1Time = System.currentTimeMillis()
         Timber.d(
@@ -116,23 +130,26 @@ internal class MediaRepositoryImpl @Inject constructor(
 
     override suspend fun saveAlbum(
         cluster: MediaCluster,
+        albumTitle: String,
     ): List<Media> {
         val mediaList = cluster.mediaList
         if (mediaList.isEmpty()) return emptyList()
 
-        val targetClusterId = cluster.id
-        val albumTitle = "${cluster.formattedDate} ${cluster.address}".trim()
         val savedMedia = dataSource.saveAlbum(albumTitle, mediaList)
         if (savedMedia.isEmpty()) return emptyList()
 
         val savedIds = savedMedia.map { it.id }.toHashSet()
+        removedMediaIdsState.update { it + savedIds }
         // 대상 클러스터에서 저장된 항목을 제거하고, 비어 있으면 클러스터 자체를 삭제한다.
         _clusteredMediaState.update { clusters ->
             clusters?.mapNotNull { cached ->
-                if (cached.id != targetClusterId) return@mapNotNull cached
+                // 선택된 미디어가 여러 클러스터에 걸쳐 있을 수 있으므로, 모든 클러스터에서 제거한다.
                 val remaining = cached.mediaList.filterNot { it.id in savedIds }
                 if (remaining.isEmpty()) null else cached.copy(mediaList = remaining)
             }
+        }
+        _allMediaState.update { cached ->
+            cached?.filterNot { it.id in savedIds }
         }
 
         return savedMedia

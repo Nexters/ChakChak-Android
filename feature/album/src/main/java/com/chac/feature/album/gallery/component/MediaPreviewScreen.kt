@@ -28,6 +28,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -38,32 +39,72 @@ import com.chac.core.designsystem.ui.icon.Close
 import com.chac.core.designsystem.ui.theme.ChacColors
 import com.chac.core.designsystem.ui.theme.ChacTextStyles
 import com.chac.core.designsystem.ui.theme.ChacTheme
+import com.chac.core.resources.R
 import com.chac.domain.album.media.model.MediaType
-import com.chac.feature.album.model.MediaClusterUiModel
 import com.chac.feature.album.model.MediaUiModel
 
 /**
  * 미디어 미리보기 화면 라우트
  *
- * @param cluster 클러스터
+ * @param clusterId 클러스터 ID
  * @param mediaId 최초 표시할 미디어 식별자
  * @param viewModel 미리보기 화면 뷰모델
  * @param onDismiss 닫기 콜백
  */
 @Composable
 fun MediaPreviewRoute(
-    cluster: MediaClusterUiModel,
+    clusterId: Long,
     mediaId: Long,
     viewModel: MediaPreviewViewModel = hiltViewModel(),
     onDismiss: () -> Unit,
 ) {
-    LaunchedEffect(viewModel) {
-        viewModel.initialize(cluster, mediaId)
-    }
-
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
-    when (val state = uiState) {
+    LaunchedEffect(viewModel, clusterId, mediaId) {
+        viewModel.initialize(clusterId, mediaId)
+    }
+
+    MediaPreviewRouteScreen(
+        uiState = uiState,
+        onDismiss = onDismiss,
+        headerForReady = { it.address },
+    )
+}
+
+/**
+ * 전체 사진 미디어 미리보기 화면 라우트
+ *
+ * @param mediaId 최초 표시할 미디어 식별자
+ * @param viewModel 미리보기 화면 뷰모델
+ * @param onDismiss 닫기 콜백
+ */
+@Composable
+fun AllPhotosMediaPreviewRoute(
+    mediaId: Long,
+    viewModel: MediaPreviewViewModel = hiltViewModel(),
+    onDismiss: () -> Unit,
+) {
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val header = stringResource(R.string.clustering_total_photo_title)
+
+    LaunchedEffect(viewModel, mediaId) {
+        viewModel.initializeAllPhotos(mediaId)
+    }
+
+    MediaPreviewRouteScreen(
+        uiState = uiState,
+        onDismiss = onDismiss,
+        headerForReady = { header },
+    )
+}
+
+@Composable
+private fun MediaPreviewRouteScreen(
+    uiState: MediaPreviewUiState,
+    onDismiss: () -> Unit,
+    headerForReady: (MediaPreviewUiState.Ready) -> String,
+) {
+    when (uiState) {
         is MediaPreviewUiState.Loading -> {
             Box(
                 modifier = Modifier
@@ -77,9 +118,9 @@ fun MediaPreviewRoute(
 
         is MediaPreviewUiState.Ready -> {
             MediaPreviewScreen(
-                mediaList = state.mediaList,
-                initialIndex = state.initialIndex,
-                address = state.address,
+                mediaList = uiState.mediaList,
+                initialIndex = uiState.initialIndex,
+                address = headerForReady(uiState),
                 onDismiss = onDismiss,
             )
         }

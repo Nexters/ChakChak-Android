@@ -2,6 +2,7 @@ package com.chac.feature.album.clustering.component
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -13,6 +14,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.res.stringResource
@@ -25,21 +27,27 @@ import com.chac.core.resources.R
 import java.util.Locale
 
 /**
- * 전체 사진 수를 요약 카드로 표시한다
+ * 전체 사진 수를 표시한다
  *
  * @param totalCount 전체 사진 개수
+ * @param onClick 클릭 이벤트 콜백
  */
 @Composable
 fun TotalPhotoSummary(
     totalCount: Int,
     modifier: Modifier = Modifier,
+    onClick: () -> Unit,
 ) {
+    val shape = RoundedCornerShape(16.dp)
+
     Row(
         modifier = modifier
             .fillMaxWidth()
+            .clip(shape = shape)
+            .clickable(onClick = onClick)
             .background(
                 color = ChacColors.BackgroundPopup,
-                shape = RoundedCornerShape(16.dp),
+                shape = shape,
             )
             .padding(all = 20.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -102,7 +110,10 @@ internal fun formatCount(count: Int): String = String.format(Locale.getDefault()
 private fun TotalPhotoSummaryPreview() {
     ChacTheme {
         Box(modifier = Modifier.padding(16.dp)) {
-            TotalPhotoSummary(totalCount = 99_990)
+            TotalPhotoSummary(
+                totalCount = 99_990,
+                onClick = {},
+            )
         }
     }
 }

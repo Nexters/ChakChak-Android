@@ -1,6 +1,5 @@
 package com.chac.feature.album.gallery
 
-import android.provider.MediaStore
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
@@ -42,13 +41,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
-import androidx.core.net.toUri
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.chac.core.designsystem.ui.component.ChacImage
@@ -61,7 +59,6 @@ import com.chac.core.designsystem.ui.modifier.verticalScrollFadingEdge
 import com.chac.core.designsystem.ui.theme.ChacColors
 import com.chac.core.designsystem.ui.theme.ChacTextStyles
 import com.chac.core.designsystem.ui.theme.ChacTheme
-import com.chac.core.permission.compose.rememberWriteRequestLauncher
 import com.chac.core.resources.R
 import com.chac.domain.album.media.model.MediaType
 import com.chac.feature.album.gallery.model.GalleryUiState
@@ -71,36 +68,33 @@ import com.chac.feature.album.model.MediaUiModel
 /**
  * 갤러리 화면 라우트
  *
- * @param cluster 화면에 표시할 클러스터
+ * @param clusterId 화면에 표시할 클러스터 ID
  * @param viewModel 갤러리 화면의 뷰모델
- * @param onSaveCompleted 저장 완료 이후 동작을 전달하는 콜백
+ * @param onClickNext '다음' 버튼 클릭 이벤트 콜백 (selectedMediaIds)
+ * @param onLongClickMediaItem 미디어 아이템의 롱클릭 이벤트 콜백
  * @param onClickBack 뒤로가기 버튼 클릭 이벤트 콜백
  */
 @Composable
 fun GalleryRoute(
-    cluster: MediaClusterUiModel,
+    clusterId: Long,
     viewModel: GalleryViewModel = hiltViewModel(),
-    onSaveCompleted: (String, Int) -> Unit,
-    onClickMediaPreview: (MediaClusterUiModel, Long) -> Unit,
+    onClickNext: (List<Long>) -> Unit,
+    onLongClickMediaItem: (Long?, Long) -> Unit,
     onClickBack: () -> Unit,
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    val context = LocalContext.current
+    val cluster = uiState.cluster
+    val title = cluster.address.ifBlank {
+        cluster.formattedDate.ifBlank { stringResource(R.string.clustering_default_album_title) }
+    }
 
-    val writeRequestLauncher = rememberWriteRequestLauncher(
-        onGranted = { viewModel.saveSelectedMedia() },
-    )
-
-    LaunchedEffect(viewModel) {
-        viewModel.initialize(cluster)
-
-        viewModel.saveCompletedEvents.collect { event ->
-            onSaveCompleted(event.title, event.savedCount)
-        }
+    LaunchedEffect(viewModel, clusterId) {
+        viewModel.initialize(clusterId)
     }
 
     GalleryScreen(
         uiState = uiState,
+        title = title,
         onToggleMedia = viewModel::toggleSelection,
         onClickSelectAll = { selected: Boolean ->
             if (selected) {
@@ -110,19 +104,58 @@ fun GalleryRoute(
             }
         },
         onClickSave = {
-            val selectedMediaList = viewModel.getSelectedMediaList()
-
-            if (selectedMediaList.isEmpty()) return@GalleryScreen
-
-            val uris = selectedMediaList.map { it.uriString.toUri() }
-            val intentSender = MediaStore.createWriteRequest(
-                context.contentResolver,
-                uris,
-            ).intentSender
-
-            writeRequestLauncher(intentSender)
+            val selectedIds = viewModel.getSelectedMediaIds()
+            if (selectedIds.isEmpty()) return@GalleryScreen
+            onClickNext(selectedIds)
         },
-        onClickMediaPreview = onClickMediaPreview,
+        onLongClickMediaItem = { mediaId ->
+            onLongClickMediaItem(clusterId, mediaId)
+        },
+        onClickBack = onClickBack,
+    )
+}
+
+/**
+ * 전체 사진 갤러리 화면 라우트
+ *
+ * @param viewModel 갤러리 화면의 뷰모델
+ * @param onClickNext '다음' 버튼 클릭 이벤트 콜백 (selectedMediaIds)
+ * @param onLongClickMediaItem 미디어 아이템의 롱클릭 이벤트 콜백
+ * @param onClickBack 뒤로가기 버튼 클릭 이벤트 콜백
+ */
+@Composable
+fun AllPhotosGalleryRoute(
+    viewModel: GalleryViewModel = hiltViewModel(),
+    onClickNext: (List<Long>) -> Unit,
+    onLongClickMediaItem: (Long?, Long) -> Unit,
+    onClickBack: () -> Unit,
+) {
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+
+    LaunchedEffect(viewModel) {
+        viewModel.initializeAllPhotos()
+    }
+
+    GalleryScreen(
+        uiState = uiState,
+        title = stringResource(R.string.clustering_total_photo_title),
+        onToggleMedia = viewModel::toggleSelection,
+        onClickSelectAll = { selected: Boolean ->
+            if (selected) {
+                viewModel.selectAll()
+            } else {
+                viewModel.clearSelection()
+            }
+        },
+        onClickSave = {
+            val selectedIds = viewModel.getSelectedMediaIds()
+            if (selectedIds.isEmpty()) return@GalleryScreen
+            onClickNext(selectedIds)
+        },
+        onLongClickMediaItem = { mediaId ->
+            // 전체 사진 모드에서는 전체 사진 목록 기준으로 미리보기를 표시한다.
+            onLongClickMediaItem(null, mediaId)
+        },
         onClickBack = onClickBack,
     )
 }
@@ -131,29 +164,27 @@ fun GalleryRoute(
  * 갤러리 화면
  *
  * @param uiState 갤러리 화면 UI 상태
+ * @param title 화면의 타이틀
  * @param onToggleMedia 미디어 선택 상태 토글 콜백
  * @param onClickSelectAll 전체 선택 버튼 클릭 이벤트 콜백
  * @param onClickSave 저장 버튼 클릭 이벤트 콜백
- * @param onClickMediaPreview 미디어 미리보기 화면 이동 콜백
+ * @param onLongClickMediaItem 미디어 아이템의 롱클릭 이벤트 콜백
  * @param onClickBack 뒤로가기 버튼 클릭 이벤트 콜백
  */
 @Composable
 private fun GalleryScreen(
     uiState: GalleryUiState,
+    title: String,
     onToggleMedia: (MediaUiModel) -> Unit,
     onClickSelectAll: (Boolean) -> Unit,
     onClickSave: () -> Unit,
-    onClickMediaPreview: (MediaClusterUiModel, Long) -> Unit,
+    onLongClickMediaItem: (Long) -> Unit,
     onClickBack: () -> Unit,
 ) {
     var isExitDialogVisible by remember { mutableStateOf(false) }
     val gridState = rememberLazyGridState()
 
-    val cluster = uiState.cluster
-    val title = cluster.address.ifBlank {
-        cluster.formattedDate.ifBlank { stringResource(R.string.clustering_default_album_title) }
-    }
-    val mediaList = cluster.mediaList
+    val mediaList = uiState.cluster.mediaList
     val selectedMediaIds = when (uiState) {
         is GalleryUiState.SomeSelected -> uiState.selectedIds
         is GalleryUiState.Saving -> uiState.selectedIds
@@ -275,9 +306,7 @@ private fun GalleryScreen(
                         media = media,
                         isSelected = selectedMediaIds.contains(media.id),
                         onToggle = { onToggleMedia(media) },
-                        onLongClick = {
-                            onClickMediaPreview(cluster, media.id)
-                        },
+                        onLongClick = { onLongClickMediaItem(media.id) },
                     )
                 }
             }
@@ -300,8 +329,7 @@ private fun GalleryScreen(
                 ),
             ) {
                 val buttonText = when {
-                    uiState is GalleryUiState.SomeSelected ->
-                        stringResource(R.string.gallery_save_album_count, selectedCount)
+                    uiState is GalleryUiState.SomeSelected -> stringResource(R.string.common_next)
                     else -> stringResource(R.string.gallery_select_prompt)
                 }
                 Text(
@@ -505,7 +533,7 @@ private fun GalleryPhotoItem(
                 .align(Alignment.BottomEnd)
                 .padding(6.dp)
                 .size(20.dp),
-            tint = androidx.compose.ui.graphics.Color.Unspecified,
+            tint = Color.Unspecified,
         )
     }
 }
@@ -534,10 +562,11 @@ private fun GalleryScreenPreview() {
                     ),
                 ),
             ),
+            title = "Jeju Trip",
             onToggleMedia = {},
             onClickSelectAll = {},
             onClickSave = {},
-            onClickMediaPreview = { _, _ -> },
+            onLongClickMediaItem = {},
             onClickBack = {},
         )
     }
@@ -568,10 +597,11 @@ private fun GalleryScreenAllSelectedPreview() {
                 ),
                 selectedIds = (0L until 40L).toSet(),
             ),
+            title = stringResource(R.string.clustering_total_photo_title),
             onToggleMedia = {},
             onClickSelectAll = {},
             onClickSave = {},
-            onClickMediaPreview = { _, _ -> },
+            onLongClickMediaItem = {},
             onClickBack = {},
         )
     }
