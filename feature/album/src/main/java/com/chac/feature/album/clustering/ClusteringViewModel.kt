@@ -13,11 +13,13 @@ import com.chac.feature.album.mapper.toUiModel
 import com.chac.feature.album.model.MediaClusterUiModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.retryWhen
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import timber.log.Timber
@@ -33,9 +35,51 @@ class ClusteringViewModel @Inject constructor(
     private val getClusteredMediaStateUseCase: GetClusteredMediaStateUseCase,
     private val getAllMediaStateUseCase: GetAllMediaStateUseCase,
 ) : ViewModel() {
+    /** 미디어/위치 권한 상태 */
+    private val hasMediaWithLocationPermission = MutableStateFlow<Boolean?>(null)
+
+    /** 클러스터 스냅샷 상태 */
+    private val clustersState = MutableStateFlow<List<MediaClusterUiModel>>(emptyList())
+
+    /** WorkManager 상태 */
+    private val workState = MutableStateFlow(ClusteringWorkState.Idle)
+
+    /** 전체 사진 개수 상태 */
+    private val totalPhotoCountState = MutableStateFlow(0)
+
     /** 클러스터링 화면의 상태 */
-    private val _uiState = MutableStateFlow<ClusteringUiState>(ClusteringUiState.PermissionChecking)
-    val uiState: StateFlow<ClusteringUiState> = _uiState.asStateFlow()
+    val uiState: StateFlow<ClusteringUiState> = combine(
+        hasMediaWithLocationPermission,
+        workState,
+        clustersState,
+        totalPhotoCountState,
+    ) { hasPermission, currentWorkState, clusters, totalPhotoCount ->
+        when (hasPermission) {
+            null -> ClusteringUiState.PermissionChecking
+            false -> ClusteringUiState.PermissionDenied
+            true -> when (currentWorkState) {
+                ClusteringWorkState.Enqueued,
+                ClusteringWorkState.Running,
+                -> ClusteringUiState.Loading(
+                    totalPhotoCount = totalPhotoCount,
+                    clusters = clusters,
+                )
+
+                ClusteringWorkState.Succeeded,
+                ClusteringWorkState.Failed,
+                ClusteringWorkState.Cancelled,
+                ClusteringWorkState.Idle,
+                -> ClusteringUiState.Completed(
+                    totalPhotoCount = totalPhotoCount,
+                    clusters = clusters,
+                )
+            }
+        }
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.Eagerly,
+        initialValue = ClusteringUiState.PermissionChecking,
+    )
 
     /** 캐시 스냅샷 수집 Job */
     private var clusterStateCollectJob: Job? = null
@@ -43,26 +87,10 @@ class ClusteringViewModel @Inject constructor(
     /** WorkManager 상태 수집 Job */
     private var clusteringWorkStateCollectJob: Job? = null
 
-    /** 최근 클러스터 스냅샷 */
-    private var latestClusters: List<MediaClusterUiModel> = emptyList()
-
-    /** 최근 전체 사진 개수 */
-    private var latestTotalPhotoCount: Int = 0
-
     init {
         viewModelScope.launch {
             getAllMediaStateUseCase().collect { mediaList ->
-                val count = mediaList.size
-                latestTotalPhotoCount = count
-
-                // UI가 WithClusters 상태일 때만 카운트를 반영한다.
-                _uiState.update { state ->
-                    when (state) {
-                        is ClusteringUiState.Loading -> state.copy(totalPhotoCount = count)
-                        is ClusteringUiState.Completed -> state.copy(totalPhotoCount = count)
-                        else -> state
-                    }
-                }
+                totalPhotoCountState.value = mediaList.size
             }
         }
     }
@@ -73,13 +101,13 @@ class ClusteringViewModel @Inject constructor(
      * @param hasPermission 권한 허용 여부
      */
     fun onMediaWithLocationPermissionChanged(hasPermission: Boolean) {
+        hasMediaWithLocationPermission.value = hasPermission
         if (!hasPermission) {
             clusterStateCollectJob?.cancel()
             clusterStateCollectJob = null
             clusteringWorkStateCollectJob?.cancel()
             clusteringWorkStateCollectJob = null
             cancelClusteringUseCase()
-            _uiState.value = ClusteringUiState.PermissionDenied
             return
         }
 
@@ -118,15 +146,12 @@ class ClusteringViewModel @Inject constructor(
                     true
                 }
                 .collect { clusters ->
-                    val uiClusters = mergeThumbnails(clusters.map { it.toUiModel() })
-                    latestClusters = uiClusters
-                    // 현재 상태 타입(Loading/Completed)을 유지하면서 클러스터 목록만 갱신한다.
-                    _uiState.update { current ->
-                        when (current) {
-                            is ClusteringUiState.Loading -> current.copy(clusters = uiClusters)
-                            is ClusteringUiState.Completed -> current.copy(clusters = uiClusters)
-                            else -> current
-                        }
+                    val newClusters = clusters.map { it.toUiModel() }
+                    clustersState.update { previous ->
+                        mergeThumbnails(
+                            previousClusters = previous,
+                            newClusters = newClusters,
+                        )
                     }
                 }
         }
@@ -145,70 +170,29 @@ class ClusteringViewModel @Inject constructor(
                     true
                 }
                 .collect { state ->
-                    when (state) {
-                        ClusteringWorkState.Idle -> {
-                            if (latestClusters.isNotEmpty()) {
-                                _uiState.value = ClusteringUiState.Completed(
-                                    totalPhotoCount = currentTotalPhotoCount(),
-                                    clusters = latestClusters,
-                                )
-                            } else if (_uiState.value != ClusteringUiState.PermissionDenied) {
-                                _uiState.value = ClusteringUiState.PermissionChecking
-                            }
-                        }
-
-                        ClusteringWorkState.Enqueued,
-                        ClusteringWorkState.Running,
-                        -> {
-                            _uiState.value = ClusteringUiState.Loading(
-                                totalPhotoCount = currentTotalPhotoCount(),
-                                clusters = latestClusters,
-                            )
-                        }
-
-                        ClusteringWorkState.Succeeded -> {
-                            _uiState.value = ClusteringUiState.Completed(
-                                totalPhotoCount = currentTotalPhotoCount(),
-                                clusters = latestClusters,
-                            )
-                        }
-
-                        ClusteringWorkState.Failed,
-                        ClusteringWorkState.Cancelled,
-                        -> {
-                            Timber.w("Clustering work finished with state=$state")
-                            _uiState.value = ClusteringUiState.Completed(
-                                totalPhotoCount = currentTotalPhotoCount(),
-                                clusters = latestClusters,
-                            )
-                        }
+                    if (state == ClusteringWorkState.Failed || state == ClusteringWorkState.Cancelled) {
+                        Timber.w("Clustering work finished with state=$state")
                     }
+                    workState.value = state
                 }
         }
     }
 
     /**
-     * 현재 UI 상태에 포함된 전체 사진 개수를 가져온다.
-     */
-    private fun currentTotalPhotoCount(): Int = when (val state = _uiState.value) {
-        is ClusteringUiState.WithClusters -> state.totalPhotoCount
-        ClusteringUiState.PermissionChecking -> latestTotalPhotoCount
-        ClusteringUiState.PermissionDenied -> latestTotalPhotoCount
-    }
-
-    /**
      * 클러스터 갱신 시 썸네일을 보존하도록 이전 상태를 병합한다.
      *
+     * @param previousClusters 이전 클러스터 목록
      * @param newClusters 최신 클러스터 목록
      * @return 썸네일이 보존된 클러스터 목록
      */
     private fun mergeThumbnails(
+        previousClusters: List<MediaClusterUiModel>,
         newClusters: List<MediaClusterUiModel>,
     ): List<MediaClusterUiModel> {
-        val previousClusters = latestClusters.associateBy { it.id }
+        val previousClustersById = previousClusters.associateBy { it.id }
 
         return newClusters.map { cluster ->
-            val previous = previousClusters[cluster.id]
+            val previous = previousClustersById[cluster.id]
             val mergedThumbnails = cluster.thumbnailUriStrings.ifEmpty {
                 previous?.thumbnailUriStrings.orEmpty()
             }
