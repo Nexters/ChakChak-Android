@@ -2,9 +2,11 @@ package com.chac.feature.album.clustering
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.chac.domain.album.media.model.ClusteringWorkState
+import com.chac.domain.album.media.usecase.CancelClusteringUseCase
 import com.chac.domain.album.media.usecase.GetAllMediaStateUseCase
 import com.chac.domain.album.media.usecase.GetClusteredMediaStateUseCase
-import com.chac.domain.album.media.usecase.GetClusteredMediaStreamUseCase
+import com.chac.domain.album.media.usecase.ObserveClusteringWorkStateUseCase
 import com.chac.domain.album.media.usecase.StartClusteringUseCase
 import com.chac.feature.album.clustering.model.ClusteringUiState
 import com.chac.feature.album.mapper.toUiModel
@@ -25,7 +27,8 @@ import kotlin.coroutines.cancellation.CancellationException
 /** 클러스터링 화면 상태를 제공하는 ViewModel */
 @HiltViewModel
 class ClusteringViewModel @Inject constructor(
-    private val getClusteredMediaStreamUseCase: GetClusteredMediaStreamUseCase,
+    private val observeClusteringWorkStateUseCase: ObserveClusteringWorkStateUseCase,
+    private val cancelClusteringUseCase: CancelClusteringUseCase,
     private val startClusteringUseCase: StartClusteringUseCase,
     private val getClusteredMediaStateUseCase: GetClusteredMediaStateUseCase,
     private val getAllMediaStateUseCase: GetAllMediaStateUseCase,
@@ -34,21 +37,23 @@ class ClusteringViewModel @Inject constructor(
     private val _uiState = MutableStateFlow<ClusteringUiState>(ClusteringUiState.PermissionChecking)
     val uiState: StateFlow<ClusteringUiState> = _uiState.asStateFlow()
 
-    /**
-     * 클러스터 스트림 수집의 예외 처리를 위한 Job
-     *
-     * 1. 클러스터 스트림 중복 수집 방지
-     * 2. 수집이 진행중일 때 권한이 거절되면 캔슬
-     */
-    private var clusterCollectJob: Job? = null
-
     /** 캐시 스냅샷 수집 Job */
     private var clusterStateCollectJob: Job? = null
+
+    /** WorkManager 상태 수집 Job */
+    private var clusteringWorkStateCollectJob: Job? = null
+
+    /** 최근 클러스터 스냅샷 */
+    private var latestClusters: List<MediaClusterUiModel> = emptyList()
+
+    /** 최근 전체 사진 개수 */
+    private var latestTotalPhotoCount: Int = 0
 
     init {
         viewModelScope.launch {
             getAllMediaStateUseCase().collect { mediaList ->
                 val count = mediaList.size
+                latestTotalPhotoCount = count
 
                 // UI가 WithClusters 상태일 때만 카운트를 반영한다.
                 _uiState.update { state ->
@@ -63,74 +68,39 @@ class ClusteringViewModel @Inject constructor(
     }
 
     /**
-     * 권한 변경 결과를 반영해 UI 상태와 스트림 수집을 갱신한다.
+     * 미디어, 위치 권한 변경 결과를 반영해 UI 상태와 스트림 수집을 갱신한다.
      *
      * @param hasPermission 권한 허용 여부
      */
-    fun onPermissionChanged(hasPermission: Boolean) {
+    fun onMediaWithLocationPermissionChanged(hasPermission: Boolean) {
         if (!hasPermission) {
-            clusterCollectJob?.cancel()
-            clusterCollectJob = null
             clusterStateCollectJob?.cancel()
             clusterStateCollectJob = null
+            clusteringWorkStateCollectJob?.cancel()
+            clusteringWorkStateCollectJob = null
+            cancelClusteringUseCase()
             _uiState.value = ClusteringUiState.PermissionDenied
             return
         }
 
-        // 권한이 이미 허용된 상태라면 수집을 다시 시작하지 않는다.
-        if (_uiState.value is ClusteringUiState.WithClusters) return
-        if (clusterCollectJob != null) return
         if (clusterStateCollectJob == null) {
             observeClusterState()
         }
+        if (clusteringWorkStateCollectJob == null) {
+            observeClusteringWorkState()
+        }
 
-        initializeClusters()
+        requestClusteringIfNeeded()
     }
 
     /**
-     * 초기 클러스터 스트림 수집을 수집하고 상태를 갱신한다.
+     * 캐시가 비어있을 때만 WorkManager에 클러스터링 실행을 요청한다.
      */
-    private fun initializeClusters() {
-        // TODO 나중에 여기서 클러스터링 실행 시도만 하고, 클러스터링 후 데이터를 넣어주고 가져온느 작업을 Worker에서 추가해줘야함
-        // startClusteringUseCase()
-        clusterCollectJob = viewModelScope.launch {
-            try {
-                _uiState.value = ClusteringUiState.Loading(
-                    totalPhotoCount = currentTotalPhotoCount(),
-                    clusters = emptyList(),
-                )
-
-                // 클러스터 스트림을 수집하며 로딩 상태에 누적한다.
-                getClusteredMediaStreamUseCase()
-                    .retryWhen { cause, _ ->
-                        if (cause is CancellationException) return@retryWhen false
-
-                        // 기존 누적 데이터를 초기화한다.
-                        _uiState.value = ClusteringUiState.Loading(
-                            totalPhotoCount = currentTotalPhotoCount(),
-                            clusters = emptyList(),
-                        )
-
-                        Timber.e(cause, "Failed to collect cluster stream; retrying")
-                        true
-                    }
-                    .collect { cluster ->
-                        val updatedClusters = currentClusters() + cluster.toUiModel()
-                        _uiState.value = ClusteringUiState.Loading(
-                            totalPhotoCount = currentTotalPhotoCount(),
-                            clusters = mergeThumbnails(updatedClusters),
-                        )
-                    }
-
-                // 클러스터링 중 저장이 발생했을 수 있으므로 최신 상태를 반영한다.
-                val latestClusters = getClusteredMediaStateUseCase().first()
-                val uiClusters = mergeThumbnails(latestClusters.map { it.toUiModel() })
-                _uiState.value = ClusteringUiState.Completed(
-                    totalPhotoCount = currentTotalPhotoCount(),
-                    clusters = uiClusters,
-                )
-            } finally {
-                clusterCollectJob = null
+    private fun requestClusteringIfNeeded() {
+        viewModelScope.launch {
+            val hasClusters = getClusteredMediaStateUseCase().first().isNotEmpty()
+            if (!hasClusters) {
+                startClusteringUseCase()
             }
         }
     }
@@ -149,6 +119,7 @@ class ClusteringViewModel @Inject constructor(
                 }
                 .collect { clusters ->
                     val uiClusters = mergeThumbnails(clusters.map { it.toUiModel() })
+                    latestClusters = uiClusters
                     // 현재 상태 타입(Loading/Completed)을 유지하면서 클러스터 목록만 갱신한다.
                     _uiState.update { current ->
                         when (current) {
@@ -162,21 +133,67 @@ class ClusteringViewModel @Inject constructor(
     }
 
     /**
+     * WorkManager 상태를 수집해 로딩/완료 상태를 갱신한다.
+     */
+    private fun observeClusteringWorkState() {
+        clusteringWorkStateCollectJob = viewModelScope.launch {
+            observeClusteringWorkStateUseCase()
+                .retryWhen { cause, _ ->
+                    if (cause is CancellationException) return@retryWhen false
+
+                    Timber.e(cause, "Failed to collect clustering work state; retrying")
+                    true
+                }
+                .collect { state ->
+                    when (state) {
+                        ClusteringWorkState.Idle -> {
+                            if (latestClusters.isNotEmpty()) {
+                                _uiState.value = ClusteringUiState.Completed(
+                                    totalPhotoCount = currentTotalPhotoCount(),
+                                    clusters = latestClusters,
+                                )
+                            } else if (_uiState.value != ClusteringUiState.PermissionDenied) {
+                                _uiState.value = ClusteringUiState.PermissionChecking
+                            }
+                        }
+
+                        ClusteringWorkState.Enqueued,
+                        ClusteringWorkState.Running,
+                        -> {
+                            _uiState.value = ClusteringUiState.Loading(
+                                totalPhotoCount = currentTotalPhotoCount(),
+                                clusters = latestClusters,
+                            )
+                        }
+
+                        ClusteringWorkState.Succeeded -> {
+                            _uiState.value = ClusteringUiState.Completed(
+                                totalPhotoCount = currentTotalPhotoCount(),
+                                clusters = latestClusters,
+                            )
+                        }
+
+                        ClusteringWorkState.Failed,
+                        ClusteringWorkState.Cancelled,
+                        -> {
+                            Timber.w("Clustering work finished with state=$state")
+                            _uiState.value = ClusteringUiState.Completed(
+                                totalPhotoCount = currentTotalPhotoCount(),
+                                clusters = latestClusters,
+                            )
+                        }
+                    }
+                }
+        }
+    }
+
+    /**
      * 현재 UI 상태에 포함된 전체 사진 개수를 가져온다.
      */
     private fun currentTotalPhotoCount(): Int = when (val state = _uiState.value) {
         is ClusteringUiState.WithClusters -> state.totalPhotoCount
-        ClusteringUiState.PermissionChecking -> 0
-        ClusteringUiState.PermissionDenied -> 0
-    }
-
-    /**
-     * 현재 UI 상태에 포함된 클러스터 목록을 가져온다.
-     */
-    private fun currentClusters(): List<MediaClusterUiModel> = when (val state = _uiState.value) {
-        is ClusteringUiState.WithClusters -> state.clusters
-        ClusteringUiState.PermissionChecking -> emptyList()
-        ClusteringUiState.PermissionDenied -> emptyList()
+        ClusteringUiState.PermissionChecking -> latestTotalPhotoCount
+        ClusteringUiState.PermissionDenied -> latestTotalPhotoCount
     }
 
     /**
@@ -188,7 +205,7 @@ class ClusteringViewModel @Inject constructor(
     private fun mergeThumbnails(
         newClusters: List<MediaClusterUiModel>,
     ): List<MediaClusterUiModel> {
-        val previousClusters = currentClusters().associateBy { it.id }
+        val previousClusters = latestClusters.associateBy { it.id }
 
         return newClusters.map { cluster ->
             val previous = previousClusters[cluster.id]
