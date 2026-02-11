@@ -2,6 +2,7 @@ package com.chac.feature.album.navigation
 
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavKey
+import com.chac.feature.album.ai.AiOrganizeRoute
 import com.chac.feature.album.clustering.ClusteringRoute
 import com.chac.feature.album.gallery.AllPhotosGalleryRoute
 import com.chac.feature.album.gallery.GalleryRoute
@@ -15,6 +16,7 @@ import com.chac.feature.album.settings.SettingsRoute
  * 앨범 목적지를 Navigation3 entry provider에 등록한다
  *
  * @param onClickCluster 클러스터 카드 클릭 이벤트 콜백 (clusterId)
+ * @param onClickAiOrganize AI 정리 화면 이동 콜백
  * @param onClickAllPhotos '모든 사진' 버튼 클릭 이벤트 콜백
  * @param onClickNextInGallery 갤러리 화면에서 '다음' 버튼 클릭 이벤트 콜백 (clusterId, selectedMediaIds). 전체 사진 저장 시 clusterId는 null이다.
  * @param onLongClickMediaItem 미디어 아이템의 롱클릭 이벤트 콜백 (clusterId, mediaId). 전체 사진 모드에서는 clusterId가 null이다.
@@ -26,6 +28,7 @@ import com.chac.feature.album.settings.SettingsRoute
  */
 fun EntryProviderScope<NavKey>.albumEntries(
     onClickCluster: (Long) -> Unit,
+    onClickAiOrganize: () -> Unit,
     onClickAllPhotos: () -> Unit,
     onClickNextInGallery: (Long?, List<Long>) -> Unit,
     onLongClickMediaItem: (Long?, Long) -> Unit,
@@ -38,8 +41,15 @@ fun EntryProviderScope<NavKey>.albumEntries(
     entry(AlbumNavKey.Clustering) { _ ->
         ClusteringRoute(
             onClickCluster = onClickCluster,
+            onClickAiOrganize = onClickAiOrganize,
             onClickAllPhotos = onClickAllPhotos,
             onClickSettings = onClickSettings,
+        )
+    }
+    entry(AlbumNavKey.AiOrganize) { _ ->
+        AiOrganizeRoute(
+            onClickCluster = onClickCluster,
+            onClickBack = onClickBack,
         )
     }
     entry(AlbumNavKey.AllPhotosGallery) { _ ->

@@ -15,7 +15,10 @@ dependencies {
     implementation(projects.core.resources)
     implementation(libs.commons.math3)
     implementation(libs.androidx.work.ktx)
+    implementation(libs.mlkit.image.labeling)
     implementation(libs.hilt.ext.common)
     implementation(libs.hilt.ext.work)
     ksp(libs.hilt.ext.compiler)
+
+    testImplementation(libs.junit)
 }

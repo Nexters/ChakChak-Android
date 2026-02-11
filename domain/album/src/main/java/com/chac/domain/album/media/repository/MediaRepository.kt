@@ -4,13 +4,14 @@ import com.chac.domain.album.media.model.MediaSortOrder
 import com.chac.domain.album.media.model.Media
 import com.chac.domain.album.media.model.MediaCluster
 import com.chac.domain.album.media.model.MediaLocation
+import com.chac.domain.album.media.model.PromptSpec
 import com.chac.domain.album.media.model.MediaType
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 
 interface MediaRepository {
     /** 클러스터 단위로 계산 결과를 emit하는 Flow */
-    fun getClusteredMediaStream(): Flow<MediaCluster>
+    fun getClusteredMediaStream(promptSpec: PromptSpec? = null): Flow<MediaCluster>
 
     /** 캐시된 전체 클러스터 스냅샷을 제공하는 상태 Flow (계산 전에는 null) */
     val clusteredMediaState: StateFlow<List<MediaCluster>?>

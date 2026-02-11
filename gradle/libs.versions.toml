@@ -42,6 +42,7 @@ playServicesOssLicenses = "17.4.0"
 apacheCommonsMath3 = "3.6.1"
 timber = "5.0.1"
 coil = "2.7.0"
+mlkitImageLabeling = "17.0.9"
 
 # Unit Test
 junit = "4.13.2"
@@ -113,6 +114,7 @@ play-services-oss-licenses = { group = "com.google.android.gms", name = "play-se
 commons-math3 = { group = "org.apache.commons", name = "commons-math3", version.ref = "apacheCommonsMath3" }
 timber = { group = "com.jakewharton.timber", name = "timber", version.ref = "timber" }
 coil-compose = { group = "io.coil-kt", name = "coil-compose", version.ref = "coil" }
+mlkit-image-labeling = { group = "com.google.mlkit", name = "image-labeling", version.ref = "mlkitImageLabeling" }
 
 [plugins]
 # Gradle Plugins

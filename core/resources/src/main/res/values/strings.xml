@@ -9,6 +9,7 @@
     <string name="clustering_default_album_title">앨범</string>
     <string name="clustering_photo_count">%1$s장의 사진</string>
     <string name="clustering_action_organize">정리하기</string>
+    <string name="clustering_ai_organize_action">AI 프롬프트로 정리하기</string>
     <string name="clustering_loading_message">앨범을 생성하는 중입니다.\n잠시만 기다려주세요!</string>
     <string name="clustering_placeholder_icon">ICON</string>
     <string name="clustering_empty_message">정리할 사진이 없습니다.\n사진을 올리면 앨범을 착 정리할게요!</string>
@@ -40,4 +41,12 @@
     <string name="settings_back_cd">뒤로가기</string>
     <string name="settings_oss_licenses">오픈소스 라이선스</string>
     <string name="settings_privacy_policy">개인정보 처리방침</string>
+    <string name="ai_organize_top_bar_title">AI 사진 정리</string>
+    <string name="ai_organize_title">프롬프트를 입력해 원하는 사진만 모아보세요.</string>
+    <string name="ai_organize_prompt_placeholder">예) 풍경사진 정리해줘, 동물 사진만 정리해줘</string>
+    <string name="ai_organize_run">AI 정리 시작</string>
+    <string name="ai_organize_total_photo_count">대상 사진 %1$d장</string>
+    <string name="ai_organize_initial_message">프롬프트를 입력하고 AI 정리를 시작해주세요.</string>
+    <string name="ai_organize_loading_message">프롬프트에 맞는 사진을 찾는 중입니다.</string>
+    <string name="ai_organize_empty_message">조건에 맞는 사진을 찾지 못했어요.\n다른 프롬프트로 시도해보세요.</string>
 </resources>

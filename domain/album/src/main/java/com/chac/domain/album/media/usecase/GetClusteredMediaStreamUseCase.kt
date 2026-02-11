@@ -1,6 +1,7 @@
 package com.chac.domain.album.media.usecase
 
 import com.chac.domain.album.media.model.MediaCluster
+import com.chac.domain.album.media.model.PromptSpec
 import com.chac.domain.album.media.repository.MediaRepository
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
@@ -13,5 +14,6 @@ import javax.inject.Inject
 class GetClusteredMediaStreamUseCase @Inject constructor(
     private val mediaRepository: MediaRepository,
 ) {
-    operator fun invoke(): Flow<MediaCluster> = mediaRepository.getClusteredMediaStream()
+    operator fun invoke(promptSpec: PromptSpec? = null): Flow<MediaCluster> =
+        mediaRepository.getClusteredMediaStream(promptSpec)
 }

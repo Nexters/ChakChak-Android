@@ -18,17 +18,24 @@ import javax.inject.Inject
 internal class ClusteringWorkerSchedulerImpl @Inject constructor(
     @ApplicationContext private val context: Context,
 ) : ClusteringWorkScheduler {
-    override fun scheduleClustering() {
+    override fun scheduleClustering(promptText: String?) {
         val workerManager = WorkManager.getInstance(context)
+        val policy = if (promptText.isNullOrBlank()) {
+            ExistingWorkPolicy.KEEP
+        } else {
+            ExistingWorkPolicy.REPLACE
+        }
         val workRequest = OneTimeWorkRequestBuilder<ClusteringWorker>()
             .setExpedited(OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)
             .setInputData(
-                Data.Builder().build(),
+                Data.Builder()
+                    .putString(ClusteringWorker.INPUT_KEY_PROMPT_TEXT, promptText)
+                    .build(),
             )
             .build()
         workerManager.enqueueUniqueWork(
             WORK_NAME,
-            ExistingWorkPolicy.KEEP,
+            policy,
             workRequest,
         )
     }

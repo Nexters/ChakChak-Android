@@ -10,6 +10,7 @@ import androidx.hilt.work.HiltWorker
 import androidx.work.CoroutineWorker
 import androidx.work.ForegroundInfo
 import androidx.work.WorkerParameters
+import com.chac.data.album.media.ai.PromptInterpreter
 import com.chac.core.resources.R.string
 import com.chac.domain.album.media.usecase.GetClusteredMediaStreamUseCase
 import dagger.assisted.Assisted
@@ -25,6 +26,7 @@ class ClusteringWorker @AssistedInject constructor(
     @Assisted private val context: Context,
     @Assisted private val workerParams: WorkerParameters,
     private val getClusteredMediaStreamUseCase: GetClusteredMediaStreamUseCase,
+    private val promptInterpreter: PromptInterpreter,
 ) : CoroutineWorker(context, workerParams) {
     private val notificationManager by lazy {
         context.getSystemService(NotificationManager::class.java)
@@ -86,9 +88,12 @@ class ClusteringWorker @AssistedInject constructor(
     }
 
     private suspend fun startClustering(): Result = withContext(Dispatchers.IO) {
+        val promptText = inputData.getString(INPUT_KEY_PROMPT_TEXT)
+        val promptSpec = promptInterpreter.interpret(promptText)
+
         notificationManager.notify(getNotificationId(), createProgressNotificationBuilder().build())
         return@withContext try {
-            getClusteredMediaStreamUseCase().collect {}
+            getClusteredMediaStreamUseCase(promptSpec).collect {}
             notificationManager.cancel(getNotificationId())
             Result.success()
         } catch (throwable: Throwable) {
@@ -113,5 +118,6 @@ class ClusteringWorker @AssistedInject constructor(
     companion object {
         private const val CHANNEL_ID = "channel_id::clustering_worker"
         private const val CHANNEL_NAME = "ClusteringWorker"
+        const val INPUT_KEY_PROMPT_TEXT = "input_key_prompt_text"
     }
 }

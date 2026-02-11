@@ -6,7 +6,7 @@ import javax.inject.Inject
 class StartClusteringUseCase @Inject constructor(
     private val clusteringWorkScheduler: ClusteringWorkScheduler,
 ) {
-    operator fun invoke() {
-        clusteringWorkScheduler.scheduleClustering()
+    operator fun invoke(promptText: String? = null) {
+        clusteringWorkScheduler.scheduleClustering(promptText)
     }
 }

@@ -10,6 +10,10 @@ sealed interface AlbumNavKey : NavKey {
     @Serializable
     data object Clustering : AlbumNavKey
 
+    /** AI 프롬프트 정리 화면 */
+    @Serializable
+    data object AiOrganize : AlbumNavKey
+
     /** 전체 사진 갤러리 화면 */
     @Serializable
     data object AllPhotosGallery : AlbumNavKey
