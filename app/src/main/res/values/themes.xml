@@ -6,6 +6,7 @@
     <style name="Theme.Chac.WithSplashScreen" parent="Theme.SplashScreen">
         <item name="windowSplashScreenBackground">@color/splash_purple</item>
         <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash_logo</item>
+        <item name="android:windowSplashScreenBrandingImage">@drawable/ic_splash_watermark</item>
         <item name="windowSplashScreenIconBackgroundColor">@android:color/transparent</item>
         <item name="postSplashScreenTheme">@style/Theme.Chac</item>
     </style>
