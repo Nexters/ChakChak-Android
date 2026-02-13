@@ -39,6 +39,7 @@
     <string name="settings_title">설정</string>
     <string name="settings_back_cd">뒤로가기</string>
     <string name="settings_oss_licenses">오픈소스 라이선스</string>
+    <string name="settings_rewatch_onboarding">온보딩 다시보기</string>
     <string name="settings_privacy_policy">개인정보 처리방침</string>
     <string name="clustering_date_skeleton">yMMMd</string>
     <string name="clustering_date_pattern" />
