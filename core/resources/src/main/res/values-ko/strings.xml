@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="clustering_date_pattern">yyyy년 MM월 dd일</string>
+</resources>

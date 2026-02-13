@@ -2,6 +2,7 @@ package com.chac.data.album.media.timeformat
 
 import android.content.Context
 import android.text.format.DateFormat
+import com.chac.core.resources.R.string
 import dagger.hilt.android.qualifiers.ApplicationContext
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -15,7 +16,11 @@ internal class AndroidTimeFormatProvider @Inject constructor(
 ) : TimeFormatProvider {
     override fun formatClusterTime(epochMillis: Long): String {
         val locale = context.resources.configuration.locales[0]
-        val pattern = DateFormat.getBestDateTimePattern(locale, "yMMMdH")
+        val skeleton = context.getString(string.clustering_date_skeleton)
+        val localizedPattern = context.getString(string.clustering_date_pattern)
+        val pattern = localizedPattern.ifBlank {
+            DateFormat.getBestDateTimePattern(locale, skeleton)
+        }
         return SimpleDateFormat(pattern, locale).format(Date(epochMillis))
     }
 }
