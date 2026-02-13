@@ -24,6 +24,14 @@
     <string name="gallery_unselect_all">전체 해제</string>
     <string name="gallery_slash">/</string>
     <string name="gallery_select_prompt">사진을 선택해주세요</string>
+    <string name="gallery_mode_grid">그리드</string>
+    <string name="gallery_mode_fling">플링</string>
+    <string name="gallery_fling_hint">왼쪽은 선택 안 함, 오른쪽은 선택</string>
+    <string name="gallery_fling_done">모든 사진을 확인했어요</string>
+    <string name="gallery_fling_restart">처음부터 다시 보기</string>
+    <string name="gallery_fling_progress">%1$d / %2$d</string>
+    <string name="gallery_fling_select">선택</string>
+    <string name="gallery_fling_unselect">선택 안 함</string>
     <string name="gallery_save_album_count">%1$d장의 사진 앨범에 저장</string>
     <string name="gallery_exit_title">페이지 나가기</string>
     <string name="gallery_exit_message">선택된 내용은 저장되지 않습니다.\n페이지를 나가겠어요?</string>

@@ -1,24 +1,19 @@
 package com.chac.feature.album.gallery
 
 import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.itemsIndexed
@@ -27,33 +22,24 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Icon
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Dialog
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.chac.core.designsystem.ui.component.ChacImage
 import com.chac.core.designsystem.ui.component.ChacTopBar
-import com.chac.core.designsystem.ui.icon.Alert
-import com.chac.core.designsystem.ui.icon.ChacIcons
-import com.chac.core.designsystem.ui.icon.CheckSelected
-import com.chac.core.designsystem.ui.icon.CheckUnselected
 import com.chac.core.designsystem.ui.modifier.verticalScrollFadingEdge
 import com.chac.core.designsystem.ui.theme.ChacColors
 import com.chac.core.designsystem.ui.theme.ChacTextStyles
@@ -181,6 +167,9 @@ private fun GalleryScreen(
     onClickBack: () -> Unit,
 ) {
     var isExitDialogVisible by remember { mutableStateOf(false) }
+    var isFlingMode by rememberSaveable { mutableStateOf(false) }
+    var flingIndex by rememberSaveable { mutableIntStateOf(0) }
+    val horizontalPadding = 20.dp
     val gridState = rememberLazyGridState()
 
     val mediaList = uiState.cluster.mediaList
@@ -193,6 +182,24 @@ private fun GalleryScreen(
     val selectedCount = selectedMediaIds.size
     val isAllSelected = totalCount > 0 && selectedCount == totalCount
 
+    val selectMedia: (MediaUiModel) -> Unit = { media ->
+        if (!selectedMediaIds.contains(media.id)) {
+            onToggleMedia(media)
+        }
+    }
+    val unselectMedia: (MediaUiModel) -> Unit = { media ->
+        if (selectedMediaIds.contains(media.id)) {
+            onToggleMedia(media)
+        }
+    }
+
+    LaunchedEffect(mediaList.size) {
+        val maxIndex = mediaList.size
+        if (flingIndex > maxIndex) {
+            flingIndex = maxIndex
+        }
+    }
+
     BackHandler(enabled = uiState is GalleryUiState.SomeSelected && !isExitDialogVisible) {
         isExitDialogVisible = true
     }
@@ -202,7 +209,7 @@ private fun GalleryScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .background(ChacColors.Background)
-                .padding(horizontal = 20.dp)
+                .padding(horizontal = horizontalPadding)
                 .padding(bottom = 20.dp),
         ) {
             ChacTopBar(
@@ -286,28 +293,56 @@ private fun GalleryScreen(
                 }
             }
 
-            LazyVerticalGrid(
-                columns = GridCells.Fixed(3),
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxWidth()
-                    .verticalScrollFadingEdge(
-                        state = gridState,
-                        top = 14.dp,
-                        bottom = 14.dp,
-                    ),
-                state = gridState,
-                horizontalArrangement = Arrangement.spacedBy(10.dp),
-                verticalArrangement = Arrangement.spacedBy(10.dp),
-                contentPadding = PaddingValues(vertical = 14.dp),
-            ) {
-                itemsIndexed(mediaList, key = { _, media -> media.id }) { index, media ->
-                    GalleryPhotoItem(
-                        media = media,
-                        isSelected = selectedMediaIds.contains(media.id),
-                        onToggle = { onToggleMedia(media) },
-                        onLongClick = { onLongClickMediaItem(media.id) },
-                    )
+            Spacer(modifier = Modifier.height(10.dp))
+            GalleryModeToggle(
+                isFlingMode = isFlingMode,
+                onClickGrid = { isFlingMode = false },
+                onClickFling = { isFlingMode = true },
+            )
+            Spacer(modifier = Modifier.height(10.dp))
+
+            if (isFlingMode) {
+                GalleryFlingDeck(
+                    mediaList = mediaList,
+                    selectedMediaIds = selectedMediaIds,
+                    currentIndex = flingIndex,
+                    onSelectCurrent = { media ->
+                        selectMedia(media)
+                        flingIndex = (flingIndex + 1).coerceAtMost(mediaList.size)
+                    },
+                    onUnselectCurrent = { media ->
+                        unselectMedia(media)
+                        flingIndex = (flingIndex + 1).coerceAtMost(mediaList.size)
+                    },
+                    onRestart = { flingIndex = 0 },
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxWidth(),
+                )
+            } else {
+                LazyVerticalGrid(
+                    columns = GridCells.Fixed(3),
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxWidth()
+                        .verticalScrollFadingEdge(
+                            state = gridState,
+                            top = 14.dp,
+                            bottom = 14.dp,
+                        ),
+                    state = gridState,
+                    horizontalArrangement = Arrangement.spacedBy(10.dp),
+                    verticalArrangement = Arrangement.spacedBy(10.dp),
+                    contentPadding = PaddingValues(vertical = 14.dp),
+                ) {
+                    itemsIndexed(mediaList, key = { _, media -> media.id }) { _, media ->
+                        GalleryPhotoItem(
+                            media = media,
+                            isSelected = selectedMediaIds.contains(media.id),
+                            onToggle = { onToggleMedia(media) },
+                            onLongClick = { onLongClickMediaItem(media.id) },
+                        )
+                    }
                 }
             }
 
@@ -357,158 +392,6 @@ private fun GalleryScreen(
                 onClickBack()
             },
             onDismiss = { isExitDialogVisible = false },
-        )
-    }
-}
-
-/**
- * 선택 상태에서 페이지 이탈을 확인하는 대화상자를 표시한다
- *
- * @param onClickConfirm 확인 버튼 클릭 이벤트 콜백
- * @param onDismiss 대화상자 닫힘 이벤트 콜백 (ex. 취소 또는 바깥 영역 클릭)
- */
-@Composable
-private fun GalleryExitDialog(
-    modifier: Modifier = Modifier,
-    onClickConfirm: () -> Unit,
-    onDismiss: () -> Unit,
-) {
-    Dialog(onDismissRequest = onDismiss) {
-        Surface(
-            shape = RoundedCornerShape(20.dp),
-            color = ChacColors.BackgroundPopup,
-        ) {
-            Column(
-                modifier = modifier
-                    .fillMaxWidth()
-                    .padding(20.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-            ) {
-                Image(
-                    imageVector = ChacIcons.Alert,
-                    contentDescription = null,
-                    modifier = Modifier.size(50.dp),
-                )
-                Spacer(modifier = Modifier.height(16.dp))
-                Text(
-                    text = stringResource(R.string.gallery_exit_title),
-                    style = ChacTextStyles.Headline02,
-                    color = ChacColors.Text01,
-                )
-                Spacer(modifier = Modifier.height(10.dp))
-                Text(
-                    text = stringResource(R.string.gallery_exit_message),
-                    style = ChacTextStyles.Body,
-                    color = ChacColors.Text03,
-                    textAlign = TextAlign.Center,
-                )
-                Spacer(modifier = Modifier.height(30.dp))
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                ) {
-                    Button(
-                        onClick = onDismiss,
-                        modifier = Modifier
-                            .weight(1f)
-                            .height(54.dp),
-                        shape = RoundedCornerShape(12.dp),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = ChacColors.Sub04,
-                            contentColor = ChacColors.TextBtn02,
-                        ),
-                    ) {
-                        Text(
-                            text = stringResource(R.string.gallery_exit_cancel),
-                            style = ChacTextStyles.Btn,
-                            color = ChacColors.Primary,
-                        )
-                    }
-                    Button(
-                        onClick = onClickConfirm,
-                        modifier = Modifier
-                            .weight(1f)
-                            .height(54.dp),
-                        shape = RoundedCornerShape(12.dp),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = ChacColors.Primary,
-                            contentColor = ChacColors.TextBtn01,
-                        ),
-                    ) {
-                        Text(
-                            text = stringResource(R.string.gallery_exit_confirm),
-                            style = ChacTextStyles.Btn,
-                            color = ChacColors.TextBtn01,
-                        )
-                    }
-                }
-            }
-        }
-    }
-}
-
-/**
- * 사진 그리드의 선택 가능한 아이템을 표시한다
- *
- * @param media 이미지 모델
- * @param isSelected 선택 상태 여부
- * @param onToggle 선택 상태 토글 콜백
- * @param onLongClick 롱클릭 이벤트 콜백
- */
-@OptIn(ExperimentalFoundationApi::class)
-@Composable
-private fun GalleryPhotoItem(
-    media: MediaUiModel,
-    isSelected: Boolean,
-    onToggle: () -> Unit,
-    onLongClick: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    Box(
-        modifier = modifier
-            .aspectRatio(1f)
-            .clip(RoundedCornerShape(12.dp))
-            .then(
-                if (isSelected) {
-                    Modifier
-                        .border(
-                            width = 1.dp,
-                            color = ChacColors.Primary,
-                            shape = RoundedCornerShape(12.dp),
-                        )
-                } else {
-                    Modifier
-                },
-            )
-            .background(ChacColors.BackgroundPopup)
-            .combinedClickable(
-                onClick = onToggle,
-                onLongClick = onLongClick,
-            ),
-    ) {
-        ChacImage(
-            model = media.uriString,
-            modifier = Modifier.matchParentSize(),
-        )
-
-        // dim
-        if (isSelected) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .alpha(alpha = 0.6f)
-                    .background(color = Color.Black),
-            )
-        }
-
-        Icon(
-            imageVector = if (isSelected) ChacIcons.CheckSelected else ChacIcons.CheckUnselected,
-            contentDescription = null,
-            modifier = Modifier
-                .align(Alignment.BottomEnd)
-                .padding(6.dp)
-                .size(20.dp),
-            tint = Color.Unspecified,
         )
     }
 }
@@ -578,17 +461,6 @@ private fun GalleryScreenAllSelectedPreview() {
             onClickSave = {},
             onLongClickMediaItem = {},
             onClickBack = {},
-        )
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun GalleryExitDialogPreview() {
-    ChacTheme {
-        GalleryExitDialog(
-            onClickConfirm = {},
-            onDismiss = {},
         )
     }
 }
