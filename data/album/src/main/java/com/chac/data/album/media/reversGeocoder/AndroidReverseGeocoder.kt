@@ -44,13 +44,9 @@ internal class AndroidReverseGeocoder @Inject constructor(
                     geocoder.getFromLocation(latitude, longitude, 1)?.firstOrNull()
                 }
             }.getOrNull()
-            address?.let { address ->
-                address.subLocality
-                    ?: address.locality
-                    ?: address.adminArea
-                    ?: address.countryName
-                    ?: address.getAddressLine(0)
-            }
+            address?.toCityDistrictDongAddress()
+                ?: address?.countryName
+                ?: address?.getAddressLine(0)
         }
     }
 
@@ -87,4 +83,36 @@ internal class AndroidReverseGeocoder @Inject constructor(
             },
         )
     }
+
+    /**
+     * [Address]를 "시 구 동" 형태의 문자열로 변환한다.
+     *
+     * 우선순위:
+     * - 시: adminArea -> locality
+     * - 구: subAdminArea -> locality(시와 중복이 아닐 때)
+     * - 동: subLocality thoroughfare
+     */
+    private fun Address.toCityDistrictDongAddress(): String? {
+        val normalizedLocality = locality.normalizedOrNull()
+        val city = adminArea.normalizedOrNull() ?: normalizedLocality
+        val district = subAdminArea.normalizedOrNull() ?: normalizedLocality.takeUnless { it == city }
+
+        val normalizedSubLocality = subLocality.normalizedOrNull()
+        val normalizedThoroughfare = thoroughfare.normalizedOrNull()
+        val dong = when {
+            normalizedSubLocality == null -> normalizedThoroughfare
+            normalizedThoroughfare == null || normalizedThoroughfare == normalizedSubLocality -> normalizedSubLocality
+            else -> "$normalizedSubLocality $normalizedThoroughfare"
+        }
+
+        val parts = LinkedHashSet<String>(3)
+        city?.let(parts::add)
+        district?.let(parts::add)
+        dong?.let(parts::add)
+        return parts.joinToString(" ").ifBlank { null }
+    }
+
+    private fun String?.normalizedOrNull(): String? = this
+        ?.trim()
+        ?.takeIf { it.isNotEmpty() }
 }
