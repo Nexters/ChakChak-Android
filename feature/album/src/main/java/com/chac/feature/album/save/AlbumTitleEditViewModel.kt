@@ -93,12 +93,9 @@ class AlbumTitleEditViewModel @Inject constructor(
                 val allMediaSelected = selectedMediaIds.mapNotNull { id -> allMediaById[id] }
 
                 val mediaList = clusterMedia.ifEmpty { allMediaSelected }
-                val defaultTitle = if (clusterMedia.isNotEmpty()) {
-                    // 기본 제목은 클러스터 메타데이터(날짜 + 주소)로 만든다.
-                    "${cluster?.formattedDate.orEmpty()} ${cluster?.address.orEmpty()}".trim()
-                } else {
-                    ""
-                }
+                // 기본 제목은 클러스터 주소로 만든다.
+                val defaultTitle = cluster?.address.orEmpty().trim()
+
                 if (mediaList.isEmpty()) {
                     // 저장할 대상이 없다. 로딩 상태에서 빠져나올 수 있도록 초기화 완료로만 표시한다.
                     _uiState.update { it.copy(isInitialized = true) }

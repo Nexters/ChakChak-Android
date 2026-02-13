@@ -37,6 +37,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
@@ -187,8 +188,10 @@ fun AlbumTitleEditScreen(
                     placeholder = {
                         Text(
                             text = placeholder,
-                            style = ChacTextStyles.SubTitle01,
+                            overflow = TextOverflow.Ellipsis,
+                            maxLines = 1,
                             color = ChacColors.Ffffff40,
+                            style = ChacTextStyles.SubTitle01,
                         )
                     },
                     trailingIcon = {
@@ -209,6 +212,7 @@ fun AlbumTitleEditScreen(
                             }
                         }
                     },
+                    maxLines = 1,
                     colors = TextFieldDefaults.colors(
                         focusedContainerColor = ChacColors.BackgroundPopup,
                         unfocusedContainerColor = ChacColors.BackgroundPopup,
