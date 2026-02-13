@@ -1,5 +1,9 @@
 package com.chac.feature.album.clustering.component
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.LinearOutSlowInEasing
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -27,6 +31,11 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -46,6 +55,8 @@ import com.chac.core.designsystem.ui.theme.ChacTheme
 import com.chac.domain.album.media.model.MediaType
 import com.chac.feature.album.model.MediaClusterUiModel
 import com.chac.feature.album.model.MediaUiModel
+
+private const val CLUSTER_CARD_ENTER_FADE_MS = 320
 
 /**
  * 클러스터 목록을 표시한다
@@ -88,12 +99,57 @@ fun ClusterList(
         contentPadding = contentPadding,
     ) {
         itemsIndexed(items = clusters, key = { _, item -> item.id }) { index, cluster ->
-            ClusterCard(
+            AnimatedClusterCard(
+                index = index,
                 cluster = cluster,
                 backgroundColor = clusterCardBackgroundColor(cluster, index),
                 onClick = { onClickCluster(cluster.id) },
             )
         }
+    }
+}
+
+/**
+ * 클러스터 카드를 등장 애니메이션과 함께 표시한다.
+ *
+ * 카드 ID를 키로 가시성 상태를 저장해 같은 아이템이 Recomposition 될때에는 애니메이션이 반복 재생되지 않도록 한다.
+ *
+ * @param index 리스트 내 카드 인덱스(등장 지연 계산에 사용)
+ * @param cluster 표시할 클러스터 UI 모델
+ * @param backgroundColor 카드 배경색
+ * @param onClick 카드 클릭 이벤트 콜백
+ */
+@Composable
+private fun AnimatedClusterCard(
+    index: Int,
+    cluster: MediaClusterUiModel,
+    backgroundColor: Color,
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit,
+) {
+    var isVisible by rememberSaveable(cluster.id) { mutableStateOf(false) }
+
+    LaunchedEffect(cluster.id) {
+        if (!isVisible) {
+            isVisible = true
+        }
+    }
+
+    AnimatedVisibility(
+        visible = isVisible,
+        modifier = modifier,
+        enter = fadeIn(
+            animationSpec = tween(
+                durationMillis = CLUSTER_CARD_ENTER_FADE_MS,
+                easing = LinearOutSlowInEasing,
+            ),
+        ),
+    ) {
+        ClusterCard(
+            cluster = cluster,
+            backgroundColor = backgroundColor,
+            onClick = onClick,
+        )
     }
 }
 
