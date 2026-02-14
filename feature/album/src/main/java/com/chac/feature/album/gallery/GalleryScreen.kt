@@ -17,7 +17,6 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -29,7 +28,6 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -40,6 +38,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
@@ -50,8 +49,8 @@ import androidx.compose.ui.window.Dialog
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.chac.core.designsystem.ui.component.ChacImage
+import com.chac.core.designsystem.ui.component.ChacTopBar
 import com.chac.core.designsystem.ui.icon.Alert
-import com.chac.core.designsystem.ui.icon.Back
 import com.chac.core.designsystem.ui.icon.ChacIcons
 import com.chac.core.designsystem.ui.icon.CheckSelected
 import com.chac.core.designsystem.ui.icon.CheckUnselected
@@ -203,9 +202,12 @@ private fun GalleryScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .background(ChacColors.Background)
+                .padding(horizontal = 20.dp)
                 .padding(bottom = 20.dp),
         ) {
-            GalleryTopBar(
+            ChacTopBar(
+                title = stringResource(R.string.gallery_top_bar_title),
+                navigationContentDescription = stringResource(R.string.gallery_back_cd),
                 onClickBack = {
                     if (uiState is GalleryUiState.SomeSelected) {
                         isExitDialogVisible = true
@@ -216,9 +218,7 @@ private fun GalleryScreen(
             )
             Spacer(modifier = Modifier.height(20.dp))
             Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 20.dp),
+                modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.Top,
             ) {
@@ -299,7 +299,7 @@ private fun GalleryScreen(
                 state = gridState,
                 horizontalArrangement = Arrangement.spacedBy(10.dp),
                 verticalArrangement = Arrangement.spacedBy(10.dp),
-                contentPadding = PaddingValues(14.dp),
+                contentPadding = PaddingValues(vertical = 14.dp),
             ) {
                 itemsIndexed(mediaList, key = { _, media -> media.id }) { index, media ->
                     GalleryPhotoItem(
@@ -317,7 +317,6 @@ private fun GalleryScreen(
                 onClick = onClickSave,
                 enabled = uiState is GalleryUiState.SomeSelected,
                 modifier = Modifier
-                    .padding(horizontal = 20.dp)
                     .fillMaxWidth()
                     .height(54.dp),
                 shape = RoundedCornerShape(12.dp),
@@ -449,41 +448,6 @@ private fun GalleryExitDialog(
 }
 
 /**
- * 갤러리 상단의 뒤로가기 버튼과 타이틀을 표시한다
- *
- * @param onClickBack 뒤로가기 버튼 클릭 이벤트 콜백
- */
-@Composable
-private fun GalleryTopBar(
-    modifier: Modifier = Modifier,
-    onClickBack: () -> Unit,
-) {
-    Box(
-        modifier = modifier
-            .fillMaxWidth()
-            .heightIn(52.dp),
-        contentAlignment = Alignment.Center,
-    ) {
-        IconButton(
-            onClick = onClickBack,
-            modifier = Modifier.align(Alignment.CenterStart),
-        ) {
-            Icon(
-                imageVector = ChacIcons.Back,
-                contentDescription = stringResource(R.string.gallery_back_cd),
-                tint = ChacColors.Text01,
-                modifier = Modifier.size(24.dp),
-            )
-        }
-        Text(
-            text = stringResource(R.string.gallery_top_bar_title),
-            style = ChacTextStyles.Title,
-            color = ChacColors.Text01,
-        )
-    }
-}
-
-/**
  * 사진 그리드의 선택 가능한 아이템을 표시한다
  *
  * @param media 이미지 모델
@@ -526,6 +490,17 @@ private fun GalleryPhotoItem(
             model = media.uriString,
             modifier = Modifier.matchParentSize(),
         )
+
+        // dim
+        if (isSelected) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .alpha(alpha = 0.6f)
+                    .background(color = Color.Black),
+            )
+        }
+
         Icon(
             imageVector = if (isSelected) ChacIcons.CheckSelected else ChacIcons.CheckUnselected,
             contentDescription = null,

@@ -4,17 +4,12 @@ import android.content.Intent
 import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -23,8 +18,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.chac.core.designsystem.ui.icon.Back
-import com.chac.core.designsystem.ui.icon.ChacIcons
+import com.chac.core.designsystem.ui.component.ChacTopBar
 import com.chac.core.designsystem.ui.theme.ChacColors
 import com.chac.core.designsystem.ui.theme.ChacTextStyles
 import com.chac.core.designsystem.ui.theme.ChacTheme
@@ -72,9 +66,14 @@ private fun SettingsScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(ChacColors.Background),
+            .background(ChacColors.Background)
+            .padding(horizontal = 20.dp),
     ) {
-        SettingsTopBar(onClickBack = onClickBack)
+        ChacTopBar(
+            title = stringResource(R.string.settings_title),
+            navigationContentDescription = stringResource(R.string.settings_back_cd),
+            onClickBack = onClickBack,
+        )
 
         SettingsItem(
             title = stringResource(R.string.settings_oss_licenses),
@@ -84,42 +83,6 @@ private fun SettingsScreen(
         SettingsItem(
             title = stringResource(R.string.settings_privacy_policy),
             onClick = onClickPrivacyPolicy,
-        )
-    }
-}
-
-/**
- * 설정 화면 TopBar
- *
- * @param onClickBack 뒤로가기 버튼 클릭 이벤트 콜백
- */
-@Composable
-private fun SettingsTopBar(
-    onClickBack: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    Box(
-        modifier = modifier
-            .fillMaxWidth()
-            .heightIn(52.dp)
-            .padding(horizontal = 4.dp),
-        contentAlignment = Alignment.Center,
-    ) {
-        IconButton(
-            onClick = onClickBack,
-            modifier = Modifier.align(Alignment.CenterStart),
-        ) {
-            Icon(
-                imageVector = ChacIcons.Back,
-                contentDescription = stringResource(R.string.settings_back_cd),
-                tint = ChacColors.Text01,
-                modifier = Modifier.size(24.dp),
-            )
-        }
-        Text(
-            text = stringResource(R.string.settings_title),
-            style = ChacTextStyles.Title,
-            color = ChacColors.Text01,
         )
     }
 }
@@ -140,7 +103,7 @@ private fun SettingsItem(
         modifier = modifier
             .fillMaxWidth()
             .clickable(onClick = onClick)
-            .padding(horizontal = 20.dp, vertical = 16.dp),
+            .padding(vertical = 16.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(

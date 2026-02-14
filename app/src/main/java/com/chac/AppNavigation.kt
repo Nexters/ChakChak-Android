@@ -1,6 +1,11 @@
 package com.chac
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.animation.ContentTransform
+import androidx.compose.animation.core.CubicBezierEasing
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
@@ -19,6 +24,10 @@ import androidx.navigation3.ui.NavDisplay
 import com.chac.feature.album.navigation.AlbumNavKey
 import com.chac.feature.album.navigation.albumEntries
 
+private const val NAV_SLIDE_DURATION_MS = 320
+private const val NAV_SLIDE_PARALLAX_DIVISOR = 3
+private val NAV_SLIDE_EASING = CubicBezierEasing(0.22f, 1f, 0.36f, 1f)
+
 /** Navigation3 호스트를 구성하고 앨범 기능 entry provider를 연결한다 */
 @Composable
 fun ChacAppNavigation() {
@@ -33,6 +42,42 @@ fun ChacAppNavigation() {
         NavDisplay(
             backStack = backStack,
             onBack = { backStack.pop() },
+            transitionSpec = {
+                ContentTransform(
+                    targetContentEnter = slideInHorizontally(
+                        animationSpec = tween(durationMillis = NAV_SLIDE_DURATION_MS, easing = NAV_SLIDE_EASING),
+                        initialOffsetX = { fullWidth -> fullWidth },
+                    ),
+                    initialContentExit = slideOutHorizontally(
+                        animationSpec = tween(durationMillis = NAV_SLIDE_DURATION_MS, easing = NAV_SLIDE_EASING),
+                        targetOffsetX = { fullWidth -> -fullWidth / NAV_SLIDE_PARALLAX_DIVISOR },
+                    ),
+                )
+            },
+            popTransitionSpec = {
+                ContentTransform(
+                    targetContentEnter = slideInHorizontally(
+                        animationSpec = tween(durationMillis = NAV_SLIDE_DURATION_MS, easing = NAV_SLIDE_EASING),
+                        initialOffsetX = { fullWidth -> -fullWidth / NAV_SLIDE_PARALLAX_DIVISOR },
+                    ),
+                    initialContentExit = slideOutHorizontally(
+                        animationSpec = tween(durationMillis = NAV_SLIDE_DURATION_MS, easing = NAV_SLIDE_EASING),
+                        targetOffsetX = { fullWidth -> fullWidth },
+                    ),
+                )
+            },
+            predictivePopTransitionSpec = {
+                ContentTransform(
+                    targetContentEnter = slideInHorizontally(
+                        animationSpec = tween(durationMillis = NAV_SLIDE_DURATION_MS, easing = NAV_SLIDE_EASING),
+                        initialOffsetX = { fullWidth -> -fullWidth / NAV_SLIDE_PARALLAX_DIVISOR },
+                    ),
+                    initialContentExit = slideOutHorizontally(
+                        animationSpec = tween(durationMillis = NAV_SLIDE_DURATION_MS, easing = NAV_SLIDE_EASING),
+                        targetOffsetX = { fullWidth -> fullWidth },
+                    ),
+                )
+            },
             entryDecorators = listOf(
                 SaveableStateHolderNavEntryDecorator(saveableStateHolder),
                 rememberViewModelStoreNavEntryDecorator(

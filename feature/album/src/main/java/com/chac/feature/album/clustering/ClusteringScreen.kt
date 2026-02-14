@@ -10,10 +10,15 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -34,6 +39,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.chac.core.designsystem.ui.component.ChacTopBar
 import com.chac.core.designsystem.ui.theme.ChacColors
 import com.chac.core.designsystem.ui.theme.ChacTextStyles
 import com.chac.core.designsystem.ui.theme.ChacTheme
@@ -46,7 +52,6 @@ import com.chac.core.resources.R
 import com.chac.domain.album.media.model.MediaType
 import com.chac.feature.album.clustering.component.AlbumSectionHeader
 import com.chac.feature.album.clustering.component.ClusterList
-import com.chac.feature.album.clustering.component.ClusteringTopBar
 import com.chac.feature.album.clustering.component.TotalPhotoSummary
 import com.chac.feature.album.clustering.model.ClusteringUiState
 import com.chac.feature.album.model.MediaClusterUiModel
@@ -132,7 +137,24 @@ private fun ClusteringScreen(
             .background(ChacColors.Background)
             .padding(horizontal = 20.dp),
     ) {
-        ClusteringTopBar(onClickSettings = onClickSettings)
+        ChacTopBar(
+            showWatermark = true,
+            actions = {
+                IconButton(
+                    onClick = onClickSettings,
+                    modifier = Modifier.offset(x = 12.dp), // IconButton로 인한 패딩만큼 오른쪽으로 이동
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.Settings,
+                        contentDescription = stringResource(R.string.clustering_settings_cd),
+                        modifier = Modifier.size(24.dp),
+                        tint = ChacColors.Text04Caption,
+                    )
+                }
+            },
+        )
+
+        Spacer(modifier = Modifier.height(24.dp))
 
         Column(
             modifier = Modifier

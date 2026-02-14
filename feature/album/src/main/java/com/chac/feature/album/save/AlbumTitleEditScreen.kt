@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.navigationBars
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.windowInsetsPadding
@@ -38,6 +37,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
@@ -45,7 +45,7 @@ import androidx.core.net.toUri
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.chac.core.designsystem.ui.component.ChacImage
-import com.chac.core.designsystem.ui.icon.Back
+import com.chac.core.designsystem.ui.component.ChacTopBar
 import com.chac.core.designsystem.ui.icon.ChacIcons
 import com.chac.core.designsystem.ui.icon.Remove
 import com.chac.core.designsystem.ui.theme.ChacColors
@@ -154,7 +154,8 @@ fun AlbumTitleEditScreen(
                 .padding(horizontal = 20.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            AlbumTitleEditTopBar(
+            ChacTopBar(
+                title = stringResource(R.string.album_title_edit_title),
                 onClickBack = onClickBack,
             )
 
@@ -187,8 +188,10 @@ fun AlbumTitleEditScreen(
                     placeholder = {
                         Text(
                             text = placeholder,
-                            style = ChacTextStyles.SubTitle01,
+                            overflow = TextOverflow.Ellipsis,
+                            maxLines = 1,
                             color = ChacColors.Ffffff40,
+                            style = ChacTextStyles.SubTitle01,
                         )
                     },
                     trailingIcon = {
@@ -209,6 +212,7 @@ fun AlbumTitleEditScreen(
                             }
                         }
                     },
+                    maxLines = 1,
                     colors = TextFieldDefaults.colors(
                         focusedContainerColor = ChacColors.BackgroundPopup,
                         unfocusedContainerColor = ChacColors.BackgroundPopup,
@@ -256,41 +260,6 @@ fun AlbumTitleEditScreen(
                 CircularProgressIndicator(color = ChacColors.Primary)
             }
         }
-    }
-}
-
-/**
- * 앨범명 수정 화면 상단 바.
- *
- * @param onClickBack 뒤로가기 버튼 클릭 콜백
- */
-@Composable
-private fun AlbumTitleEditTopBar(
-    modifier: Modifier = Modifier,
-    onClickBack: () -> Unit,
-) {
-    Box(
-        modifier = modifier.fillMaxWidth(),
-    ) {
-        IconButton(
-            onClick = onClickBack,
-            modifier = Modifier.align(Alignment.CenterStart),
-        ) {
-            Icon(
-                imageVector = ChacIcons.Back,
-                contentDescription = null,
-                modifier = Modifier
-                    .size(24.dp)
-                    .offset(x = (-12).dp), // IconButton로 인한 패딩만큼 왼쪽으로 이동
-                tint = ChacColors.Text01,
-            )
-        }
-        Text(
-            text = stringResource(R.string.album_title_edit_title),
-            style = ChacTextStyles.Title,
-            color = ChacColors.Text01,
-            modifier = Modifier.align(Alignment.Center),
-        )
     }
 }
 
